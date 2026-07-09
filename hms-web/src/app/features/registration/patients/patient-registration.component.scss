@@ -15,12 +15,15 @@
 
 .patient-actions-cell {
   display: flex;
-  gap: var(--hms-space-1);
+  align-items: center;
+  gap: var(--hms-space-2);
   justify-content: flex-end;
   flex-wrap: nowrap;
   white-space: nowrap;
+  padding: var(--hms-space-2) 0;
 }
 
 .patient-actions-header {
+  width: 0;
   white-space: nowrap;
 }

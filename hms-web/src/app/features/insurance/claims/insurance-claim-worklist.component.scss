@@ -43,6 +43,7 @@
 
 .insurance-actions-cell {
   display: flex;
+  align-items: center;
   gap: var(--hms-space-2);
   justify-content: flex-end;
   flex-wrap: nowrap;
@@ -51,5 +52,6 @@
 }
 
 .insurance-actions-header {
+  width: 0;
   white-space: nowrap;
 }
