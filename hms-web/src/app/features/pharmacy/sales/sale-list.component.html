@@ -1,0 +1,42 @@
+<section>
+  <h2>Pharmacy Sales</h2>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  <table>
+    <thead>
+      <tr><th>Sale #</th><th>Patient</th><th>Total</th><th></th></tr>
+    </thead>
+    <tbody>
+      @for (sale of sales(); track sale.id) {
+        <tr>
+          <td>{{ sale.saleNumber }}</td>
+          <td>{{ sale.patientName }}</td>
+          <td>{{ sale.totalAmount }}</td>
+          <td><button type="button" (click)="toggle(sale)">{{ expandedId() === sale.id ? 'Hide' : 'Details' }}</button></td>
+        </tr>
+        @if (expandedId() === sale.id) {
+          <tr>
+            <td colspan="4">
+              <table>
+                <thead><tr><th>Drug</th><th>Qty</th><th>Unit price</th><th>Line total</th></tr></thead>
+                <tbody>
+                  @for (item of sale.items; track item.id) {
+                    <tr>
+                      <td>{{ item.drugName }}</td>
+                      <td>{{ item.quantity }}</td>
+                      <td>{{ item.unitPrice }}</td>
+                      <td>{{ item.lineTotal }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</section>

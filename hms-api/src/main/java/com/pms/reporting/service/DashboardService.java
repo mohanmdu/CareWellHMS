@@ -1,0 +1,59 @@
+package com.pms.reporting.service;
+
+import com.pms.billing.entity.InvoiceStatus;
+import com.pms.billing.repository.InvoiceRepository;
+import com.pms.insurance.entity.InsuranceClaimStatus;
+import com.pms.insurance.repository.InsuranceClaimRepository;
+import com.pms.ipadmission.entity.AdmissionStatus;
+import com.pms.ipadmission.repository.AdmissionRepository;
+import com.pms.pharmacy.repository.PharmacySaleRepository;
+import com.pms.reporting.dto.DashboardDto;
+import com.pms.registration.repository.AppointmentRepository;
+import com.pms.registration.repository.PatientRepository;
+import java.time.LocalDate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * Replaces AdminServiceImpl/AdminDaoImpl's dashboard aggregation methods
+ * (DashBoardDetailsBean - migration doc §4.6) with cross-module repository
+ * queries instead of the legacy's ad hoc per-screen SQL. No server-side
+ * report engine exists yet (see migration doc §4.6/§6.2 recommendation to
+ * add POI/OpenPDF) - this is a read-only aggregate, not a print/export view.
+ */
+@Service
+@Transactional(readOnly = true)
+public class DashboardService {
+
+    private final PatientRepository patientRepository;
+    private final AdmissionRepository admissionRepository;
+    private final AppointmentRepository appointmentRepository;
+    private final InvoiceRepository invoiceRepository;
+    private final PharmacySaleRepository pharmacySaleRepository;
+    private final InsuranceClaimRepository insuranceClaimRepository;
+
+    public DashboardService(
+            PatientRepository patientRepository,
+            AdmissionRepository admissionRepository,
+            AppointmentRepository appointmentRepository,
+            InvoiceRepository invoiceRepository,
+            PharmacySaleRepository pharmacySaleRepository,
+            InsuranceClaimRepository insuranceClaimRepository) {
+        this.patientRepository = patientRepository;
+        this.admissionRepository = admissionRepository;
+        this.appointmentRepository = appointmentRepository;
+        this.invoiceRepository = invoiceRepository;
+        this.pharmacySaleRepository = pharmacySaleRepository;
+        this.insuranceClaimRepository = insuranceClaimRepository;
+    }
+
+    public DashboardDto summary() {
+        return new DashboardDto(
+                patientRepository.count(),
+                admissionRepository.countByStatus(AdmissionStatus.ADMITTED),
+                appointmentRepository.findByAppointmentDate(LocalDate.now()).size(),
+                invoiceRepository.sumTotalAmountByStatus(InvoiceStatus.PAID),
+                pharmacySaleRepository.sumTotalAmount(),
+                insuranceClaimRepository.findByStatus(InsuranceClaimStatus.PENDING).size());
+    }
+}

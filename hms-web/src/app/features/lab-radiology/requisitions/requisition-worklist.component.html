@@ -1,0 +1,39 @@
+<section>
+  <h2>Lab Worklist</h2>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  @for (requisition of requisitions(); track requisition.id) {
+    <div class="requisition-card">
+      <p><strong>{{ requisition.requisitionNumber }}</strong> — {{ requisition.patientName }} ({{ requisition.status }})</p>
+      <table>
+        <thead>
+          <tr><th>Test</th><th>Specimen</th><th>Status</th><th>Result</th><th></th></tr>
+        </thead>
+        <tbody>
+          @for (item of requisition.items; track item.id) {
+            <tr>
+              <td>{{ item.testName }}</td>
+              <td>{{ item.specimenType }}</td>
+              <td>{{ item.status }}</td>
+              <td>{{ item.resultValue }} @if (item.normalRange) { ({{ item.normalRange }}) }</td>
+              <td>
+                @if (item.status === 'PENDING') {
+                  <button type="button" (click)="collectSpecimen(requisition, item)">Collect Specimen</button>
+                }
+                @if (item.status === 'SPECIMEN_COLLECTED') {
+                  <button type="button" (click)="enterResult(requisition, item)">Enter Result</button>
+                }
+                @if (item.status === 'RESULT_ENTERED') {
+                  <button type="button" (click)="approve(requisition, item)">Approve</button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

@@ -1,0 +1,65 @@
+<section>
+  <h2>Insurance Claims</h2>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  <h3>Raise New Claim</h3>
+  @if (!selectedPatient()) {
+    <form (ngSubmit)="search()">
+      <input name="searchQuery" [(ngModel)]="searchQuery" placeholder="Search patient by name" />
+      <button type="submit">Search</button>
+    </form>
+    <ul>
+      @for (patient of searchResults(); track patient.id) {
+        <li>
+          {{ patient.firstName }} {{ patient.lastName }} ({{ patient.mobileNumber }})
+          <button type="button" (click)="selectPatient(patient)">Select</button>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p>Patient: <strong>{{ selectedPatient()?.firstName }} {{ selectedPatient()?.lastName }}</strong></p>
+    <form (ngSubmit)="submit()">
+      <input name="policyNumber" [(ngModel)]="form.policyNumber" placeholder="Policy number" required />
+      <input name="insurerName" [(ngModel)]="form.insurerName" placeholder="Insurer name" required />
+      <select name="claimType" [(ngModel)]="form.claimType">
+        <option value="PRE_AUTHORIZATION">Pre-Authorization</option>
+        <option value="ENHANCEMENT">Enhancement</option>
+      </select>
+      <input name="requestedAmount" type="number" [(ngModel)]="form.requestedAmount" placeholder="Requested amount" />
+      <button type="submit">Raise Claim</button>
+    </form>
+  }
+
+  <h3>Approval Queue</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Claim #</th><th>Patient</th><th>Insurer</th><th>Type</th>
+        <th>Requested</th><th>Approved</th><th>Status</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (claim of claims(); track claim.id) {
+        <tr>
+          <td>{{ claim.claimNumber }}</td>
+          <td>{{ claim.patientName }}</td>
+          <td>{{ claim.insurerName }}</td>
+          <td>{{ claim.claimType }}</td>
+          <td>{{ claim.requestedAmount }}</td>
+          <td>{{ claim.approvedAmount }}</td>
+          <td>{{ claim.status }}</td>
+          <td>
+            @if (claim.status === 'PENDING') {
+              <button type="button" (click)="approve(claim)">Approve</button>
+              <button type="button" (click)="reject(claim)">Reject</button>
+              <button type="button" (click)="cancel(claim)">Cancel</button>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</section>

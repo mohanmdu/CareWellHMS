@@ -1,0 +1,37 @@
+<section>
+  <h2>Drugs</h2>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  <form (ngSubmit)="add()">
+    <input name="name" [(ngModel)]="form.name" placeholder="Name" required />
+    <input name="genericName" [(ngModel)]="form.genericName" placeholder="Generic name" />
+    <input name="manufacturer" [(ngModel)]="form.manufacturer" placeholder="Manufacturer" />
+    <input name="unitOfMeasure" [(ngModel)]="form.unitOfMeasure" placeholder="Unit (e.g. Tablet)" />
+    <button type="submit">Add</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr><th>Name</th><th>Generic</th><th>Manufacturer</th><th>Unit</th><th>Status</th><th></th></tr>
+    </thead>
+    <tbody>
+      @for (drug of drugs(); track drug.id) {
+        <tr>
+          <td>{{ drug.name }}</td>
+          <td>{{ drug.genericName }}</td>
+          <td>{{ drug.manufacturer }}</td>
+          <td>{{ drug.unitOfMeasure }}</td>
+          <td>{{ drug.active ? 'Active' : 'Inactive' }}</td>
+          <td>
+            @if (drug.active) {
+              <button type="button" (click)="deactivate(drug)">Deactivate</button>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</section>

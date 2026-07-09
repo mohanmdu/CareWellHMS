@@ -1,0 +1,52 @@
+<section>
+  <h2>Room Catalog</h2>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  <div class="catalog-columns">
+    <div>
+      <h3>Room Types</h3>
+      <form (ngSubmit)="addRoomType()">
+        <input name="roomTypeName" [(ngModel)]="newRoomType.name" placeholder="Name (e.g. General Ward)" required />
+        <input name="dailyRate" type="number" [(ngModel)]="newRoomType.dailyRate" placeholder="Daily rate" />
+        <button type="submit">Add</button>
+      </form>
+      <table>
+        <thead><tr><th>Name</th><th>Daily rate</th></tr></thead>
+        <tbody>
+          @for (type of roomTypes(); track type.id) {
+            <tr><td>{{ type.name }}</td><td>{{ type.dailyRate }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div>
+      <h3>Rooms</h3>
+      <form (ngSubmit)="addRoom()">
+        <input name="roomNumber" [(ngModel)]="newRoom.roomNumber" placeholder="Room number" required />
+        <select name="roomTypeId" [(ngModel)]="newRoom.roomTypeId" required>
+          <option [ngValue]="null" disabled>Select room type</option>
+          @for (type of roomTypes(); track type.id) {
+            <option [ngValue]="type.id">{{ type.name }}</option>
+          }
+        </select>
+        <button type="submit">Add</button>
+      </form>
+      <table>
+        <thead><tr><th>Room</th><th>Type</th><th>Status</th></tr></thead>
+        <tbody>
+          @for (room of rooms(); track room.id) {
+            <tr>
+              <td>{{ room.roomNumber }}</td>
+              <td>{{ room.roomTypeName }}</td>
+              <td>{{ room.occupied ? 'Occupied' : 'Available' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

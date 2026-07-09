@@ -1,0 +1,18 @@
+<section>
+  <h2>MIS Dashboard</h2>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  @if (dashboard(); as d) {
+    <div class="dashboard-tiles">
+      <div class="tile"><span class="tile-value">{{ d.totalPatients }}</span><span class="tile-label">Total Patients</span></div>
+      <div class="tile"><span class="tile-value">{{ d.activeAdmissions }}</span><span class="tile-label">Active Admissions</span></div>
+      <div class="tile"><span class="tile-value">{{ d.todaysAppointments }}</span><span class="tile-label">Today's Appointments</span></div>
+      <div class="tile"><span class="tile-value">{{ d.totalOpRevenue }}</span><span class="tile-label">OP Revenue (Paid)</span></div>
+      <div class="tile"><span class="tile-value">{{ d.totalPharmacyRevenue }}</span><span class="tile-label">Pharmacy Revenue</span></div>
+      <div class="tile"><span class="tile-value">{{ d.pendingInsuranceClaims }}</span><span class="tile-label">Pending Insurance Claims</span></div>
+    </div>
+  }
+</section>

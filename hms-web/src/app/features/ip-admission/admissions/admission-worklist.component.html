@@ -1,0 +1,65 @@
+<section>
+  <h2>IP Admissions</h2>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  <h3>New Admission</h3>
+  @if (!selectedPatient()) {
+    <form (ngSubmit)="search()">
+      <input name="searchQuery" [(ngModel)]="searchQuery" placeholder="Search patient by name" />
+      <button type="submit">Search</button>
+    </form>
+    <ul>
+      @for (patient of searchResults(); track patient.id) {
+        <li>
+          {{ patient.firstName }} {{ patient.lastName }} ({{ patient.mobileNumber }})
+          <button type="button" (click)="selectPatient(patient)">Select</button>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p>Patient: <strong>{{ selectedPatient()?.firstName }} {{ selectedPatient()?.lastName }}</strong></p>
+    <select name="roomId" [(ngModel)]="selectedRoomId">
+      <option [ngValue]="null" disabled>Select available room</option>
+      @for (room of availableRooms(); track room.id) {
+        <option [ngValue]="room.id">{{ room.roomNumber }} ({{ room.roomTypeName }})</option>
+      }
+    </select>
+    <button type="button" (click)="admit()">Admit</button>
+  }
+
+  <h3>Current &amp; Past Admissions</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Admission #</th><th>Patient</th><th>Room</th><th>Status</th>
+        <th>Advance</th><th>Total Billed</th><th>Settlement</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (admission of admissions(); track admission.id) {
+        <tr>
+          <td>{{ admission.admissionNumber }}</td>
+          <td>{{ admission.patientName }}</td>
+          <td>{{ admission.roomNumber }} ({{ admission.roomTypeName }})</td>
+          <td>{{ admission.status }}</td>
+          <td>{{ admission.advanceAmount }}</td>
+          <td>{{ admission.totalBilled }}</td>
+          <td>
+            @if (admission.settlementAmount !== null) {
+              {{ admission.settlementAmount! >= 0 ? 'Refund: ' : 'Due: ' }}{{ admission.settlementAmount! >= 0 ? admission.settlementAmount : -admission.settlementAmount! }}
+            }
+          </td>
+          <td>
+            @if (admission.status === 'ADMITTED') {
+              <button type="button" (click)="addAdvance(admission)">Add Advance</button>
+              <button type="button" (click)="discharge(admission)">Discharge</button>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</section>

@@ -1,0 +1,68 @@
+<section>
+  <h2>Invoices &amp; Receipts</h2>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  <table>
+    <thead>
+      <tr>
+        <th>Invoice #</th>
+        <th>Patient</th>
+        <th>Total</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (invoice of invoices(); track invoice.id) {
+        <tr>
+          <td>{{ invoice.invoiceNumber }}</td>
+          <td>{{ invoice.patientName }}</td>
+          <td>{{ invoice.totalAmount }}</td>
+          <td>{{ invoice.status }}</td>
+          <td>
+            <button type="button" (click)="toggle(invoice)">
+              {{ expandedId() === invoice.id ? 'Hide' : 'View receipt' }}
+            </button>
+            @if (invoice.status === 'DRAFT') {
+              <button type="button" (click)="pay(invoice)">Mark Paid</button>
+            }
+            @if (invoice.status === 'DRAFT' || invoice.status === 'PAID') {
+              <button type="button" (click)="cancel(invoice)">Cancel/Refund</button>
+            }
+          </td>
+        </tr>
+        @if (expandedId() === invoice.id) {
+          <tr>
+            <td colspan="5">
+              <div class="receipt">
+                <p><strong>Receipt — {{ invoice.invoiceNumber }}</strong></p>
+                <table>
+                  <thead>
+                    <tr><th>Item</th><th>Qty</th><th>Unit price</th><th>Line total</th></tr>
+                  </thead>
+                  <tbody>
+                    @for (line of invoice.lineItems; track line.id) {
+                      <tr>
+                        <td>{{ line.itemName }}</td>
+                        <td>{{ line.quantity }}</td>
+                        <td>{{ line.unitPrice }}</td>
+                        <td>{{ line.lineTotal }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+                <p><strong>Total: {{ invoice.totalAmount }}</strong></p>
+                @if (invoice.cancellationReason) {
+                  <p>Reason: {{ invoice.cancellationReason }}</p>
+                }
+              </div>
+            </td>
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</section>

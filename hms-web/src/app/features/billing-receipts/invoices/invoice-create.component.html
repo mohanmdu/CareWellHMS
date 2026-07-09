@@ -1,0 +1,70 @@
+<section>
+  <h2>New Invoice</h2>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  @if (!selectedPatient()) {
+    <form (ngSubmit)="search()">
+      <input name="searchQuery" [(ngModel)]="searchQuery" placeholder="Search patient by name" />
+      <button type="submit">Search</button>
+    </form>
+    <ul>
+      @for (patient of searchResults(); track patient.id) {
+        <li>
+          {{ patient.firstName }} {{ patient.lastName }} ({{ patient.mobileNumber }})
+          <button type="button" (click)="selectPatient(patient)">Select</button>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p>Patient: <strong>{{ selectedPatient()?.firstName }} {{ selectedPatient()?.lastName }}</strong></p>
+
+    @if (patientAppointments().length > 0) {
+      <label>
+        Link to appointment (optional)
+        <select name="appointmentId" [(ngModel)]="selectedAppointmentId">
+          <option [ngValue]="null">None</option>
+          @for (appointment of patientAppointments(); track appointment.id) {
+            <option [ngValue]="appointment.id">
+              {{ appointment.appointmentDate }} {{ appointment.slotTime }} - {{ appointment.consultantName }}
+            </option>
+          }
+        </select>
+      </label>
+    }
+
+    <h3>Add billing items</h3>
+    <form (ngSubmit)="addLine()">
+      <select name="billingItemId" [(ngModel)]="selectedBillingItemId">
+        <option [ngValue]="null" disabled>Select item</option>
+        @for (item of billingItems(); track item.id) {
+          <option [ngValue]="item.id">{{ item.name }} ({{ item.price }})</option>
+        }
+      </select>
+      <input name="quantity" type="number" min="1" [(ngModel)]="quantity" />
+      <button type="submit">Add</button>
+    </form>
+
+    <table>
+      <thead>
+        <tr><th>Item</th><th>Qty</th><th>Unit price</th><th>Line total</th><th></th></tr>
+      </thead>
+      <tbody>
+        @for (line of draftLines(); track $index) {
+          <tr>
+            <td>{{ line.itemName }}</td>
+            <td>{{ line.quantity }}</td>
+            <td>{{ line.unitPrice }}</td>
+            <td>{{ line.unitPrice * line.quantity }}</td>
+            <td><button type="button" (click)="removeLine($index)">Remove</button></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <p><strong>Total: {{ total() }}</strong></p>
+    <button type="button" (click)="submit()" [disabled]="draftLines().length === 0">Create Invoice</button>
+  }
+</section>

@@ -1,0 +1,55 @@
+<section>
+  <h2>Dispense / Sale</h2>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  @if (!selectedPatient()) {
+    <form (ngSubmit)="search()">
+      <input name="searchQuery" [(ngModel)]="searchQuery" placeholder="Search patient by name" />
+      <button type="submit">Search</button>
+    </form>
+    <ul>
+      @for (patient of searchResults(); track patient.id) {
+        <li>
+          {{ patient.firstName }} {{ patient.lastName }} ({{ patient.mobileNumber }})
+          <button type="button" (click)="selectPatient(patient)">Select</button>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p>Patient: <strong>{{ selectedPatient()?.firstName }} {{ selectedPatient()?.lastName }}</strong></p>
+
+    <form (ngSubmit)="addLine()">
+      <select name="batchId" [(ngModel)]="selectedBatchId">
+        <option [ngValue]="null" disabled>Select drug batch</option>
+        @for (batch of batches(); track batch.id) {
+          <option [ngValue]="batch.id">{{ batch.drugName }} — {{ batch.batchNumber }} ({{ batch.quantityOnHand }} in stock, {{ batch.sellingPrice }})</option>
+        }
+      </select>
+      <input name="quantity" type="number" min="1" [(ngModel)]="quantity" />
+      <button type="submit">Add</button>
+    </form>
+
+    <table>
+      <thead>
+        <tr><th>Drug</th><th>Qty</th><th>Unit price</th><th>Line total</th><th></th></tr>
+      </thead>
+      <tbody>
+        @for (line of draftLines(); track $index) {
+          <tr>
+            <td>{{ line.drugName }}</td>
+            <td>{{ line.quantity }}</td>
+            <td>{{ line.unitPrice }}</td>
+            <td>{{ line.unitPrice * line.quantity }}</td>
+            <td><button type="button" (click)="removeLine($index)">Remove</button></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <p><strong>Total: {{ total() }}</strong></p>
+    <button type="button" (click)="submit()" [disabled]="draftLines().length === 0">Dispense</button>
+  }
+</section>

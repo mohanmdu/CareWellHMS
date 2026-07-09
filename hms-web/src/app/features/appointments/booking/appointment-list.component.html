@@ -1,0 +1,41 @@
+<section>
+  <h2>Appointments</h2>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  <table>
+    <thead>
+      <tr>
+        <th>Patient</th>
+        <th>Consultant</th>
+        <th>Department</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (appointment of appointments(); track appointment.id) {
+        <tr>
+          <td>{{ appointment.patientName }}</td>
+          <td>{{ appointment.consultantName }}</td>
+          <td>{{ appointment.departmentName }}</td>
+          <td>{{ appointment.appointmentDate }}</td>
+          <td>{{ appointment.slotTime }}</td>
+          <td>{{ appointment.status }}</td>
+          <td>
+            @if (appointment.status === 'BOOKED') {
+              <button type="button" (click)="confirm(appointment)">Confirm</button>
+            }
+            @if (appointment.status === 'BOOKED' || appointment.status === 'CONFIRMED') {
+              <button type="button" (click)="cancel(appointment)">Cancel</button>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</section>

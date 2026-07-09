@@ -1,0 +1,40 @@
+<section>
+  <h2>Stock / Batches</h2>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  <form (ngSubmit)="receiveStock()">
+    <select name="drugId" [(ngModel)]="form.drugId" required>
+      <option [ngValue]="null" disabled>Select drug</option>
+      @for (drug of drugs(); track drug.id) {
+        <option [ngValue]="drug.id">{{ drug.name }}</option>
+      }
+    </select>
+    <input name="batchNumber" [(ngModel)]="form.batchNumber" placeholder="Batch number" required />
+    <input name="expiryDate" type="date" [(ngModel)]="form.expiryDate" required />
+    <input name="quantityOnHand" type="number" min="0" [(ngModel)]="form.quantityOnHand" placeholder="Quantity" />
+    <input name="purchasePrice" type="number" [(ngModel)]="form.purchasePrice" placeholder="Purchase price" />
+    <input name="sellingPrice" type="number" [(ngModel)]="form.sellingPrice" placeholder="Selling price" />
+    <button type="submit">Receive Stock</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr><th>Drug</th><th>Batch</th><th>Expiry</th><th>Qty on hand</th><th>Purchase price</th><th>Selling price</th></tr>
+    </thead>
+    <tbody>
+      @for (batch of batches(); track batch.id) {
+        <tr>
+          <td>{{ batch.drugName }}</td>
+          <td>{{ batch.batchNumber }}</td>
+          <td>{{ batch.expiryDate }}</td>
+          <td>{{ batch.quantityOnHand }}</td>
+          <td>{{ batch.purchasePrice }}</td>
+          <td>{{ batch.sellingPrice }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</section>

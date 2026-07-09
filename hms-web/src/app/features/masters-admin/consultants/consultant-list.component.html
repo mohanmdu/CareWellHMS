@@ -1,0 +1,51 @@
+<section>
+  <h2>Consultants</h2>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  <form (ngSubmit)="add()">
+    <input name="name" [(ngModel)]="form.name" placeholder="Name" required />
+    <select name="departmentId" [(ngModel)]="form.departmentId" required>
+      <option [ngValue]="null" disabled>Select department</option>
+      @for (department of departments(); track department.id) {
+        <option [ngValue]="department.id">{{ department.name }}</option>
+      }
+    </select>
+    <input name="specialization" [(ngModel)]="form.specialization" placeholder="Specialization" />
+    <input name="email" [(ngModel)]="form.email" placeholder="Email" />
+    <input name="mobileNumber" [(ngModel)]="form.mobileNumber" placeholder="Mobile number" />
+    <input name="consultationFee" type="number" [(ngModel)]="form.consultationFee" placeholder="Consultation fee" />
+    <button type="submit">Add</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Department</th>
+        <th>Specialization</th>
+        <th>Fee</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (consultant of consultants(); track consultant.id) {
+        <tr>
+          <td>{{ consultant.name }}</td>
+          <td>{{ consultant.departmentName }}</td>
+          <td>{{ consultant.specialization }}</td>
+          <td>{{ consultant.consultationFee }}</td>
+          <td>{{ consultant.active ? 'Active' : 'Inactive' }}</td>
+          <td>
+            @if (consultant.active) {
+              <button type="button" (click)="deactivate(consultant)">Deactivate</button>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</section>

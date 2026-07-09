@@ -1,0 +1,35 @@
+<section>
+  <h2>Roles</h2>
+
+  @if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  }
+
+  <form (ngSubmit)="add()">
+    <input name="newRoleName" [(ngModel)]="newRoleName" placeholder="New role name" required />
+    <button type="submit">Add</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (role of roles(); track role.id) {
+        <tr>
+          <td>{{ role.name }}</td>
+          <td>{{ role.active ? 'Active' : 'Inactive' }}</td>
+          <td>
+            @if (role.active) {
+              <button type="button" (click)="deactivate(role)">Deactivate</button>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</section>
