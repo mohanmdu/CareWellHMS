@@ -22,6 +22,14 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
  * with stateless sessions + hashed passwords. Swap the in-memory user store
  * and add a JWT filter here per the migration plan's Phase 1 auth task -
  * this is a starting point, not the final auth design.
+ *
+ * Auth enforcement is currently DISABLED (permitAll, no httpBasic challenge)
+ * to unblock local frontend testing - see chat history 2026-07-09. The
+ * passwordEncoder/userDetailsService beans below are left in place so
+ * re-enabling is a one-line revert: swap permitAll() back to
+ * .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+ * .anyRequest().authenticated(), and restore .httpBasic(basic -> {}).
+ * Do this before any environment other than a single developer's machine.
  */
 @Configuration
 @EnableWebSecurity
@@ -46,10 +54,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                        .anyRequest().authenticated())
-                .httpBasic(basic -> {});
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
         return http.build();
     }
 
