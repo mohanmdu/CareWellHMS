@@ -143,7 +143,10 @@ export class PatientRegistrationComponent {
         this.service.softDelete(patient.id).subscribe({
           next: () => {
             this.notification.success('Patient deleted.');
+            // Moves the patient from Active to Inactive - refresh both, not
+            // just the tab the action was clicked from.
             this.refreshActive();
+            this.refreshInactive();
           },
           error: () => this.notification.error('Failed to delete patient.')
         });
@@ -157,6 +160,8 @@ export class PatientRegistrationComponent {
     this.service.restore(patient.id).subscribe({
       next: () => {
         this.notification.success('Patient restored.');
+        // Moves the patient from Inactive back to Active - refresh both.
+        this.refreshActive();
         this.refreshInactive();
       },
       error: () => this.notification.error('Failed to restore patient.')
