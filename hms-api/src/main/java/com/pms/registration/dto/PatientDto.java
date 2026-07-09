@@ -17,5 +17,5 @@ public record PatientDto(
         @NotBlank @Pattern(regexp = "\\d{10}", message = "Mobile number must be exactly 10 digits") String mobileNumber,
         String email,
         String address,
-        boolean active) {
+        Boolean active) {
 }
