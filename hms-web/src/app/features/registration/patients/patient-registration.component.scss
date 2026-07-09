@@ -17,9 +17,10 @@
   display: flex;
   gap: var(--hms-space-1);
   justify-content: flex-end;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
 .patient-actions-header {
-  width: 1%;
+  white-space: nowrap;
 }

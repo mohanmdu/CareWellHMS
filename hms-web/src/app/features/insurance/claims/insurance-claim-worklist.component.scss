@@ -45,10 +45,11 @@
   display: flex;
   gap: var(--hms-space-2);
   justify-content: flex-end;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  white-space: nowrap;
   padding: var(--hms-space-2) 0;
 }
 
 .insurance-actions-header {
-  width: 1%;
+  white-space: nowrap;
 }
