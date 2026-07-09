@@ -16,11 +16,25 @@
 
   <mat-form-field appearance="outline" class="patient-form-field" subscriptSizing="dynamic">
     <mat-label>Age</mat-label>
-    <mat-select name="age" [(ngModel)]="form.age" required>
-      @for (age of ages; track age) {
+    <input
+      matInput
+      name="age"
+      inputmode="numeric"
+      maxlength="3"
+      autocomplete="off"
+      [matAutocomplete]="ageAuto"
+      [ngModel]="ageInput"
+      (input)="onAgeInput($event)"
+      required
+    />
+    <mat-autocomplete #ageAuto="matAutocomplete" (optionSelected)="onAgeOptionSelected($event)">
+      @for (age of filteredAgeOptions(); track age) {
         <mat-option [value]="age">{{ age }}</mat-option>
       }
-    </mat-select>
+    </mat-autocomplete>
+    @if (ageInput && !form.age) {
+      <mat-hint>Enter an age between 1 and 100</mat-hint>
+    }
   </mat-form-field>
 
   <mat-form-field appearance="outline" class="patient-form-field" subscriptSizing="dynamic">

@@ -1,5 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -18,11 +19,23 @@ export interface PatientFormDialogData {
  * a dedicated dialog rather than the generic PromptDialog since it needs
  * typed dropdowns and a mobile-number input mask that the generic
  * text/number/textarea prompt fields don't support.
+ *
+ * Age is a type-or-pick combobox (mat-autocomplete over an editable input),
+ * not a closed mat-select - staff can type the age directly or open the
+ * panel and choose from 1-100.
  */
 @Component({
   selector: 'app-patient-form-dialog',
   standalone: true,
-  imports: [FormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule],
+  imports: [
+    FormsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatAutocompleteModule,
+    MatButtonModule
+  ],
   templateUrl: './patient-form-dialog.component.html',
   styleUrl: './patient-form-dialog.component.scss'
 })
@@ -31,12 +44,15 @@ export class PatientFormDialogComponent {
   private readonly data = inject<PatientFormDialogData>(MAT_DIALOG_DATA);
 
   readonly isEdit = !!this.data.patient;
-  readonly ages = Array.from({ length: 100 }, (_, i) => i + 1);
+  readonly ageOptions = Array.from({ length: 100 }, (_, i) => i + 1);
+  filteredAgeOptions = signal<number[]>(this.ageOptions);
+
+  ageInput = this.data.patient?.age != null ? String(this.data.patient.age) : '';
 
   form = {
     firstName: this.data.patient?.firstName ?? '',
     gender: this.data.patient?.gender ?? '',
-    age: this.data.patient?.age ?? null,
+    age: this.data.patient?.age ?? (null as number | null),
     mobileNumber: this.data.patient?.mobileNumber ?? '',
     address: this.data.patient?.address ?? ''
   };
@@ -44,6 +60,23 @@ export class PatientFormDialogComponent {
   onMobileInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.form.mobileNumber = input.value.replace(/\D/g, '').slice(0, 10);
+  }
+
+  onAgeInput(event: Event): void {
+    const digitsOnly = (event.target as HTMLInputElement).value.replace(/\D/g, '').slice(0, 3);
+    this.ageInput = digitsOnly;
+    const value = Number(digitsOnly);
+    this.form.age = digitsOnly && value >= 1 && value <= 100 ? value : null;
+    this.filteredAgeOptions.set(
+      digitsOnly ? this.ageOptions.filter((age) => String(age).startsWith(digitsOnly)) : this.ageOptions
+    );
+  }
+
+  onAgeOptionSelected(event: MatAutocompleteSelectedEvent): void {
+    const age = event.option.value as number;
+    this.form.age = age;
+    this.ageInput = String(age);
+    this.filteredAgeOptions.set(this.ageOptions);
   }
 
   get isValid(): boolean {
