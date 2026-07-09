@@ -1,0 +1,36 @@
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--hms-space-3);
+  border-radius: var(--hms-radius-full);
+  font-size: var(--hms-font-size-xs);
+  font-weight: var(--hms-font-weight-semibold);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tone-success {
+  background: var(--hms-color-success-container);
+  color: var(--hms-color-on-success-container);
+}
+
+.tone-warning {
+  background: var(--hms-color-warning-container);
+  color: var(--hms-color-on-warning-container);
+}
+
+.tone-danger {
+  background: var(--hms-color-danger-container);
+  color: var(--hms-color-on-danger-container);
+}
+
+.tone-info {
+  background: var(--hms-color-tertiary-container);
+  color: var(--hms-color-on-tertiary-container);
+}
+
+.tone-neutral {
+  background: var(--hms-color-surface-sunken);
+  color: var(--hms-color-text-muted);
+}

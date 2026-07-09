@@ -1,14 +1,41 @@
-<section class="login-card">
-  <h2>Sign in</h2>
-  <form (ngSubmit)="login()">
-    <label>
-      Username
-      <input name="username" [(ngModel)]="username" required autocomplete="username" />
-    </label>
-    <label>
-      Password
-      <input name="password" type="password" [(ngModel)]="password" required autocomplete="current-password" />
-    </label>
-    <button type="submit">Sign in</button>
-  </form>
-</section>
+<div class="login-shell">
+  <section class="login-card">
+    <div class="login-brand">
+      <span class="login-brand-icon" aria-hidden="true">+</span>
+      <div>
+        <h1>Navjeevan HMS</h1>
+        <p>Hospital Management System</p>
+      </div>
+    </div>
+
+    <form (ngSubmit)="login()">
+      <mat-form-field appearance="outline" class="login-field">
+        <mat-label>Username</mat-label>
+        <input matInput name="username" [(ngModel)]="username" required autocomplete="username" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="login-field">
+        <mat-label>Password</mat-label>
+        <input
+          matInput
+          name="password"
+          [type]="hidePassword() ? 'password' : 'text'"
+          [(ngModel)]="password"
+          required
+          autocomplete="current-password"
+        />
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
+          (click)="togglePasswordVisibility()"
+        >
+          <mat-icon aria-hidden="true">{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <button mat-flat-button color="primary" type="submit" class="login-submit">Sign in</button>
+    </form>
+  </section>
+</div>

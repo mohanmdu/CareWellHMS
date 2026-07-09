@@ -1,18 +1,23 @@
-<section>
-  <h2>MIS Dashboard</h2>
+<div class="hms-page">
+  <app-page-header title="MIS Dashboard" subtitle="Cross-module snapshot of today's hospital activity." />
 
-  @if (errorMessage()) {
-    <p class="error">{{ errorMessage() }}</p>
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
   }
 
   @if (dashboard(); as d) {
-    <div class="dashboard-tiles">
-      <div class="tile"><span class="tile-value">{{ d.totalPatients }}</span><span class="tile-label">Total Patients</span></div>
-      <div class="tile"><span class="tile-value">{{ d.activeAdmissions }}</span><span class="tile-label">Active Admissions</span></div>
-      <div class="tile"><span class="tile-value">{{ d.todaysAppointments }}</span><span class="tile-label">Today's Appointments</span></div>
-      <div class="tile"><span class="tile-value">{{ d.totalOpRevenue }}</span><span class="tile-label">OP Revenue (Paid)</span></div>
-      <div class="tile"><span class="tile-value">{{ d.totalPharmacyRevenue }}</span><span class="tile-label">Pharmacy Revenue</span></div>
-      <div class="tile"><span class="tile-value">{{ d.pendingInsuranceClaims }}</span><span class="tile-label">Pending Insurance Claims</span></div>
+    <div class="dashboard-grid">
+      <app-stat-tile icon="groups" [value]="d.totalPatients" label="Total Patients" tone="primary" />
+      <app-stat-tile icon="local_hospital" [value]="d.activeAdmissions" label="Active Admissions" tone="info" />
+      <app-stat-tile icon="event" [value]="d.todaysAppointments" label="Today's Appointments" tone="primary" />
+      <app-stat-tile icon="payments" [value]="d.totalOpRevenue" label="OP Revenue (Paid)" tone="success" />
+      <app-stat-tile icon="medication" [value]="d.totalPharmacyRevenue" label="Pharmacy Revenue" tone="success" />
+      <app-stat-tile
+        icon="health_and_safety"
+        [value]="d.pendingInsuranceClaims"
+        label="Pending Insurance Claims"
+        tone="warning"
+      />
     </div>
   }
-</section>
+</div>

@@ -1,0 +1,9 @@
+<div class="stat-tile" [class]="'tone-' + tone()">
+  <div class="stat-tile-icon">
+    <mat-icon aria-hidden="true">{{ icon() }}</mat-icon>
+  </div>
+  <div class="stat-tile-body">
+    <span class="stat-tile-value">{{ value() }}</span>
+    <span class="stat-tile-label">{{ label() }}</span>
+  </div>
+</div>

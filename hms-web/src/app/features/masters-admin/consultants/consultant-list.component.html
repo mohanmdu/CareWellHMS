@@ -1,51 +1,108 @@
-<section>
-  <h2>Consultants</h2>
+<div class="hms-page">
+  <app-page-header title="Consultants" subtitle="Doctors and specialists available for appointment booking." />
 
-  @if (errorMessage()) {
-    <p class="error">{{ errorMessage() }}</p>
-  }
+  <section class="hms-card-surface consultant-form">
+    <form class="hms-form-grid" (ngSubmit)="add()">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Name</mat-label>
+        <input matInput name="name" [(ngModel)]="form.name" required />
+      </mat-form-field>
 
-  <form (ngSubmit)="add()">
-    <input name="name" [(ngModel)]="form.name" placeholder="Name" required />
-    <select name="departmentId" [(ngModel)]="form.departmentId" required>
-      <option [ngValue]="null" disabled>Select department</option>
-      @for (department of departments(); track department.id) {
-        <option [ngValue]="department.id">{{ department.name }}</option>
-      }
-    </select>
-    <input name="specialization" [(ngModel)]="form.specialization" placeholder="Specialization" />
-    <input name="email" [(ngModel)]="form.email" placeholder="Email" />
-    <input name="mobileNumber" [(ngModel)]="form.mobileNumber" placeholder="Mobile number" />
-    <input name="consultationFee" type="number" [(ngModel)]="form.consultationFee" placeholder="Consultation fee" />
-    <button type="submit">Add</button>
-  </form>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Department</mat-label>
+        <mat-select name="departmentId" [(ngModel)]="form.departmentId" required>
+          @for (department of departments(); track department.id) {
+            <mat-option [value]="department.id">{{ department.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Department</th>
-        <th>Specialization</th>
-        <th>Fee</th>
-        <th>Status</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (consultant of consultants(); track consultant.id) {
-        <tr>
-          <td>{{ consultant.name }}</td>
-          <td>{{ consultant.departmentName }}</td>
-          <td>{{ consultant.specialization }}</td>
-          <td>{{ consultant.consultationFee }}</td>
-          <td>{{ consultant.active ? 'Active' : 'Inactive' }}</td>
-          <td>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Specialization</mat-label>
+        <input matInput name="specialization" [(ngModel)]="form.specialization" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Email</mat-label>
+        <input matInput name="email" type="email" [(ngModel)]="form.email" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Mobile number</mat-label>
+        <input matInput name="mobileNumber" [(ngModel)]="form.mobileNumber" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Consultation fee</mat-label>
+        <input matInput name="consultationFee" type="number" min="0" [(ngModel)]="form.consultationFee" />
+      </mat-form-field>
+
+      <div class="consultant-form-submit">
+        <button mat-flat-button color="primary" type="submit" [disabled]="saving() || !form.name.trim() || !form.departmentId">
+          <mat-icon aria-hidden="true">add</mat-icon>
+          Add consultant
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="hms-card-surface consultant-list">
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    @if (!loading() && consultants().length === 0) {
+      <app-empty-state
+        icon="medical_services"
+        title="No consultants yet"
+        message="Add the first consultant using the form above."
+      />
+    } @else if (consultants().length > 0) {
+      <table mat-table [dataSource]="consultants()" class="consultant-table">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let consultant">{{ consultant.name }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="department">
+          <th mat-header-cell *matHeaderCellDef>Department</th>
+          <td mat-cell *matCellDef="let consultant">{{ consultant.departmentName }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="specialization">
+          <th mat-header-cell *matHeaderCellDef>Specialization</th>
+          <td mat-cell *matCellDef="let consultant">{{ consultant.specialization || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="fee">
+          <th mat-header-cell *matHeaderCellDef>Fee</th>
+          <td mat-cell *matCellDef="let consultant">{{ consultant.consultationFee | number: '1.0-2' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let consultant">
+            <app-status-badge
+              [label]="consultant.active ? 'Active' : 'Inactive'"
+              [tone]="consultant.active ? 'success' : 'neutral'"
+            />
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="consultant-actions-header"></th>
+          <td mat-cell *matCellDef="let consultant" class="consultant-actions-cell">
             @if (consultant.active) {
-              <button type="button" (click)="deactivate(consultant)">Deactivate</button>
+              <button mat-stroked-button color="warn" type="button" (click)="deactivate(consultant)">
+                Deactivate
+              </button>
             }
           </td>
-        </tr>
-      }
-    </tbody>
-  </table>
-</section>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    }
+  </section>
+</div>

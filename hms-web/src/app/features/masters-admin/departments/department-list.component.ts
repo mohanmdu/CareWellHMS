@@ -1,57 +1,32 @@
-import { Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, inject } from '@angular/core';
+import { MasterCrudComponent } from '../../../shared/master-crud/master-crud.component';
+import { MasterCrudConfig } from '../../../shared/master-crud/master-crud.model';
 import { Department } from './department.model';
 import { DepartmentService } from './department.service';
 
 /**
- * Reference implementation of the generic master/detail CRUD screen pattern
- * (migration doc §5) that should be generalized into a shared
- * MasterCrudComponent<T> once 2-3 more master entities are ported.
+ * Thin per-entity configuration of the shared MasterCrudComponent<T>
+ * (migration doc §5) - the generic list/add/deactivate screen originally
+ * prototyped here now lives in shared/master-crud.
  */
 @Component({
   selector: 'app-department-list',
   standalone: true,
-  imports: [FormsModule],
+  imports: [MasterCrudComponent],
   templateUrl: './department-list.component.html'
 })
 export class DepartmentListComponent {
   private readonly service = inject(DepartmentService);
 
-  departments = signal<Department[]>([]);
-  newDepartmentName = '';
-  errorMessage = signal<string | null>(null);
-
-  constructor() {
-    this.refresh();
-  }
-
-  refresh(): void {
-    this.service.list().subscribe({
-      next: (departments) => this.departments.set(departments),
-      error: () => this.errorMessage.set('Failed to load departments.')
-    });
-  }
-
-  add(): void {
-    if (!this.newDepartmentName.trim()) {
-      return;
-    }
-    this.service.create({ name: this.newDepartmentName.trim() }).subscribe({
-      next: () => {
-        this.newDepartmentName = '';
-        this.refresh();
-      },
-      error: () => this.errorMessage.set('Failed to create department.')
-    });
-  }
-
-  deactivate(department: Department): void {
-    if (department.id === null) {
-      return;
-    }
-    this.service.deactivate(department.id).subscribe({
-      next: () => this.refresh(),
-      error: () => this.errorMessage.set('Failed to deactivate department.')
-    });
-  }
+  readonly config: MasterCrudConfig<Department> = {
+    title: 'Departments',
+    subtitle: 'Clinical and administrative departments used across scheduling, billing and staffing.',
+    entityLabel: 'department',
+    getId: (department) => department.id,
+    getName: (department) => department.name,
+    getActive: (department) => department.active,
+    list: () => this.service.list(),
+    create: (name) => this.service.create({ name }),
+    deactivate: (id) => this.service.deactivate(id)
+  };
 }

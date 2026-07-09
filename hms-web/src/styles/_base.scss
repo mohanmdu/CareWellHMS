@@ -1,0 +1,131 @@
+// Base resets, global typography and small utility classes shared by every
+// screen. Component-specific layout lives in each component's own stylesheet
+// - this file only holds things that are truly global.
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--hms-font-family);
+  font-size: var(--hms-font-size-md);
+  line-height: var(--hms-line-height-normal);
+  color: var(--hms-color-text);
+  background: var(--hms-color-surface-alt);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-weight: var(--hms-font-weight-semibold);
+  line-height: var(--hms-line-height-tight);
+  margin: 0 0 var(--hms-space-2);
+}
+
+// Consistent, visible keyboard focus ring everywhere - important for a
+// clinical app used with barcode scanners / keyboard-heavy data entry.
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--hms-color-primary);
+  outline-offset: 2px;
+}
+
+// Skip-to-content link: hidden until focused, first tab stop on every page.
+.hms-skip-link {
+  position: absolute;
+  left: var(--hms-space-3);
+  top: -48px;
+  background: var(--hms-color-primary);
+  color: var(--hms-color-on-primary);
+  padding: var(--hms-space-2) var(--hms-space-4);
+  border-radius: var(--hms-radius-sm);
+  z-index: 1000;
+  transition: top var(--hms-transition-base);
+
+  &:focus {
+    top: var(--hms-space-3);
+  }
+}
+
+.hms-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// Page shell used by every feature screen for consistent max-width/vertical
+// rhythm. Horizontal padding around the routed content is applied once, by
+// the app shell's <main> (see app-shell.component.scss), so it covers
+// migrated and not-yet-migrated screens alike without doubling up here.
+.hms-page {
+  max-width: var(--hms-content-max-width);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-5);
+}
+
+.hms-card-surface {
+  background: var(--hms-color-surface);
+  border: 1px solid var(--hms-color-border);
+  border-radius: var(--hms-radius-lg);
+  box-shadow: var(--hms-shadow-sm);
+}
+
+.hms-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--hms-space-4);
+  align-items: start;
+}
+
+.hms-inline-actions {
+  display: flex;
+  gap: var(--hms-space-2);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+// Thin, unobtrusive scrollbars for dense data tables / side nav.
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--hms-color-border-strong);
+  border-radius: var(--hms-radius-full);
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+// Snackbar tone overrides (rendered into the CDK overlay container, outside
+// any component's view encapsulation, so these rules must be global).
+.hms-snackbar-success {
+  --mdc-snackbar-container-color: var(--hms-color-success);
+  --mdc-snackbar-supporting-text-color: var(--hms-color-on-primary);
+  --mat-snack-bar-button-color: var(--hms-color-on-primary);
+}
+
+.hms-snackbar-error {
+  --mdc-snackbar-container-color: var(--hms-color-danger);
+  --mdc-snackbar-supporting-text-color: var(--hms-color-on-primary);
+  --mat-snack-bar-button-color: var(--hms-color-on-primary);
+}

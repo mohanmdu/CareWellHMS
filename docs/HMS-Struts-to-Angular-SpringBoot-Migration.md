@@ -351,6 +351,11 @@ hms-web/
     layout/          # AppShellComponent, header, side-nav (replaces mainTemplate.jsp/header.jsp/menu.jsp)
 ```
 
+The concrete design system implementing this structure (design tokens, Material
+theming, the shared component library including `MasterCrudComponent<T>`, and
+the page templates each feature screen should follow) is documented in
+[UI-UX-Design-System.md](./UI-UX-Design-System.md).
+
 ### 6.2 Spring Boot backend structure
 
 ```

@@ -1,4 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { NotificationService } from '../../../shared/services/notification.service';
+import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
+import { StatTileComponent } from '../../../shared/ui/stat-tile/stat-tile.component';
 import { Dashboard } from './dashboard.model';
 import { DashboardService } from './dashboard.service';
 
@@ -11,18 +15,27 @@ import { DashboardService } from './dashboard.service';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  templateUrl: './dashboard.component.html'
+  imports: [MatProgressBarModule, PageHeaderComponent, StatTileComponent],
+  templateUrl: './dashboard.component.html',
+  styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent {
   private readonly service = inject(DashboardService);
+  private readonly notification = inject(NotificationService);
 
   dashboard = signal<Dashboard | null>(null);
-  errorMessage = signal<string | null>(null);
+  loading = signal(true);
 
   constructor() {
     this.service.get().subscribe({
-      next: (dashboard) => this.dashboard.set(dashboard),
-      error: () => this.errorMessage.set('Failed to load dashboard.')
+      next: (dashboard) => {
+        this.dashboard.set(dashboard);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.notification.error('Failed to load dashboard.');
+      }
     });
   }
 }

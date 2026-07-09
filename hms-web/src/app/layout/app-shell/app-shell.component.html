@@ -1,0 +1,55 @@
+<a class="hms-skip-link" href="#main-content">Skip to content</a>
+
+<mat-sidenav-container class="shell-container">
+  <mat-sidenav
+    class="shell-sidenav"
+    [mode]="isHandset() ? 'over' : 'side'"
+    [opened]="sidenavOpened()"
+    (closedStart)="sidenavOpened.set(false)"
+  >
+    <div class="shell-brand">
+      <mat-icon aria-hidden="true">local_hospital</mat-icon>
+      <span>Navjeevan HMS</span>
+    </div>
+
+    <mat-nav-list>
+      @for (group of navGroups; track group.label) {
+        <h3 class="shell-nav-heading" matSubheader>{{ group.label }}</h3>
+        @for (item of group.items; track item.route) {
+          <a
+            mat-list-item
+            [routerLink]="item.route"
+            routerLinkActive="shell-nav-active"
+            (click)="closeOnMobileNav()"
+          >
+            <mat-icon matListItemIcon aria-hidden="true">{{ item.icon }}</mat-icon>
+            <span matListItemTitle>{{ item.label }}</span>
+          </a>
+        }
+      }
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="shell-content">
+    <mat-toolbar color="primary" class="shell-toolbar">
+      <button mat-icon-button type="button" (click)="toggleSidenav()" aria-label="Toggle navigation menu">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span class="shell-title">Navjeevan Hospital Management System</span>
+      <span class="shell-spacer"></span>
+      <button mat-icon-button type="button" [matMenuTriggerFor]="userMenu" aria-label="Account menu">
+        <mat-icon>account_circle</mat-icon>
+      </button>
+      <mat-menu #userMenu="matMenu">
+        <button mat-menu-item type="button" (click)="signOut()">
+          <mat-icon>logout</mat-icon>
+          <span>Sign out</span>
+        </button>
+      </mat-menu>
+    </mat-toolbar>
+
+    <main id="main-content" class="shell-main">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

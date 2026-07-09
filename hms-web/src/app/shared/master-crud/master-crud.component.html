@@ -1,0 +1,59 @@
+<div class="hms-page">
+  <app-page-header [title]="config().title" [subtitle]="config().subtitle ?? null" />
+
+  <section class="hms-card-surface master-crud-form">
+    <form class="hms-inline-actions" (ngSubmit)="add()">
+      <mat-form-field appearance="outline" class="master-crud-name-field" subscriptSizing="dynamic">
+        <mat-label>{{ config().namePlaceholder ?? 'New ' + config().entityLabel + ' name' }}</mat-label>
+        <input matInput name="newName" [(ngModel)]="newName" required />
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="submit" [disabled]="!newName.trim() || saving()">
+        <mat-icon aria-hidden="true">add</mat-icon>
+        Add {{ config().entityLabel }}
+      </button>
+    </form>
+  </section>
+
+  <section class="hms-card-surface master-crud-list">
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    @if (!loading() && items().length === 0) {
+      <app-empty-state
+        icon="inbox"
+        [title]="'No ' + config().entityLabel + 's yet'"
+        [message]="'Add the first ' + config().entityLabel + ' using the form above.'"
+      />
+    } @else if (items().length > 0) {
+      <table mat-table [dataSource]="items()" class="master-crud-table">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let item">{{ config().getName(item) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let item">
+            <app-status-badge
+              [label]="config().getActive(item) ? 'Active' : 'Inactive'"
+              [tone]="config().getActive(item) ? 'success' : 'neutral'"
+            />
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="master-crud-actions-header"></th>
+          <td mat-cell *matCellDef="let item" class="master-crud-actions-cell">
+            @if (config().getActive(item)) {
+              <button mat-stroked-button color="warn" type="button" (click)="deactivate(item)">Deactivate</button>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    }
+  </section>
+</div>

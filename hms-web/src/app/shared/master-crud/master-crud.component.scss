@@ -1,0 +1,24 @@
+.master-crud-form {
+  padding: var(--hms-space-4) var(--hms-space-5);
+}
+
+.master-crud-name-field {
+  min-width: 260px;
+  flex: 1 1 260px;
+}
+
+.master-crud-list {
+  overflow-x: auto;
+}
+
+.master-crud-table {
+  width: 100%;
+}
+
+.master-crud-actions-cell {
+  text-align: right;
+}
+
+.master-crud-actions-header {
+  width: 140px;
+}

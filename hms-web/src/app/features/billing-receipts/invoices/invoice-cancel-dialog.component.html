@@ -1,0 +1,13 @@
+<h2 mat-dialog-title>Cancel / refund invoice</h2>
+<mat-dialog-content>
+  <mat-form-field appearance="outline" class="invoice-cancel-reason-field">
+    <mat-label>Reason</mat-label>
+    <textarea matInput name="reason" rows="3" [(ngModel)]="reason" required cdkFocusInitial></textarea>
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button type="button" mat-dialog-close>Back</button>
+  <button mat-flat-button color="warn" type="button" [disabled]="!reason.trim()" (click)="submit()">
+    Confirm cancellation
+  </button>
+</mat-dialog-actions>

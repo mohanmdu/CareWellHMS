@@ -1,0 +1,22 @@
+// Angular Material M3 theme for Navjeevan HMS.
+// Palette choice mirrors the brand hues in _tokens.scss (clinical blue
+// primary / teal tertiary) so Material chrome (buttons, form fields,
+// dialogs, tables) and hand-built shared components read as one system.
+@use '@angular/material' as mat;
+
+$hms-theme: mat.define-theme(
+  (
+    color: (
+      theme-type: light,
+      primary: mat.$azure-palette,
+      tertiary: mat.$cyan-palette
+    ),
+    typography: (
+      brand-family: 'system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif',
+      plain-family: 'system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif'
+    ),
+    density: (
+      scale: -1
+    )
+  )
+);

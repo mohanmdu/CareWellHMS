@@ -1,0 +1,25 @@
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--hms-space-4);
+  flex-wrap: wrap;
+}
+
+.page-header-text h1 {
+  font-size: var(--hms-font-size-2xl);
+  margin: 0;
+}
+
+.page-header-subtitle {
+  margin: var(--hms-space-1) 0 0;
+  color: var(--hms-color-text-muted);
+  font-size: var(--hms-font-size-md);
+}
+
+.page-header-actions {
+  display: flex;
+  gap: var(--hms-space-2);
+  flex-wrap: wrap;
+  align-items: center;
+}

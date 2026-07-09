@@ -1,0 +1,24 @@
+.consultant-form {
+  padding: var(--hms-space-5);
+}
+
+.consultant-form-submit {
+  display: flex;
+  align-items: center;
+}
+
+.consultant-list {
+  overflow-x: auto;
+}
+
+.consultant-table {
+  width: 100%;
+}
+
+.consultant-actions-cell {
+  text-align: right;
+}
+
+.consultant-actions-header {
+  width: 140px;
+}

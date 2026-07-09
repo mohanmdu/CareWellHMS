@@ -1,70 +1,139 @@
-<section>
-  <h2>New Invoice</h2>
-
-  @if (errorMessage()) {
-    <p class="error">{{ errorMessage() }}</p>
-  }
+<div class="hms-page">
+  <app-page-header title="New Invoice" subtitle="Search a patient, add priced items, and post one invoice." />
 
   @if (!selectedPatient()) {
-    <form (ngSubmit)="search()">
-      <input name="searchQuery" [(ngModel)]="searchQuery" placeholder="Search patient by name" />
-      <button type="submit">Search</button>
-    </form>
-    <ul>
-      @for (patient of searchResults(); track patient.id) {
-        <li>
-          {{ patient.firstName }} {{ patient.lastName }} ({{ patient.mobileNumber }})
-          <button type="button" (click)="selectPatient(patient)">Select</button>
-        </li>
+    <section class="hms-card-surface invoice-search">
+      <form class="hms-inline-actions" (ngSubmit)="search()">
+        <mat-form-field appearance="outline" class="invoice-search-field" subscriptSizing="dynamic">
+          <mat-label>Search patient by name</mat-label>
+          <input matInput name="searchQuery" [(ngModel)]="searchQuery" />
+          <mat-icon matPrefix aria-hidden="true">search</mat-icon>
+        </mat-form-field>
+        <button mat-flat-button color="primary" type="submit">Search</button>
+      </form>
+
+      @if (searchResults().length > 0) {
+        <ul class="invoice-search-results">
+          @for (patient of searchResults(); track patient.id) {
+            <li class="invoice-search-result">
+              <div>
+                <strong>{{ patient.firstName }} {{ patient.lastName }}</strong>
+                <span class="invoice-search-result-meta">{{ patient.mobileNumber }}</span>
+              </div>
+              <button mat-stroked-button color="primary" type="button" (click)="selectPatient(patient)">
+                Select
+              </button>
+            </li>
+          }
+        </ul>
+      } @else {
+        <app-empty-state icon="person_search" title="Search for a patient" message="Results will appear here." />
       }
-    </ul>
+    </section>
   } @else {
-    <p>Patient: <strong>{{ selectedPatient()?.firstName }} {{ selectedPatient()?.lastName }}</strong></p>
+    <section class="hms-card-surface invoice-patient-summary">
+      <div class="invoice-patient-info">
+        <mat-icon aria-hidden="true">person</mat-icon>
+        <div>
+          <strong>{{ selectedPatient()?.firstName }} {{ selectedPatient()?.lastName }}</strong>
+          <span class="invoice-search-result-meta">{{ selectedPatient()?.mobileNumber }}</span>
+        </div>
+      </div>
+      <button mat-button type="button" (click)="changePatient()">Change patient</button>
+    </section>
 
     @if (patientAppointments().length > 0) {
-      <label>
-        Link to appointment (optional)
-        <select name="appointmentId" [(ngModel)]="selectedAppointmentId">
-          <option [ngValue]="null">None</option>
-          @for (appointment of patientAppointments(); track appointment.id) {
-            <option [ngValue]="appointment.id">
-              {{ appointment.appointmentDate }} {{ appointment.slotTime }} - {{ appointment.consultantName }}
-            </option>
-          }
-        </select>
-      </label>
+      <section class="hms-card-surface">
+        <mat-form-field appearance="outline" class="invoice-appointment-field" subscriptSizing="dynamic">
+          <mat-label>Link to appointment (optional)</mat-label>
+          <mat-select name="appointmentId" [(ngModel)]="selectedAppointmentId">
+            <mat-option [value]="null">None</mat-option>
+            @for (appointment of patientAppointments(); track appointment.id) {
+              <mat-option [value]="appointment.id">
+                {{ appointment.appointmentDate }} {{ appointment.slotTime }} - {{ appointment.consultantName }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </section>
     }
 
-    <h3>Add billing items</h3>
-    <form (ngSubmit)="addLine()">
-      <select name="billingItemId" [(ngModel)]="selectedBillingItemId">
-        <option [ngValue]="null" disabled>Select item</option>
-        @for (item of billingItems(); track item.id) {
-          <option [ngValue]="item.id">{{ item.name }} ({{ item.price }})</option>
-        }
-      </select>
-      <input name="quantity" type="number" min="1" [(ngModel)]="quantity" />
-      <button type="submit">Add</button>
-    </form>
+    <section class="hms-card-surface invoice-items">
+      <h2 class="invoice-section-title">Billing items</h2>
+      <form class="hms-inline-actions" (ngSubmit)="addLine()">
+        <mat-form-field appearance="outline" class="invoice-item-field" subscriptSizing="dynamic">
+          <mat-label>Item</mat-label>
+          <mat-select name="billingItemId" [(ngModel)]="selectedBillingItemId">
+            @for (item of billingItems(); track item.id) {
+              <mat-option [value]="item.id">{{ item.name }} ({{ item.price | number: '1.0-2' }})</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="invoice-qty-field" subscriptSizing="dynamic">
+          <mat-label>Qty</mat-label>
+          <input matInput name="quantity" type="number" min="1" [(ngModel)]="quantity" />
+        </mat-form-field>
+        <button mat-stroked-button color="primary" type="submit" [disabled]="!selectedBillingItemId">
+          <mat-icon aria-hidden="true">add</mat-icon>
+          Add
+        </button>
+      </form>
 
-    <table>
-      <thead>
-        <tr><th>Item</th><th>Qty</th><th>Unit price</th><th>Line total</th><th></th></tr>
-      </thead>
-      <tbody>
-        @for (line of draftLines(); track $index) {
-          <tr>
-            <td>{{ line.itemName }}</td>
-            <td>{{ line.quantity }}</td>
-            <td>{{ line.unitPrice }}</td>
-            <td>{{ line.unitPrice * line.quantity }}</td>
-            <td><button type="button" (click)="removeLine($index)">Remove</button></td>
-          </tr>
-        }
-      </tbody>
-    </table>
+      @if (draftLines().length === 0) {
+        <app-empty-state icon="receipt_long" title="No items added yet" message="Add billing items above." />
+      } @else {
+        <table mat-table [dataSource]="draftLines()" class="invoice-lines-table">
+          <ng-container matColumnDef="item">
+            <th mat-header-cell *matHeaderCellDef>Item</th>
+            <td mat-cell *matCellDef="let line">{{ line.itemName }}</td>
+          </ng-container>
+          <ng-container matColumnDef="quantity">
+            <th mat-header-cell *matHeaderCellDef>Qty</th>
+            <td mat-cell *matCellDef="let line">{{ line.quantity }}</td>
+          </ng-container>
+          <ng-container matColumnDef="unitPrice">
+            <th mat-header-cell *matHeaderCellDef>Unit price</th>
+            <td mat-cell *matCellDef="let line">{{ line.unitPrice | number: '1.0-2' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="lineTotal">
+            <th mat-header-cell *matHeaderCellDef>Line total</th>
+            <td mat-cell *matCellDef="let line">{{ line.unitPrice * line.quantity | number: '1.0-2' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let line; let i = index" class="invoice-lines-actions-cell">
+              <button
+                mat-icon-button
+                type="button"
+                color="warn"
+                [attr.aria-label]="'Remove ' + line.itemName"
+                (click)="removeLine(i)"
+              >
+                <mat-icon aria-hidden="true">delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="lineColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: lineColumns"></tr>
+        </table>
+      }
 
-    <p><strong>Total: {{ total() }}</strong></p>
-    <button type="button" (click)="submit()" [disabled]="draftLines().length === 0">Create Invoice</button>
+      <div class="invoice-total-row">
+        <span>Total</span>
+        <strong>{{ total() | number: '1.0-2' }}</strong>
+      </div>
+
+      <div class="invoice-submit-row">
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          [disabled]="draftLines().length === 0 || submitting()"
+          (click)="submit()"
+        >
+          Create Invoice
+        </button>
+      </div>
+    </section>
   }
-</section>
+</div>

@@ -1,0 +1,27 @@
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--hms-space-2);
+  padding: var(--hms-space-10) var(--hms-space-4);
+  color: var(--hms-color-text-muted);
+}
+
+.empty-state-icon {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+  color: var(--hms-color-border-strong);
+}
+
+.empty-state h3 {
+  margin: 0;
+  color: var(--hms-color-text);
+  font-size: var(--hms-font-size-lg);
+}
+
+.empty-state p {
+  margin: 0;
+  max-width: 32ch;
+}

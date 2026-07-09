@@ -1,6 +1,16 @@
+import { DecimalPipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatTableModule } from '@angular/material/table';
 import { Router } from '@angular/router';
+import { NotificationService } from '../../../shared/services/notification.service';
+import { EmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
+import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
 import { Appointment } from '../../appointments/booking/appointment.model';
 import { AppointmentService } from '../../appointments/booking/appointment.service';
 import { Patient } from '../../registration/patients/patient.model';
@@ -25,17 +35,32 @@ interface DraftLine {
 @Component({
   selector: 'app-invoice-create',
   standalone: true,
-  imports: [FormsModule],
-  templateUrl: './invoice-create.component.html'
+  imports: [
+    DecimalPipe,
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTableModule,
+    PageHeaderComponent,
+    EmptyStateComponent
+  ],
+  templateUrl: './invoice-create.component.html',
+  styleUrl: './invoice-create.component.scss'
 })
 export class InvoiceCreateComponent {
   private readonly patientService = inject(PatientService);
   private readonly appointmentService = inject(AppointmentService);
   private readonly billingItemService = inject(BillingItemService);
   private readonly invoiceService = inject(InvoiceService);
+  private readonly notification = inject(NotificationService);
   private readonly router = inject(Router);
 
-  errorMessage = signal<string | null>(null);
+  readonly lineColumns = ['item', 'quantity', 'unitPrice', 'lineTotal', 'actions'];
+
+  submitting = signal(false);
 
   searchQuery = '';
   searchResults = signal<Patient[]>([]);
@@ -57,7 +82,7 @@ export class InvoiceCreateComponent {
   constructor() {
     this.billingItemService.list().subscribe({
       next: (items) => this.billingItems.set(items.filter((i) => i.active)),
-      error: () => this.errorMessage.set('Failed to load billing items.')
+      error: () => this.notification.error('Failed to load billing items.')
     });
     this.appointmentService.list().subscribe({ next: (appointments) => this.allAppointments.set(appointments) });
   }
@@ -65,13 +90,18 @@ export class InvoiceCreateComponent {
   search(): void {
     this.patientService.search(this.searchQuery).subscribe({
       next: (patients) => this.searchResults.set(patients),
-      error: () => this.errorMessage.set('Patient search failed.')
+      error: () => this.notification.error('Patient search failed.')
     });
   }
 
   selectPatient(patient: Patient): void {
     this.selectedPatient.set(patient);
     this.selectedAppointmentId = null;
+  }
+
+  changePatient(): void {
+    this.selectedPatient.set(null);
+    this.draftLines.set([]);
   }
 
   addLine(): void {
@@ -83,6 +113,7 @@ export class InvoiceCreateComponent {
       ...lines,
       { billingItemId: item.id!, itemName: item.name, unitPrice: item.price, quantity: this.quantity }
     ]);
+    this.selectedBillingItemId = null;
     this.quantity = 1;
   }
 
@@ -95,6 +126,7 @@ export class InvoiceCreateComponent {
     if (!patient || patient.id === null || this.draftLines().length === 0) {
       return;
     }
+    this.submitting.set(true);
     this.invoiceService
       .create({
         patientId: patient.id,
@@ -102,8 +134,14 @@ export class InvoiceCreateComponent {
         lineItems: this.draftLines().map((l) => ({ billingItemId: l.billingItemId, quantity: l.quantity }))
       })
       .subscribe({
-        next: () => this.router.navigateByUrl('/billing/invoices'),
-        error: (err) => this.errorMessage.set(err.error?.message ?? 'Failed to create invoice.')
+        next: () => {
+          this.notification.success('Invoice created.');
+          this.router.navigateByUrl('/billing/invoices');
+        },
+        error: (err) => {
+          this.submitting.set(false);
+          this.notification.error(err.error?.message ?? 'Failed to create invoice.');
+        }
       });
   }
 }

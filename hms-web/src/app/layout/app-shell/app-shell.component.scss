@@ -1,0 +1,68 @@
+.shell-container {
+  height: 100vh;
+}
+
+.shell-sidenav {
+  width: var(--hms-shell-sidenav-width);
+  border-right: 1px solid var(--hms-color-border);
+}
+
+.shell-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+  padding: var(--hms-space-4) var(--hms-space-4) var(--hms-space-3);
+  font-weight: var(--hms-font-weight-semibold);
+  font-size: var(--hms-font-size-lg);
+  color: var(--hms-color-primary);
+}
+
+.shell-nav-heading {
+  color: var(--hms-color-text-muted);
+  font-size: var(--hms-font-size-xs);
+  font-weight: var(--hms-font-weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.shell-nav-active {
+  background: var(--hms-color-primary-container);
+  color: var(--hms-color-on-primary-container);
+
+  mat-icon {
+    color: var(--hms-color-primary);
+  }
+}
+
+.shell-content {
+  background: var(--hms-color-surface-alt);
+}
+
+.shell-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.shell-title {
+  margin-left: var(--hms-space-2);
+  font-size: var(--hms-font-size-lg);
+  font-weight: var(--hms-font-weight-medium);
+
+  @media (max-width: 599px) {
+    display: none;
+  }
+}
+
+.shell-spacer {
+  flex: 1 1 auto;
+}
+
+.shell-main {
+  min-height: calc(100vh - var(--hms-shell-header-height));
+  padding: var(--hms-space-6);
+
+  @media (max-width: 599px) {
+    padding: var(--hms-space-4);
+  }
+}
