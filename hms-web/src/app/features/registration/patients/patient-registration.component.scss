@@ -1,0 +1,25 @@
+.patient-registration-tabs {
+  overflow-x: auto;
+}
+
+.patient-tab-body {
+  padding: var(--hms-space-4) 0 var(--hms-space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+}
+
+.patient-table {
+  width: 100%;
+}
+
+.patient-actions-cell {
+  display: flex;
+  gap: var(--hms-space-1);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.patient-actions-header {
+  width: 1%;
+}

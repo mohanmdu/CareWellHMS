@@ -1,12 +1,16 @@
 package com.pms.registration.service;
 
 import com.pms.common.EntityNotFoundException;
+import com.pms.registration.dto.PatientAuditLogDto;
 import com.pms.registration.dto.PatientDto;
 import com.pms.registration.entity.Patient;
+import com.pms.registration.entity.PatientAuditLog;
+import com.pms.registration.repository.PatientAuditLogRepository;
 import com.pms.registration.repository.PatientRepository;
 import java.time.Year;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,36 +20,93 @@ import org.springframework.transaction.annotation.Transactional;
  * uses a simple year-prefixed sequential registration number instead -
  * revisit against the real numbering scheme before this touches production
  * data (see docs/appendix for the full legacy action catalog).
+ *
+ * Delete is soft (the `active` flag) so patients can be restored; a
+ * separate permanent-delete operation does a real row delete. Every
+ * register/update/delete/restore/permanent-delete is written to
+ * PatientAuditLog for the Logs screen, attributed to the authenticated
+ * HTTP Basic principal (see SecurityConfig) - this is the first module to
+ * populate a "performed by" identity now that real auth carries one.
  */
 @Service
 @Transactional(readOnly = true)
 public class PatientService {
 
     private final PatientRepository repository;
+    private final PatientAuditLogRepository auditLogRepository;
     private final AtomicInteger sequence = new AtomicInteger(0);
 
-    public PatientService(PatientRepository repository) {
+    public PatientService(PatientRepository repository, PatientAuditLogRepository auditLogRepository) {
         this.repository = repository;
+        this.auditLogRepository = auditLogRepository;
         this.sequence.set((int) repository.count());
     }
 
     public List<PatientDto> search(String query) {
         List<Patient> patients = (query == null || query.isBlank())
-                ? repository.findAll()
-                : repository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(query, query);
+                ? repository.findByActiveTrueOrderByIdDesc()
+                : repository.findByActiveTrueAndFirstNameContainingIgnoreCaseOrActiveTrueAndLastNameContainingIgnoreCase(
+                        query, query);
         return patients.stream().map(this::toDto).toList();
+    }
+
+    public List<PatientDto> findInactive() {
+        return repository.findByActiveFalseOrderByUpdatedAtDesc().stream().map(this::toDto).toList();
     }
 
     public PatientDto findById(Long id) {
         return toDto(getOrThrow(id));
     }
 
+    public List<PatientAuditLogDto> auditLogs() {
+        return auditLogRepository.findAllByOrderByPerformedAtDesc().stream()
+                .map(log -> new PatientAuditLogDto(
+                        log.getId(), log.getOperation(), log.getPatientName(), log.getPerformedBy(), log.getPerformedAt()))
+                .toList();
+    }
+
     @Transactional
     public PatientDto register(PatientDto dto) {
         Patient patient = new Patient();
         patient.setRegistrationNumber(nextRegistrationNumber());
+        patient.setActive(true);
         applyFields(patient, dto);
-        return toDto(repository.save(patient));
+        Patient saved = repository.save(patient);
+        recordAudit("REGISTER", displayName(saved));
+        return toDto(saved);
+    }
+
+    @Transactional
+    public PatientDto update(Long id, PatientDto dto) {
+        Patient patient = getOrThrow(id);
+        applyFields(patient, dto);
+        Patient saved = repository.save(patient);
+        recordAudit("UPDATE", displayName(saved));
+        return toDto(saved);
+    }
+
+    @Transactional
+    public void softDelete(Long id) {
+        Patient patient = getOrThrow(id);
+        patient.setActive(false);
+        repository.save(patient);
+        recordAudit("DELETE", displayName(patient));
+    }
+
+    @Transactional
+    public void restore(Long id) {
+        Patient patient = getOrThrow(id);
+        patient.setActive(true);
+        repository.save(patient);
+        recordAudit("RESTORE", displayName(patient));
+    }
+
+    @Transactional
+    public void permanentDelete(Long id) {
+        Patient patient = getOrThrow(id);
+        String name = displayName(patient);
+        repository.delete(patient);
+        recordAudit("PERMANENT_DELETE", name);
     }
 
     private String nextRegistrationNumber() {
@@ -57,9 +118,25 @@ public class PatientService {
         patient.setLastName(dto.lastName());
         patient.setDateOfBirth(dto.dateOfBirth());
         patient.setGender(dto.gender());
+        patient.setAge(dto.age());
         patient.setMobileNumber(dto.mobileNumber());
         patient.setEmail(dto.email());
         patient.setAddress(dto.address());
+    }
+
+    private void recordAudit(String operation, String patientName) {
+        auditLogRepository.save(new PatientAuditLog(operation, patientName, currentUsername()));
+    }
+
+    private String currentUsername() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null ? authentication.getName() : "system";
+    }
+
+    private String displayName(Patient patient) {
+        return (patient.getLastName() == null || patient.getLastName().isBlank())
+                ? patient.getFirstName()
+                : patient.getFirstName() + " " + patient.getLastName();
     }
 
     private Patient getOrThrow(Long id) {
@@ -74,8 +151,10 @@ public class PatientService {
                 patient.getLastName(),
                 patient.getDateOfBirth(),
                 patient.getGender(),
+                patient.getAge(),
                 patient.getMobileNumber(),
                 patient.getEmail(),
-                patient.getAddress());
+                patient.getAddress(),
+                patient.isActive());
     }
 }

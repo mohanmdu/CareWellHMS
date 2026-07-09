@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { Patient } from './patient.model';
+import { Patient, PatientAuditLogEntry } from './patient.model';
 
 export type PatientInput = Omit<Patient, 'id' | 'registrationNumber'>;
 
@@ -11,11 +11,38 @@ export class PatientService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiBaseUrl}/registration/patients`;
 
+  /** Active patients only - used both by the registration grid and every workflow's patient picker. */
   search(query: string): Observable<Patient[]> {
     return this.http.get<Patient[]>(this.baseUrl, { params: query ? { query } : {} });
   }
 
+  listInactive(): Observable<Patient[]> {
+    return this.http.get<Patient[]>(`${this.baseUrl}/inactive`);
+  }
+
   register(patient: PatientInput): Observable<Patient> {
     return this.http.post<Patient>(this.baseUrl, patient);
+  }
+
+  update(id: number, patient: PatientInput): Observable<Patient> {
+    return this.http.put<Patient>(`${this.baseUrl}/${id}`, patient);
+  }
+
+  /** Soft delete - moves the patient to the Inactive Patients list. */
+  softDelete(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${id}/deactivate`, {});
+  }
+
+  restore(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${id}/restore`, {});
+  }
+
+  /** Irreversible - actually removes the record, unlike softDelete(). */
+  permanentDelete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
+  auditLogs(): Observable<PatientAuditLogEntry[]> {
+    return this.http.get<PatientAuditLogEntry[]>(`${this.baseUrl}/audit-logs`);
   }
 }

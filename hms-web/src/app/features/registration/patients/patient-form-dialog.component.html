@@ -1,0 +1,53 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Edit Patient' : 'Add Patient' }}</h2>
+
+<mat-dialog-content class="patient-form-dialog-content">
+  <mat-form-field appearance="outline" class="patient-form-field" subscriptSizing="dynamic">
+    <mat-label>Patient name</mat-label>
+    <input matInput name="firstName" [(ngModel)]="form.firstName" required cdkFocusInitial />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="patient-form-field" subscriptSizing="dynamic">
+    <mat-label>Gender</mat-label>
+    <mat-select name="gender" [(ngModel)]="form.gender" required>
+      <mat-option value="Male">Male</mat-option>
+      <mat-option value="Female">Female</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="patient-form-field" subscriptSizing="dynamic">
+    <mat-label>Age</mat-label>
+    <mat-select name="age" [(ngModel)]="form.age" required>
+      @for (age of ages; track age) {
+        <mat-option [value]="age">{{ age }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="patient-form-field" subscriptSizing="dynamic">
+    <mat-label>Mobile number</mat-label>
+    <input
+      matInput
+      name="mobileNumber"
+      inputmode="numeric"
+      maxlength="10"
+      [ngModel]="form.mobileNumber"
+      (input)="onMobileInput($event)"
+      required
+    />
+    @if (form.mobileNumber && form.mobileNumber.length !== 10) {
+      <mat-hint>Must be exactly 10 digits</mat-hint>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="patient-form-field" subscriptSizing="dynamic">
+    <mat-label>Location</mat-label>
+    <input matInput name="address" [(ngModel)]="form.address" required />
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" mat-dialog-close>Cancel</button>
+  <button mat-flat-button color="primary" type="button" [disabled]="!isValid" (click)="submit()">
+    {{ isEdit ? 'Save changes' : 'Add patient' }}
+  </button>
+</mat-dialog-actions>

@@ -1,6 +1,9 @@
 package com.pms.registration.dto;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import java.time.LocalDate;
 
 public record PatientDto(
@@ -10,7 +13,9 @@ public record PatientDto(
         String lastName,
         LocalDate dateOfBirth,
         String gender,
-        @NotBlank String mobileNumber,
+        @Min(1) @Max(100) Integer age,
+        @NotBlank @Pattern(regexp = "\\d{10}", message = "Mobile number must be exactly 10 digits") String mobileNumber,
         String email,
-        String address) {
+        String address,
+        boolean active) {
 }

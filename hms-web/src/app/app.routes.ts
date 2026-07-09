@@ -14,6 +14,18 @@ export const routes: Routes = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
       {
+        path: 'registration/patients',
+        loadComponent: () =>
+          import('./features/registration/patients/patient-registration.component').then(
+            (m) => m.PatientRegistrationComponent
+          )
+      },
+      {
+        path: 'registration/patients/logs',
+        loadComponent: () =>
+          import('./features/registration/patients/patient-logs.component').then((m) => m.PatientLogsComponent)
+      },
+      {
         path: 'dashboard',
         loadComponent: () =>
           import('./features/reports-mis/dashboard/dashboard.component').then((m) => m.DashboardComponent)

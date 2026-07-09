@@ -1,0 +1,10 @@
+.patient-form-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-2);
+  min-width: 320px;
+}
+
+.patient-form-field {
+  width: 100%;
+}

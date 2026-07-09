@@ -15,11 +15,18 @@ export interface NavGroup {
  */
 export const NAV_GROUPS: NavGroup[] = [
   {
+    label: 'Patient Registration',
+    items: [
+      { label: 'Patients', route: '/registration/patients', icon: 'person_add' },
+      { label: 'Logs', route: '/registration/patients/logs', icon: 'history' }
+    ]
+  },
+  {
     label: 'Overview',
     items: [{ label: 'Dashboard', route: '/dashboard', icon: 'dashboard' }]
   },
   {
-    label: 'Registration & Appointments',
+    label: 'Appointments',
     items: [
       { label: 'Book Appointment', route: '/appointments/book', icon: 'event_available' },
       { label: 'Appointments', route: '/appointments', icon: 'event' }

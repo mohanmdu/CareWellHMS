@@ -41,10 +41,15 @@ public class Patient extends Auditable {
 
     private String gender;
 
+    private Integer age;
+
     @Column(name = "mobile_number", nullable = false)
     private String mobileNumber;
 
     private String email;
 
     private String address;
+
+    @Column(nullable = false)
+    private boolean active = true;
 }

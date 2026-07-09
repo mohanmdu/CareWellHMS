@@ -9,5 +9,10 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
 
     List<Patient> findByMobileNumber(String mobileNumber);
 
-    List<Patient> findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(String firstName, String lastName);
+    List<Patient> findByActiveTrueOrderByIdDesc();
+
+    List<Patient> findByActiveFalseOrderByUpdatedAtDesc();
+
+    List<Patient> findByActiveTrueAndFirstNameContainingIgnoreCaseOrActiveTrueAndLastNameContainingIgnoreCase(
+            String firstName, String lastName);
 }

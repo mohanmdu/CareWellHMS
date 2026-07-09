@@ -208,7 +208,19 @@ rather than inventing a new one.
   multi-field result entry) — see §4 for the field contract. Don't add a
   new bespoke dialog component for an input-capturing confirmation; extend
   `PromptDialogField`'s `type` union if a genuinely new input shape is
-  needed.
+  needed. An entity with real per-field validation and typed dropdowns
+  (not just 1-N generic text/number fields) still gets its own dedicated
+  dialog component - see `PatientFormDialogComponent`, which is reused for
+  both Add and Edit (an `isEdit` flag driven by whether `MAT_DIALOG_DATA`
+  carries a `patient`) rather than two near-duplicate dialogs.
+- **Soft delete**: entities with a restore/permanent-delete lifecycle (not
+  just active/inactive toggle) get an `active` flag plus three operations -
+  `softDelete`/`restore`/`permanentDelete` - and, where the operation
+  history itself matters, an audit log table populated server-side from
+  the authenticated principal (`SecurityContextHolder`), not a client-sent
+  "who did this" field. See Patient Registration (`features/registration/patients`)
+  for the reference shape: an Active/Inactive `mat-tab-group` on one
+  screen, a separate Logs screen reading the audit trail.
 
 ## 8. Accessibility checklist (apply to every new/migrated screen)
 
@@ -243,6 +255,8 @@ kit.
 |---|---|---|
 | Shell | App shell / navigation | — (§6) |
 | Auth | Login | — |
+| Patient Registration | Patients (Active/Inactive tabs, add/edit dialog) | 5.2 variant with `mat-tab-group` + soft-delete lifecycle (§7) |
+| Patient Registration | Logs | New template: flat audit-trail table (S.No/Operation/Patient Name/Date/Created By), no add/edit/delete actions |
 | Reports/MIS | Dashboard | 5.4 |
 | Masters-Admin | Departments | 5.1 (generic `MasterCrudComponent<T>`) |
 | Masters-Admin | Roles | 5.1 (generic `MasterCrudComponent<T>`) |
