@@ -1,0 +1,33 @@
+.room-catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: var(--hms-space-6);
+  align-items: start;
+}
+
+.room-catalog-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-4);
+}
+
+.room-catalog-column-title {
+  font-size: var(--hms-font-size-lg);
+  margin: 0;
+}
+
+.room-catalog-form {
+  padding: var(--hms-space-4) var(--hms-space-5);
+}
+
+.room-catalog-rate-field {
+  width: 140px;
+}
+
+.room-catalog-list {
+  overflow-x: auto;
+}
+
+.room-catalog-table {
+  width: 100%;
+}

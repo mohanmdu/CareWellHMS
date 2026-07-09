@@ -1,55 +1,97 @@
-<section>
-  <h2>Dispense / Sale</h2>
-
-  @if (errorMessage()) {
-    <p class="error">{{ errorMessage() }}</p>
-  }
+<div class="hms-page">
+  <app-page-header title="Dispense / Sale" subtitle="Search a patient, dispense against real batch stock, and post one sale." />
 
   @if (!selectedPatient()) {
-    <form (ngSubmit)="search()">
-      <input name="searchQuery" [(ngModel)]="searchQuery" placeholder="Search patient by name" />
-      <button type="submit">Search</button>
-    </form>
-    <ul>
-      @for (patient of searchResults(); track patient.id) {
-        <li>
-          {{ patient.firstName }} {{ patient.lastName }} ({{ patient.mobileNumber }})
-          <button type="button" (click)="selectPatient(patient)">Select</button>
-        </li>
-      }
-    </ul>
+    <section class="hms-card-surface sale-search">
+      <app-patient-search (patientSelected)="selectPatient($event)" />
+    </section>
   } @else {
-    <p>Patient: <strong>{{ selectedPatient()?.firstName }} {{ selectedPatient()?.lastName }}</strong></p>
+    <section class="hms-card-surface sale-patient-summary">
+      <div class="sale-patient-info">
+        <mat-icon aria-hidden="true">person</mat-icon>
+        <strong>{{ selectedPatient()?.firstName }} {{ selectedPatient()?.lastName }}</strong>
+      </div>
+      <button mat-button type="button" (click)="changePatient()">Change patient</button>
+    </section>
 
-    <form (ngSubmit)="addLine()">
-      <select name="batchId" [(ngModel)]="selectedBatchId">
-        <option [ngValue]="null" disabled>Select drug batch</option>
-        @for (batch of batches(); track batch.id) {
-          <option [ngValue]="batch.id">{{ batch.drugName }} — {{ batch.batchNumber }} ({{ batch.quantityOnHand }} in stock, {{ batch.sellingPrice }})</option>
-        }
-      </select>
-      <input name="quantity" type="number" min="1" [(ngModel)]="quantity" />
-      <button type="submit">Add</button>
-    </form>
+    <section class="hms-card-surface sale-items">
+      <h2 class="sale-section-title">Drug batches</h2>
+      <form class="hms-inline-actions" (ngSubmit)="addLine()">
+        <mat-form-field appearance="outline" class="sale-batch-field" subscriptSizing="dynamic">
+          <mat-label>Drug batch</mat-label>
+          <mat-select name="batchId" [(ngModel)]="selectedBatchId">
+            @for (batch of batches(); track batch.id) {
+              <mat-option [value]="batch.id">
+                {{ batch.drugName }} — {{ batch.batchNumber }} ({{ batch.quantityOnHand }} in stock, {{ batch.sellingPrice | number: '1.0-2' }})
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="sale-qty-field" subscriptSizing="dynamic">
+          <mat-label>Qty</mat-label>
+          <input matInput name="quantity" type="number" min="1" [(ngModel)]="quantity" />
+        </mat-form-field>
+        <button mat-stroked-button color="primary" type="submit" [disabled]="!selectedBatchId">
+          <mat-icon aria-hidden="true">add</mat-icon>
+          Add
+        </button>
+      </form>
 
-    <table>
-      <thead>
-        <tr><th>Drug</th><th>Qty</th><th>Unit price</th><th>Line total</th><th></th></tr>
-      </thead>
-      <tbody>
-        @for (line of draftLines(); track $index) {
-          <tr>
-            <td>{{ line.drugName }}</td>
-            <td>{{ line.quantity }}</td>
-            <td>{{ line.unitPrice }}</td>
-            <td>{{ line.unitPrice * line.quantity }}</td>
-            <td><button type="button" (click)="removeLine($index)">Remove</button></td>
-          </tr>
-        }
-      </tbody>
-    </table>
+      @if (draftLines().length === 0) {
+        <app-empty-state icon="medication" title="No drugs added yet" message="Add drug batches above." />
+      } @else {
+        <table mat-table [dataSource]="draftLines()" class="sale-lines-table">
+          <ng-container matColumnDef="drug">
+            <th mat-header-cell *matHeaderCellDef>Drug</th>
+            <td mat-cell *matCellDef="let line">{{ line.drugName }}</td>
+          </ng-container>
+          <ng-container matColumnDef="quantity">
+            <th mat-header-cell *matHeaderCellDef>Qty</th>
+            <td mat-cell *matCellDef="let line">{{ line.quantity }}</td>
+          </ng-container>
+          <ng-container matColumnDef="unitPrice">
+            <th mat-header-cell *matHeaderCellDef>Unit price</th>
+            <td mat-cell *matCellDef="let line">{{ line.unitPrice | number: '1.0-2' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="lineTotal">
+            <th mat-header-cell *matHeaderCellDef>Line total</th>
+            <td mat-cell *matCellDef="let line">{{ line.unitPrice * line.quantity | number: '1.0-2' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let line; let i = index" class="sale-lines-actions-cell">
+              <button
+                mat-icon-button
+                type="button"
+                color="warn"
+                [attr.aria-label]="'Remove ' + line.drugName"
+                (click)="removeLine(i)"
+              >
+                <mat-icon aria-hidden="true">delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="lineColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: lineColumns"></tr>
+        </table>
+      }
 
-    <p><strong>Total: {{ total() }}</strong></p>
-    <button type="button" (click)="submit()" [disabled]="draftLines().length === 0">Dispense</button>
+      <div class="sale-total-row">
+        <span>Total</span>
+        <strong>{{ total() | number: '1.0-2' }}</strong>
+      </div>
+
+      <div class="sale-submit-row">
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          [disabled]="draftLines().length === 0 || submitting()"
+          (click)="submit()"
+        >
+          Dispense
+        </button>
+      </div>
+    </section>
   }
-</section>
+</div>

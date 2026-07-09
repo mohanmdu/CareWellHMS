@@ -1,75 +1,128 @@
-<section>
-  <h2>Book Appointment</h2>
+<div class="hms-page">
+  <app-page-header title="Book Appointment" subtitle="Find or register a patient, choose a consultant and slot, then confirm." />
 
-  @if (errorMessage()) {
-    <p class="error">{{ errorMessage() }}</p>
-  }
+  <mat-stepper
+    linear
+    class="hms-card-surface booking-stepper"
+    [selectedIndex]="step() - 1"
+    (selectedIndexChange)="step.set($event + 1)"
+  >
+    <mat-step [completed]="!!selectedPatient()">
+      <ng-template matStepLabel>Patient</ng-template>
+      <div class="booking-step-body">
+        @if (!selectedPatient()) {
+          <button
+            mat-stroked-button
+            type="button"
+            class="booking-new-patient-toggle"
+            (click)="showNewPatientForm.set(!showNewPatientForm())"
+          >
+            <mat-icon aria-hidden="true">person_add</mat-icon>
+            New patient
+          </button>
 
-  <ol class="wizard-steps">
-    <li [class.active]="step() === 1">1. Patient</li>
-    <li [class.active]="step() === 2">2. Consultant & slot</li>
-    <li [class.active]="step() === 3">3. Confirm</li>
-  </ol>
+          @if (showNewPatientForm()) {
+            <form class="hms-form-grid booking-new-patient-form" (ngSubmit)="registerNewPatient()">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>First name</mat-label>
+                <input matInput name="firstName" [(ngModel)]="newPatient.firstName" required />
+              </mat-form-field>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Last name</mat-label>
+                <input matInput name="lastName" [(ngModel)]="newPatient.lastName" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Mobile number</mat-label>
+                <input matInput name="mobileNumber" [(ngModel)]="newPatient.mobileNumber" required />
+              </mat-form-field>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Gender</mat-label>
+                <input matInput name="gender" [(ngModel)]="newPatient.gender" />
+              </mat-form-field>
+              <div class="booking-new-patient-submit">
+                <button mat-flat-button color="primary" type="submit">Register &amp; continue</button>
+              </div>
+            </form>
+          }
 
-  @if (step() === 1) {
-    <div>
-      <form (ngSubmit)="search()">
-        <input name="searchQuery" [(ngModel)]="searchQuery" placeholder="Search patient by name" />
-        <button type="submit">Search</button>
-        <button type="button" (click)="showNewPatientForm.set(!showNewPatientForm())">New patient</button>
-      </form>
-
-      @if (showNewPatientForm()) {
-        <form (ngSubmit)="registerNewPatient()">
-          <input name="firstName" [(ngModel)]="newPatient.firstName" placeholder="First name" required />
-          <input name="lastName" [(ngModel)]="newPatient.lastName" placeholder="Last name" />
-          <input name="mobileNumber" [(ngModel)]="newPatient.mobileNumber" placeholder="Mobile number" required />
-          <input name="gender" [(ngModel)]="newPatient.gender" placeholder="Gender" />
-          <button type="submit">Register & continue</button>
-        </form>
-      }
-
-      <ul>
-        @for (patient of searchResults(); track patient.id) {
-          <li>
-            {{ patient.firstName }} {{ patient.lastName }} ({{ patient.mobileNumber }})
-            <button type="button" (click)="selectPatient(patient)">Select</button>
-          </li>
+          <app-patient-search (patientSelected)="selectPatient($event)" />
+        } @else {
+          <div class="booking-selected-patient">
+            <mat-icon aria-hidden="true">person</mat-icon>
+            <strong>{{ selectedPatient()?.firstName }} {{ selectedPatient()?.lastName }}</strong>
+            <button mat-button type="button" (click)="changePatient()">Change</button>
+          </div>
         }
-      </ul>
-    </div>
-  }
+      </div>
+    </mat-step>
 
-  @if (step() === 2) {
-    <div>
-      <p>Patient: <strong>{{ selectedPatient()?.firstName }} {{ selectedPatient()?.lastName }}</strong></p>
-      <select name="consultant" [(ngModel)]="selectedConsultantId">
-        <option [ngValue]="null" disabled>Select consultant</option>
-        @for (consultant of consultants(); track consultant.id) {
-          <option [ngValue]="consultant.id">{{ consultant.name }} ({{ consultant.departmentName }})</option>
-        }
-      </select>
-      <input name="appointmentDate" type="date" [(ngModel)]="appointmentDate" />
-      <input name="slotTime" type="time" [(ngModel)]="slotTime" />
-      <textarea name="notes" [(ngModel)]="notes" placeholder="Notes"></textarea>
-      <button type="button" (click)="back()">Back</button>
-      <button type="button" (click)="goToConfirm()">Continue</button>
-    </div>
-  }
+    <mat-step [completed]="step() > 2">
+      <ng-template matStepLabel>Consultant &amp; slot</ng-template>
+      <div class="booking-step-body">
+        <p class="booking-patient-line">
+          Patient: <strong>{{ selectedPatient()?.firstName }} {{ selectedPatient()?.lastName }}</strong>
+        </p>
 
-  @if (step() === 3) {
-    <div>
-      <h3>Confirm booking</h3>
-      <dl>
-        <dt>Patient</dt>
-        <dd>{{ selectedPatient()?.firstName }} {{ selectedPatient()?.lastName }}</dd>
-        <dt>Consultant</dt>
-        <dd>{{ selectedConsultant()?.name }} ({{ selectedConsultant()?.departmentName }})</dd>
-        <dt>Date & time</dt>
-        <dd>{{ appointmentDate }} {{ slotTime }}</dd>
-      </dl>
-      <button type="button" (click)="back()">Back</button>
-      <button type="button" (click)="book()">Book appointment</button>
-    </div>
-  }
-</section>
+        <div class="hms-form-grid">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Consultant</mat-label>
+            <mat-select name="consultant" [(ngModel)]="selectedConsultantId">
+              @for (consultant of consultants(); track consultant.id) {
+                <mat-option [value]="consultant.id">
+                  {{ consultant.name }} ({{ consultant.departmentName }})
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Date</mat-label>
+            <input matInput name="appointmentDate" type="date" [(ngModel)]="appointmentDate" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Time</mat-label>
+            <input matInput name="slotTime" type="time" [(ngModel)]="slotTime" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="booking-notes-field">
+            <mat-label>Notes</mat-label>
+            <textarea matInput name="notes" rows="2" [(ngModel)]="notes"></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="booking-step-actions">
+          <button mat-button type="button" (click)="back()">Back</button>
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            [disabled]="!selectedConsultantId || !appointmentDate || !slotTime"
+            (click)="goToConfirm()"
+          >
+            Continue
+          </button>
+        </div>
+      </div>
+    </mat-step>
+
+    <mat-step>
+      <ng-template matStepLabel>Confirm</ng-template>
+      <div class="booking-step-body">
+        <dl class="booking-summary">
+          <dt>Patient</dt>
+          <dd>{{ selectedPatient()?.firstName }} {{ selectedPatient()?.lastName }}</dd>
+          <dt>Consultant</dt>
+          <dd>{{ selectedConsultant()?.name }} ({{ selectedConsultant()?.departmentName }})</dd>
+          <dt>Date &amp; time</dt>
+          <dd>{{ appointmentDate }} {{ slotTime }}</dd>
+        </dl>
+
+        <div class="booking-step-actions">
+          <button mat-button type="button" (click)="back()">Back</button>
+          <button mat-flat-button color="primary" type="button" (click)="book()">Book appointment</button>
+        </div>
+      </div>
+    </mat-step>
+  </mat-stepper>
+</div>

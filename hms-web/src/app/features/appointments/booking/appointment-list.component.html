@@ -1,41 +1,64 @@
-<section>
-  <h2>Appointments</h2>
+<div class="hms-page">
+  <app-page-header title="Appointments" subtitle="All booked, confirmed, cancelled and completed appointments." />
 
-  @if (errorMessage()) {
-    <p class="error">{{ errorMessage() }}</p>
-  }
+  <section class="hms-card-surface appointment-list-section">
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
 
-  <table>
-    <thead>
-      <tr>
-        <th>Patient</th>
-        <th>Consultant</th>
-        <th>Department</th>
-        <th>Date</th>
-        <th>Time</th>
-        <th>Status</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (appointment of appointments(); track appointment.id) {
-        <tr>
-          <td>{{ appointment.patientName }}</td>
-          <td>{{ appointment.consultantName }}</td>
-          <td>{{ appointment.departmentName }}</td>
-          <td>{{ appointment.appointmentDate }}</td>
-          <td>{{ appointment.slotTime }}</td>
-          <td>{{ appointment.status }}</td>
-          <td>
+    @if (!loading() && appointments().length === 0) {
+      <app-empty-state icon="event" title="No appointments yet" message="Booked appointments will appear here." />
+    } @else if (appointments().length > 0) {
+      <table mat-table [dataSource]="appointments()" class="appointment-table">
+        <ng-container matColumnDef="patient">
+          <th mat-header-cell *matHeaderCellDef>Patient</th>
+          <td mat-cell *matCellDef="let appointment">{{ appointment.patientName }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="consultant">
+          <th mat-header-cell *matHeaderCellDef>Consultant</th>
+          <td mat-cell *matCellDef="let appointment">{{ appointment.consultantName }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="department">
+          <th mat-header-cell *matHeaderCellDef>Department</th>
+          <td mat-cell *matCellDef="let appointment">{{ appointment.departmentName }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef>Date</th>
+          <td mat-cell *matCellDef="let appointment">{{ appointment.appointmentDate }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="time">
+          <th mat-header-cell *matHeaderCellDef>Time</th>
+          <td mat-cell *matCellDef="let appointment">{{ appointment.slotTime }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let appointment">
+            <app-status-badge [label]="appointment.status" [tone]="statusTone[appointment.status]" />
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="appointment-actions-header"></th>
+          <td mat-cell *matCellDef="let appointment" class="appointment-actions-cell">
             @if (appointment.status === 'BOOKED') {
-              <button type="button" (click)="confirm(appointment)">Confirm</button>
+              <button mat-stroked-button color="primary" type="button" (click)="confirm(appointment)">
+                Confirm
+              </button>
             }
             @if (appointment.status === 'BOOKED' || appointment.status === 'CONFIRMED') {
-              <button type="button" (click)="cancel(appointment)">Cancel</button>
+              <button mat-stroked-button color="warn" type="button" (click)="cancel(appointment)">Cancel</button>
             }
           </td>
-        </tr>
-      }
-    </tbody>
-  </table>
-</section>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    }
+  </section>
+</div>

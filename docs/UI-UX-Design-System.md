@@ -15,6 +15,10 @@ and status text against ~100 lines of global tag-selector CSS
 (`table { ... }`, `.tile { ... }`, etc.). That's the inconsistency this
 document (and the code that implements it) addresses.
 
+**Status: fully rolled out.** All 20 feature screens now use this design
+system (see §10); there is no remaining bare-HTML/legacy-compat styling
+anywhere in the app.
+
 ## 1. Foundation choice
 
 **Angular Material 18 + CDK**, themed to the hospital's brand rather than
@@ -78,16 +82,40 @@ src/app/
       empty-state/         Standard "nothing here yet" panel for empty tables.
       stat-tile/            KPI tile (icon/value/label/tone) for dashboards.
       status-badge/         Semantic pill (Active/Inactive, invoice/claim status, ...).
-      confirm-dialog/       Generic Material confirm/cancel dialog.
+      confirm-dialog/       Generic Material yes/no confirm dialog.
+      prompt-dialog/         Generic 1-N field input dialog (see below).
+      patient-search/        Search-by-name patient picker (see below).
     services/
       notification.service.ts     Success/error snackbar helpers.
       confirm-dialog.service.ts   Opens ConfirmDialogComponent, returns Observable<boolean>.
+      prompt-dialog.service.ts    Opens PromptDialogComponent, returns Observable<Values | undefined>.
     master-crud/
       master-crud.model.ts        MasterCrudConfig<T> contract.
       master-crud.component.ts    Generic list + inline add + deactivate screen
-                                   for any { id, name, active } entity.
+                                   for any { id, name, active } entity. Supports an
+                                   `[embedded]="true"` mode (no outer page wrapper/H1)
+                                   for composition inside a larger page - see Billing
+                                   Catalog's two-column layout.
   features/…                       Unchanged feature module boundaries.
 ```
+
+Two shared components were added during the full rollout (§10) once the same
+patterns showed up in enough screens to justify extracting them, rather than
+being built speculatively up front:
+
+- **`PatientSearchComponent`** — every workflow that starts against a patient
+  (invoicing, lab requisitions, pharmacy dispense, IP admission, insurance
+  claims, appointment booking) had hand-rolled an identical search-by-name
+  form + result list. Parents mount it only while no patient is selected and
+  remove it once one is (`@if (!selectedPatient()) { <app-patient-search .../> }`),
+  which resets its internal state for free instead of needing an explicit
+  `reset()` method.
+- **`PromptDialogComponent` / `PromptDialogService`** — replaces every
+  remaining `prompt()` call in the app (cancellation/rejection reasons,
+  approved amounts, discharge figures, lab result entry) with one
+  accessible, focus-trapped Material dialog taking a declarative list of
+  fields (`{ key, label, type: 'text' | 'number' | 'textarea', required, min }`)
+  instead of a bespoke dialog component per screen.
 
 Import shared components by relative path (`../../../shared/ui/...`); there
 is no barrel `index.ts` re-exporting everything, so unused components are
@@ -119,12 +147,14 @@ feedback instead of an inline `<p class="error">`. Reference:
 ### 5.3 Multi-step / line-item entry (wizards, invoice/requisition creation)
 
 `<app-page-header>` + sectioned `.hms-card-surface` cards for each logical
-step (search → select → line items → totals), a `mat-table` for the
+step (`<app-patient-search>` → line items → totals), a `mat-table` for the
 in-progress line items, running total pinned at the bottom. Reference:
-`features/billing-receipts/invoices/invoice-create.component.*`. For
-screens with strictly sequential, gated steps (not this one — patient
-search and item entry are two panels, not a gate), use Angular Material's
-`MatStepper` instead of stacked cards.
+`features/billing-receipts/invoices/invoice-create.component.*` (and the
+same shape in `lab-radiology/requisitions/requisition-create` and
+`pharmacy/sales/sale-create`). For screens with strictly sequential, gated
+steps (not these — patient search and item entry are two panels, not a
+gate), use Angular Material's `MatStepper` instead of stacked cards, as in
+`appointments/booking/booking-wizard.component.*`.
 
 ### 5.4 Dashboard / summary
 
@@ -136,9 +166,10 @@ search and item entry are two panels, not a gate), use Angular Material's
 `mat-table` with `multiTemplateDataRows`, two `*matRowDef` templates over
 the same data source (main row + a full-width detail row), toggled by a
 component-level signal and a CSS `max-height` transition — no extra HTTP
-call, no navigation. Reference: `invoice-list.component.html`. Reuse this
-recipe for admission/claim worklists that need the same "expand for detail"
-interaction rather than inventing a new one.
+call, no navigation. Reference: `invoice-list.component.html` and
+`pharmacy/sales/sale-list.component.html` (identical recipe, different
+data). Reuse this for any future worklist that needs "expand for detail"
+rather than inventing a new one.
 
 ## 6. Navigation
 
@@ -167,12 +198,17 @@ interaction rather than inventing a new one.
 - **Feedback**: `NotificationService.success()/.error()` snackbars for
   transient feedback. No feature component should render its own
   `<p class="error">` banner or call `confirm()`/`prompt()` — both were
-  present in the pre-redesign code (invoice cancellation used `prompt()`)
-  and neither is accessible or stylable.
+  present throughout the pre-redesign code (cancellation reasons, approved
+  amounts, discharge figures, lab results all used `prompt()`) and neither
+  is accessible or stylable. Zero native `confirm()`/`prompt()` calls remain
+  anywhere in the app.
 - **Dialogs**: `ConfirmDialogService.confirm({ title, message, destructive })`
-  for yes/no confirmations; a small dedicated dialog component (see
-  `invoice-cancel-dialog.component.ts`) for confirmations that also need to
-  capture input (a reason, a note).
+  for yes/no confirmations; `PromptDialogService.prompt({ title, fields, destructive })`
+  for anything that also needs to capture input (a reason, an amount, a
+  multi-field result entry) — see §4 for the field contract. Don't add a
+  new bespoke dialog component for an input-capturing confirmation; extend
+  `PromptDialogField`'s `type` union if a genuinely new input shape is
+  needed.
 
 ## 8. Accessibility checklist (apply to every new/migrated screen)
 
@@ -197,38 +233,41 @@ interaction rather than inventing a new one.
 
 ## 10. Rollout status
 
-Foundation (tokens, theme, shell/nav, shared UI kit, `MasterCrudComponent<T>`)
-and the following exemplar screens are complete:
+All 20 feature screens are migrated. `src/styles/_legacy-compat.scss` (the
+interim tokenized re-skin of the old global `table`/`form`/`.tile` rules)
+has been deleted now that nothing depends on it — do not reintroduce bare,
+unstyled `<table>`/`<form>` markup; every screen below composes the shared
+kit.
 
-| Screen | Status |
-|---|---|
-| App shell / navigation | Done |
-| Login | Done |
-| Dashboard | Done |
-| Masters → Departments | Done (generic `MasterCrudComponent<T>`) |
-| Masters → Roles | Done (generic `MasterCrudComponent<T>`) |
-| Masters → Consultants | Done (hand-built, shared primitives — §5.2) |
-| Billing → New Invoice | Done (§5.3) |
-| Billing → Invoices & Receipts | Done (§5.5 expandable rows) |
+| Module | Screen | Template (§5) |
+|---|---|---|
+| Shell | App shell / navigation | — (§6) |
+| Auth | Login | — |
+| Reports/MIS | Dashboard | 5.4 |
+| Masters-Admin | Departments | 5.1 (generic `MasterCrudComponent<T>`) |
+| Masters-Admin | Roles | 5.1 (generic `MasterCrudComponent<T>`) |
+| Masters-Admin | Consultants | 5.2 |
+| Appointments | Appointment list | 5.2 |
+| Appointments | Booking wizard | 5.3 (`MatStepper`) |
+| Billing | Billing Catalog (categories + items) | 5.1 embedded (categories) + 5.2 (items), two-column |
+| Billing | New Invoice | 5.3 |
+| Billing | Invoices & Receipts | 5.5 (expandable rows) |
+| Lab & Radiology | New Requisition | 5.3 |
+| Lab & Radiology | Lab Worklist | Card-per-requisition with a nested `mat-table` (a §5.2/5.5 hybrid — one card per parent record since each has its own item collection, rather than one flat table) |
+| Pharmacy | Drugs | 5.2 |
+| Pharmacy | Stock / Batches | 5.2 variant with no status column (batches are an append-only ledger; no deactivate concept) |
+| Pharmacy | Dispense / Sale create | 5.3 |
+| Pharmacy | Pharmacy Sales | 5.5 (expandable rows) |
+| IP Admission | Room Catalog (types + rooms) | Hand-built two-column (no deactivate endpoint on either entity, so not `MasterCrudComponent<T>`) |
+| IP Admission | IP Admissions | 5.2 |
+| Insurance | Insurance Claims | 5.2 |
 
-Not yet migrated — still on the pre-redesign bare HTML, kept visually
-acceptable in the interim by `src/styles/_legacy-compat.scss` (a tokenized
-re-skin of the old global `table`/`form`/`.tile` rules, explicitly marked
-temporary):
-
-| Screen | Target template (§5) |
-|---|---|
-| Appointments (list + booking wizard) | 5.3 (wizard) + 5.2 (list) |
-| Billing → Catalog | 5.2 |
-| Lab → New Requisition / Worklist | 5.3 + 5.2, consider 5.5 for requisition detail |
-| Pharmacy → Drugs / Stock / Dispense / Sales | 5.2 (Drugs, Stock, Sales) + 5.3 (Dispense) |
-| IP Admission → Rooms / Admissions | 5.2 + 5.2, consider 5.5 for admission detail |
-| Insurance → Claims | 5.2, consider 5.5 for claim detail |
-
-**As each screen migrates**, delete the corresponding selector block from
-`_legacy-compat.scss` (it's organized to make this a one-block-at-a-time
-deletion) — do not add new usages of the bare `table`/`form`/`.tile`
-selectors it re-skins.
+Master data entities that fit `MasterCrudConfig<T>` (`{ id, name, active }` +
+list/create/deactivate) exactly: Departments, Roles, and Billing Categories
+(the last embedded in a two-column layout — see §4's `embedded` mode).
+Everything else with extra fields or without a deactivate endpoint is
+hand-built from the same primitives rather than forced into the generic
+component.
 
 ## 11. Adding a new simple master entity
 
@@ -244,9 +283,13 @@ selectors it re-skins.
   hospital network deployments — it currently loads from
   `fonts.googleapis.com` (see `index.html`), the standard approach, but an
   offline deployment should vendor the font file instead.
-- **Migrate the remaining ~15 screens** in §10 onto the templates in §5,
-  then delete `_legacy-compat.scss` entirely.
-- **Unit tests** for the new shared components (`MasterCrudComponent`,
-  `PageHeaderComponent`, etc.) — none existed for the pre-redesign
-  components either, but the shared components are now load-bearing for
-  every screen and are worth covering first.
+- **Unit tests** for the shared components (`MasterCrudComponent`,
+  `PageHeaderComponent`, `PatientSearchComponent`, `PromptDialogComponent`,
+  etc.) — none existed for the pre-redesign components either, but the
+  shared components are now load-bearing for every screen in the app and
+  are worth covering first, before any individual feature component.
+- **Sorting/pagination** for worklists that can grow large in production
+  (Invoices, Pharmacy Sales, Lab Worklist, IP Admissions) — `mat-table` is
+  wired up plainly today (no `MatSort`/`MatPaginator`); add them once real
+  data volumes make an unpaginated list impractical, rather than
+  speculatively now.

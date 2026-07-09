@@ -3,32 +3,7 @@
 
   @if (!selectedPatient()) {
     <section class="hms-card-surface invoice-search">
-      <form class="hms-inline-actions" (ngSubmit)="search()">
-        <mat-form-field appearance="outline" class="invoice-search-field" subscriptSizing="dynamic">
-          <mat-label>Search patient by name</mat-label>
-          <input matInput name="searchQuery" [(ngModel)]="searchQuery" />
-          <mat-icon matPrefix aria-hidden="true">search</mat-icon>
-        </mat-form-field>
-        <button mat-flat-button color="primary" type="submit">Search</button>
-      </form>
-
-      @if (searchResults().length > 0) {
-        <ul class="invoice-search-results">
-          @for (patient of searchResults(); track patient.id) {
-            <li class="invoice-search-result">
-              <div>
-                <strong>{{ patient.firstName }} {{ patient.lastName }}</strong>
-                <span class="invoice-search-result-meta">{{ patient.mobileNumber }}</span>
-              </div>
-              <button mat-stroked-button color="primary" type="button" (click)="selectPatient(patient)">
-                Select
-              </button>
-            </li>
-          }
-        </ul>
-      } @else {
-        <app-empty-state icon="person_search" title="Search for a patient" message="Results will appear here." />
-      }
+      <app-patient-search (patientSelected)="selectPatient($event)" />
     </section>
   } @else {
     <section class="hms-card-surface invoice-patient-summary">

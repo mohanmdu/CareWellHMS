@@ -1,6 +1,14 @@
-<div class="hms-page">
-  <app-page-header [title]="config().title" [subtitle]="config().subtitle ?? null" />
+@if (embedded()) {
+  <h2 class="master-crud-embedded-title">{{ config().title }}</h2>
+  <ng-container [ngTemplateOutlet]="body" />
+} @else {
+  <div class="hms-page">
+    <app-page-header [title]="config().title" [subtitle]="config().subtitle ?? null" />
+    <ng-container [ngTemplateOutlet]="body" />
+  </div>
+}
 
+<ng-template #body>
   <section class="hms-card-surface master-crud-form">
     <form class="hms-inline-actions" (ngSubmit)="add()">
       <mat-form-field appearance="outline" class="master-crud-name-field" subscriptSizing="dynamic">
@@ -56,4 +64,4 @@
       </table>
     }
   </section>
-</div>
+</ng-template>

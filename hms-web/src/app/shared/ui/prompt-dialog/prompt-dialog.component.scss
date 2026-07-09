@@ -1,0 +1,15 @@
+.prompt-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-2);
+  min-width: 320px;
+}
+
+.prompt-dialog-message {
+  margin: 0 0 var(--hms-space-2);
+  color: var(--hms-color-text-muted);
+}
+
+.prompt-dialog-field {
+  width: 100%;
+}

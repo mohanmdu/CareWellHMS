@@ -1,0 +1,19 @@
+.appointment-list-section {
+  overflow-x: auto;
+}
+
+.appointment-table {
+  width: 100%;
+}
+
+.appointment-actions-cell {
+  display: flex;
+  gap: var(--hms-space-2);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  padding: var(--hms-space-2) 0;
+}
+
+.appointment-actions-header {
+  width: 1%;
+}

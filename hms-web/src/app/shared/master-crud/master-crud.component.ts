@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -22,6 +23,7 @@ import { MasterCrudConfig } from './master-crud.model';
   selector: 'app-master-crud',
   standalone: true,
   imports: [
+    NgTemplateOutlet,
     FormsModule,
     MatTableModule,
     MatFormFieldModule,
@@ -41,6 +43,8 @@ export class MasterCrudComponent<T> implements OnInit {
   private readonly confirmDialog = inject(ConfirmDialogService);
 
   config = input.required<MasterCrudConfig<T>>();
+  /** Renders as a panel (no outer page wrapper/H1) for composition inside a larger page - e.g. Billing Catalog's two-column layout. */
+  embedded = input(false);
 
   readonly displayedColumns = ['name', 'status', 'actions'];
   items = signal<T[]>([]);

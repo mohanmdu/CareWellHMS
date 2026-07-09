@@ -1,0 +1,44 @@
+<h2 mat-dialog-title>{{ data.title }}</h2>
+<mat-dialog-content class="prompt-dialog-content">
+  @if (data.message) {
+    <p class="prompt-dialog-message">{{ data.message }}</p>
+  }
+
+  @for (field of data.fields; track field.key; let first = $first) {
+    <mat-form-field appearance="outline" class="prompt-dialog-field" subscriptSizing="dynamic">
+      <mat-label>{{ field.label }}</mat-label>
+      @if (field.type === 'textarea') {
+        <textarea
+          matInput
+          rows="3"
+          [name]="field.key"
+          [(ngModel)]="values[field.key]"
+          [required]="!!field.required"
+          [attr.cdkFocusInitial]="first ? '' : null"
+        ></textarea>
+      } @else {
+        <input
+          matInput
+          [type]="field.type === 'number' ? 'number' : 'text'"
+          [min]="field.min ?? null"
+          [name]="field.key"
+          [(ngModel)]="values[field.key]"
+          [required]="!!field.required"
+          [attr.cdkFocusInitial]="first ? '' : null"
+        />
+      }
+    </mat-form-field>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button type="button" mat-dialog-close>Cancel</button>
+  <button
+    mat-flat-button
+    type="button"
+    [color]="data.destructive ? 'warn' : 'primary'"
+    [disabled]="!isValid"
+    (click)="submit()"
+  >
+    {{ data.confirmLabel ?? 'Confirm' }}
+  </button>
+</mat-dialog-actions>

@@ -7,7 +7,6 @@
 @use 'styles/theme' as hms-theme;
 @use 'styles/tokens';
 @use 'styles/base';
-@use 'styles/legacy-compat';
 
 html {
   @include mat.core();

@@ -1,0 +1,28 @@
+<div class="patient-search">
+  <form class="hms-inline-actions" (ngSubmit)="search()">
+    <mat-form-field appearance="outline" class="patient-search-field" subscriptSizing="dynamic">
+      <mat-label>Search patient by name</mat-label>
+      <input matInput name="searchQuery" [(ngModel)]="searchQuery" />
+      <mat-icon matPrefix aria-hidden="true">search</mat-icon>
+    </mat-form-field>
+    <button mat-flat-button color="primary" type="submit">Search</button>
+  </form>
+
+  @if (searched() && searchResults().length === 0) {
+    <app-empty-state icon="person_search" title="No patients found" message="Try a different name or mobile number." />
+  } @else if (searchResults().length > 0) {
+    <ul class="patient-search-results">
+      @for (patient of searchResults(); track patient.id) {
+        <li class="patient-search-result">
+          <div>
+            <strong>{{ patient.firstName }} {{ patient.lastName }}</strong>
+            <span class="patient-search-result-meta">{{ patient.mobileNumber }}</span>
+          </div>
+          <button mat-stroked-button color="primary" type="button" (click)="select(patient)">Select</button>
+        </li>
+      }
+    </ul>
+  } @else {
+    <app-empty-state icon="person_search" title="Search for a patient" message="Results will appear here." />
+  }
+</div>

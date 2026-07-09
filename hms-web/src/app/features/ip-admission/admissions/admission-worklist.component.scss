@@ -1,0 +1,61 @@
+.admission-admit-section,
+.admission-worklist-section {
+  padding: var(--hms-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-4);
+}
+
+.admission-worklist-section {
+  overflow-x: auto;
+}
+
+.admission-section-title {
+  font-size: var(--hms-font-size-lg);
+  margin: 0;
+}
+
+.admission-selected-patient {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-3) var(--hms-space-4);
+  border: 1px solid var(--hms-color-border);
+  border-radius: var(--hms-radius-md);
+
+  mat-icon {
+    color: var(--hms-color-primary);
+  }
+
+  button {
+    margin-left: auto;
+  }
+}
+
+.admission-room-picker {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--hms-space-3);
+  flex-wrap: wrap;
+}
+
+.admission-room-field {
+  min-width: 260px;
+  flex: 1 1 260px;
+}
+
+.admission-table {
+  width: 100%;
+}
+
+.admission-actions-cell {
+  display: flex;
+  gap: var(--hms-space-2);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  padding: var(--hms-space-2) 0;
+}
+
+.admission-actions-header {
+  width: 1%;
+}

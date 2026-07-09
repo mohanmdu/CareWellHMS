@@ -11,10 +11,10 @@ import { Router } from '@angular/router';
 import { NotificationService } from '../../../shared/services/notification.service';
 import { EmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
+import { PatientSearchComponent } from '../../../shared/ui/patient-search/patient-search.component';
 import { Appointment } from '../../appointments/booking/appointment.model';
 import { AppointmentService } from '../../appointments/booking/appointment.service';
 import { Patient } from '../../registration/patients/patient.model';
-import { PatientService } from '../../registration/patients/patient.service';
 import { BillingItem } from '../items/billing-item.model';
 import { BillingItemService } from '../items/billing-item.service';
 import { InvoiceService } from './invoice.service';
@@ -45,13 +45,13 @@ interface DraftLine {
     MatIconModule,
     MatTableModule,
     PageHeaderComponent,
-    EmptyStateComponent
+    EmptyStateComponent,
+    PatientSearchComponent
   ],
   templateUrl: './invoice-create.component.html',
   styleUrl: './invoice-create.component.scss'
 })
 export class InvoiceCreateComponent {
-  private readonly patientService = inject(PatientService);
   private readonly appointmentService = inject(AppointmentService);
   private readonly billingItemService = inject(BillingItemService);
   private readonly invoiceService = inject(InvoiceService);
@@ -62,8 +62,6 @@ export class InvoiceCreateComponent {
 
   submitting = signal(false);
 
-  searchQuery = '';
-  searchResults = signal<Patient[]>([]);
   selectedPatient = signal<Patient | null>(null);
 
   allAppointments = signal<Appointment[]>([]);
@@ -85,13 +83,6 @@ export class InvoiceCreateComponent {
       error: () => this.notification.error('Failed to load billing items.')
     });
     this.appointmentService.list().subscribe({ next: (appointments) => this.allAppointments.set(appointments) });
-  }
-
-  search(): void {
-    this.patientService.search(this.searchQuery).subscribe({
-      next: (patients) => this.searchResults.set(patients),
-      error: () => this.notification.error('Patient search failed.')
-    });
   }
 
   selectPatient(patient: Patient): void {

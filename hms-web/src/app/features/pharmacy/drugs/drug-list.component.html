@@ -1,37 +1,81 @@
-<section>
-  <h2>Drugs</h2>
+<div class="hms-page">
+  <app-page-header title="Drugs" subtitle="The drug formulary used for stock receipt and dispensing." />
 
-  @if (errorMessage()) {
-    <p class="error">{{ errorMessage() }}</p>
-  }
+  <section class="hms-card-surface drug-form">
+    <form class="hms-form-grid" (ngSubmit)="add()">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Name</mat-label>
+        <input matInput name="name" [(ngModel)]="form.name" required />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Generic name</mat-label>
+        <input matInput name="genericName" [(ngModel)]="form.genericName" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Manufacturer</mat-label>
+        <input matInput name="manufacturer" [(ngModel)]="form.manufacturer" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Unit (e.g. Tablet)</mat-label>
+        <input matInput name="unitOfMeasure" [(ngModel)]="form.unitOfMeasure" />
+      </mat-form-field>
+      <div class="drug-form-submit">
+        <button mat-flat-button color="primary" type="submit" [disabled]="saving() || !form.name.trim()">
+          <mat-icon aria-hidden="true">add</mat-icon>
+          Add drug
+        </button>
+      </div>
+    </form>
+  </section>
 
-  <form (ngSubmit)="add()">
-    <input name="name" [(ngModel)]="form.name" placeholder="Name" required />
-    <input name="genericName" [(ngModel)]="form.genericName" placeholder="Generic name" />
-    <input name="manufacturer" [(ngModel)]="form.manufacturer" placeholder="Manufacturer" />
-    <input name="unitOfMeasure" [(ngModel)]="form.unitOfMeasure" placeholder="Unit (e.g. Tablet)" />
-    <button type="submit">Add</button>
-  </form>
+  <section class="hms-card-surface drug-list-section">
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
 
-  <table>
-    <thead>
-      <tr><th>Name</th><th>Generic</th><th>Manufacturer</th><th>Unit</th><th>Status</th><th></th></tr>
-    </thead>
-    <tbody>
-      @for (drug of drugs(); track drug.id) {
-        <tr>
-          <td>{{ drug.name }}</td>
-          <td>{{ drug.genericName }}</td>
-          <td>{{ drug.manufacturer }}</td>
-          <td>{{ drug.unitOfMeasure }}</td>
-          <td>{{ drug.active ? 'Active' : 'Inactive' }}</td>
-          <td>
+    @if (!loading() && drugs().length === 0) {
+      <app-empty-state icon="medication" title="No drugs yet" message="Add the first drug using the form above." />
+    } @else if (drugs().length > 0) {
+      <table mat-table [dataSource]="drugs()" class="drug-table">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let drug">{{ drug.name }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="genericName">
+          <th mat-header-cell *matHeaderCellDef>Generic</th>
+          <td mat-cell *matCellDef="let drug">{{ drug.genericName }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="manufacturer">
+          <th mat-header-cell *matHeaderCellDef>Manufacturer</th>
+          <td mat-cell *matCellDef="let drug">{{ drug.manufacturer }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="unit">
+          <th mat-header-cell *matHeaderCellDef>Unit</th>
+          <td mat-cell *matCellDef="let drug">{{ drug.unitOfMeasure }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let drug">
+            <app-status-badge [label]="drug.active ? 'Active' : 'Inactive'" [tone]="drug.active ? 'success' : 'neutral'" />
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="drug-actions-header"></th>
+          <td mat-cell *matCellDef="let drug" class="drug-actions-cell">
             @if (drug.active) {
-              <button type="button" (click)="deactivate(drug)">Deactivate</button>
+              <button mat-stroked-button color="warn" type="button" (click)="deactivate(drug)">Deactivate</button>
             }
           </td>
-        </tr>
-      }
-    </tbody>
-  </table>
-</section>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    }
+  </section>
+</div>
