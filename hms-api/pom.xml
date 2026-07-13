@@ -12,7 +12,7 @@
 	<artifactId>hms-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>hms-api</name>
-	<description>Navjeevan HMS - Spring Boot REST API (migrated from Struts2/Hibernate3)</description>
+	<description> HMS - Spring Boot REST API (migrated from Struts2/Hibernate3)</description>
 	<url/>
 	<licenses>
 		<license/>

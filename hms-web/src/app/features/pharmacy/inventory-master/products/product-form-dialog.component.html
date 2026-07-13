@@ -1,0 +1,77 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Edit' : 'Add' }} Product</h2>
+
+<mat-dialog-content class="product-dialog-content">
+  <div class="hms-form-grid">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Product Name</mat-label>
+      <input matInput [(ngModel)]="form.name" name="name" required />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Product Type</mat-label>
+      <mat-select [(ngModel)]="form.productTypeId" name="productTypeId" required>
+        @for (productType of productTypes; track productType.id) {
+          <mat-option [value]="productType.id">{{ productType.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Product Category</mat-label>
+      <input matInput [(ngModel)]="form.productCategory" name="productCategory" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Drug Dosage</mat-label>
+      <input matInput [(ngModel)]="form.drugDosage" name="drugDosage" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Drug Type</mat-label>
+      <input matInput [(ngModel)]="form.drugType" name="drugType" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Rack Number</mat-label>
+      <mat-select [(ngModel)]="form.rackId" name="rackId" required>
+        @for (rack of racks; track rack.id) {
+          <mat-option [value]="rack.id">{{ rack.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Manufacturer Name</mat-label>
+      <mat-select [(ngModel)]="form.manufacturerId" name="manufacturerId">
+        <mat-option [value]="null">None</mat-option>
+        @for (manufacturer of manufacturers; track manufacturer.id) {
+          <mat-option [value]="manufacturer.id">{{ manufacturer.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Med/Non-Med</mat-label>
+      <mat-select [(ngModel)]="form.medOrNonMed" name="medOrNonMed" required>
+        @for (category of medicalCategories; track category) {
+          <mat-option [value]="category">{{ medicalCategoryLabels[category] }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>State GST</mat-label>
+      <input matInput type="number" min="0" [(ngModel)]="form.stateGst" name="stateGst" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Central GST</mat-label>
+      <input matInput type="number" min="0" [(ngModel)]="form.centralGst" name="centralGst" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>HSN/SAC</mat-label>
+      <input matInput [(ngModel)]="form.hsnSac" name="hsnSac" />
+    </mat-form-field>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" mat-dialog-close>Cancel</button>
+  <button mat-flat-button color="primary" type="button" [disabled]="!isValid" (click)="submit()">
+    {{ isEdit ? 'Save' : 'Create' }}
+  </button>
+</mat-dialog-actions>

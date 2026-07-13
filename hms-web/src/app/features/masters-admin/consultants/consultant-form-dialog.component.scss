@@ -1,0 +1,45 @@
+.consultant-form-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-2);
+  min-width: 360px;
+  max-height: 70vh;
+}
+
+.consultant-availability-section {
+  margin-top: var(--hms-space-2);
+}
+
+.consultant-availability-heading {
+  font-size: var(--hms-font-size-md, 1rem);
+  margin: 0 0 var(--hms-space-2);
+}
+
+.consultant-dialog-field {
+  width: 100%;
+}
+
+.consultant-image-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-2);
+  margin-top: var(--hms-space-2);
+}
+
+.consultant-image-label {
+  font-size: 0.75rem;
+  color: var(--hms-color-text-muted, rgba(0, 0, 0, 0.6));
+}
+
+.consultant-image-row {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-3);
+}
+
+.consultant-image-preview {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+}

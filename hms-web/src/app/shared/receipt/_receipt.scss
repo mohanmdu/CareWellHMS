@@ -1,0 +1,77 @@
+// On-screen receipt styling shared by AppointmentBillingDialogComponent's
+// payment receipt and RefundReceiptDialogComponent's refund receipt -
+// the printed version of both is styled separately by receipt-print-styles.ts,
+// since a popup print window has none of these CSS custom properties available.
+
+.receipt {
+  border: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.15));
+  border-radius: var(--hms-radius-md, 8px);
+  padding: var(--hms-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-2);
+}
+
+.receipt-header {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-3);
+  justify-content: center;
+  text-align: center;
+  padding-bottom: var(--hms-space-3);
+  border-bottom: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
+}
+
+.receipt-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.receipt-clinic-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.receipt-clinic-name {
+  font-size: 1.1rem;
+}
+
+.receipt-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.receipt-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--hms-space-2);
+
+  th,
+  td {
+    text-align: left;
+    padding: var(--hms-space-2);
+  }
+
+  th:last-child,
+  td:last-child {
+    text-align: right;
+  }
+}
+
+.receipt-total-row {
+  font-weight: 600;
+  border-top: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
+}
+
+.receipt-words,
+.receipt-remarks {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.receipt-signature {
+  align-self: flex-end;
+  margin-top: var(--hms-space-4);
+}

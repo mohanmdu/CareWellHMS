@@ -1,0 +1,49 @@
+.prescription-tabs {
+  overflow-x: auto;
+}
+
+.prescription-tab-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-4) var(--hms-space-2) var(--hms-space-2);
+}
+
+.prescription-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--hms-space-3);
+}
+
+.prescription-search {
+  flex: 1 1 240px;
+}
+
+.prescription-table {
+  width: 100%;
+}
+
+.prescription-subtext {
+  font-size: 0.75rem;
+  color: var(--hms-color-text-muted, rgba(0, 0, 0, 0.6));
+}
+
+.prescription-actions-cell {
+  text-align: right;
+}
+
+.prescription-actions-row {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  padding: var(--hms-space-2) 0;
+}
+
+.prescription-actions-header {
+  width: 0;
+  white-space: nowrap;
+}

@@ -1,1 +1,155 @@
-<app-master-crud [config]="config" />
+<div class="hms-page">
+  <app-page-header
+    title="Departments"
+    subtitle="Clinical and administrative departments used across scheduling, billing and staffing."
+  />
+
+  <section class="hms-card-surface department-form">
+    <form class="hms-inline-actions" (ngSubmit)="add()">
+      <mat-form-field appearance="outline" class="department-name-field" subscriptSizing="dynamic">
+        <mat-label>New department name</mat-label>
+        <input matInput name="newName" [(ngModel)]="newName" required />
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="submit" [disabled]="!newName.trim() || saving()">
+        <mat-icon aria-hidden="true">add</mat-icon>
+        Add department
+      </button>
+    </form>
+  </section>
+
+  <section class="hms-card-surface department-tabs">
+    <app-table-search placeholder="Search departments..." [value]="searchTerm()" (valueChange)="onSearch($event)" class="department-search" />
+
+    <mat-tab-group (selectedIndexChange)="onTabChange($event)">
+      <mat-tab label="Active Departments">
+        <div class="department-tab-body">
+          @if (loadingActive()) {
+            <mat-progress-bar mode="indeterminate" />
+          }
+
+          @if (!loadingActive() && activeDepartments().length === 0) {
+            <app-empty-state icon="apartment" title="No departments yet" message="Add the first department above." />
+          } @else if (filteredActiveDepartments().length === 0) {
+            <app-empty-state icon="search_off" title="No matches" message="No departments match your search." />
+          } @else if (filteredActiveDepartments().length > 0) {
+            <table mat-table [dataSource]="activePagination.page()" class="department-table">
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Department</th>
+                <td mat-cell *matCellDef="let department">{{ department.name }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="createdAt">
+                <th mat-header-cell *matHeaderCellDef>Created Date</th>
+                <td mat-cell *matCellDef="let department">{{ department.createdAt ? (department.createdAt | date: 'mediumDate') : '—' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="createdBy">
+                <th mat-header-cell *matHeaderCellDef>Created By</th>
+                <td mat-cell *matCellDef="let department">{{ department.createdBy ?? '—' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="consultants">
+                <th mat-header-cell *matHeaderCellDef>Consultants</th>
+                <td mat-cell *matCellDef="let department">
+                  <button
+                    mat-button
+                    type="button"
+                    [attr.aria-label]="'View consultants in ' + department.name"
+                    (click)="viewConsultants(department)"
+                  >
+                    <mat-icon aria-hidden="true">visibility</mat-icon>
+                    {{ department.consultantCount }}
+                  </button>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef class="department-actions-header"></th>
+                <td mat-cell *matCellDef="let department" class="department-actions-cell">
+                  <button mat-stroked-button color="warn" type="button" (click)="deactivate(department)">
+                    Deactivate
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="activeColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: activeColumns"></tr>
+            </table>
+            <mat-paginator
+              [length]="activePagination.length()"
+              [pageIndex]="activePagination.pageIndex()"
+              [pageSize]="activePagination.pageSize()"
+              [pageSizeOptions]="[5, 10, 25, 50]"
+              (page)="activePagination.onPage($event)"
+            />
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab label="De-Activated Departments">
+        <div class="department-tab-body">
+          @if (loadingInactive()) {
+            <mat-progress-bar mode="indeterminate" />
+          }
+
+          @if (!loadingInactive() && inactiveDepartments().length === 0) {
+            <app-empty-state icon="inbox" title="No deactivated departments" message="Deactivated departments will appear here." />
+          } @else if (filteredInactiveDepartments().length === 0) {
+            <app-empty-state icon="search_off" title="No matches" message="No departments match your search." />
+          } @else if (filteredInactiveDepartments().length > 0) {
+            <table mat-table [dataSource]="inactivePagination.page()" class="department-table">
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Department</th>
+                <td mat-cell *matCellDef="let department">{{ department.name }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="deactivatedAt">
+                <th mat-header-cell *matHeaderCellDef>Deactivated Date</th>
+                <td mat-cell *matCellDef="let department">{{ department.deactivatedAt ? (department.deactivatedAt | date: 'mediumDate') : '—' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="deactivatedBy">
+                <th mat-header-cell *matHeaderCellDef>Deactivated By</th>
+                <td mat-cell *matCellDef="let department">{{ department.deactivatedBy ?? '—' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="consultants">
+                <th mat-header-cell *matHeaderCellDef>Consultants</th>
+                <td mat-cell *matCellDef="let department">
+                  <button
+                    mat-button
+                    type="button"
+                    [attr.aria-label]="'View consultants in ' + department.name"
+                    (click)="viewConsultants(department)"
+                  >
+                    <mat-icon aria-hidden="true">visibility</mat-icon>
+                    {{ department.consultantCount }}
+                  </button>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef class="department-actions-header"></th>
+                <td mat-cell *matCellDef="let department" class="department-actions-cell">
+                  <button mat-stroked-button color="primary" type="button" (click)="restore(department)">
+                    Activate
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="inactiveColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: inactiveColumns"></tr>
+            </table>
+            <mat-paginator
+              [length]="inactivePagination.length()"
+              [pageIndex]="inactivePagination.pageIndex()"
+              [pageSize]="inactivePagination.pageSize()"
+              [pageSizeOptions]="[5, 10, 25, 50]"
+              (page)="inactivePagination.onPage($event)"
+            />
+          }
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </section>
+</div>

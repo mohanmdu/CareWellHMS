@@ -1,108 +1,196 @@
 <div class="hms-page">
-  <app-page-header title="Consultants" subtitle="Doctors and specialists available for appointment booking." />
+  <app-page-header title="Consultants" subtitle="Doctors and specialists available for appointment booking.">
+    <button mat-flat-button color="primary" type="button" (click)="openAddDialog()">
+      <mat-icon aria-hidden="true">person_add</mat-icon>
+      Add Consultant
+    </button>
+  </app-page-header>
 
-  <section class="hms-card-surface consultant-form">
-    <form class="hms-form-grid" (ngSubmit)="add()">
-      <mat-form-field appearance="outline" subscriptSizing="dynamic">
-        <mat-label>Name</mat-label>
-        <input matInput name="name" [(ngModel)]="form.name" required />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" subscriptSizing="dynamic">
-        <mat-label>Department</mat-label>
-        <mat-select name="departmentId" [(ngModel)]="form.departmentId" required>
-          @for (department of departments(); track department.id) {
-            <mat-option [value]="department.id">{{ department.name }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" subscriptSizing="dynamic">
-        <mat-label>Specialization</mat-label>
-        <input matInput name="specialization" [(ngModel)]="form.specialization" />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" subscriptSizing="dynamic">
-        <mat-label>Email</mat-label>
-        <input matInput name="email" type="email" [(ngModel)]="form.email" />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" subscriptSizing="dynamic">
-        <mat-label>Mobile number</mat-label>
-        <input matInput name="mobileNumber" [(ngModel)]="form.mobileNumber" />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" subscriptSizing="dynamic">
-        <mat-label>Consultation fee</mat-label>
-        <input matInput name="consultationFee" type="number" min="0" [(ngModel)]="form.consultationFee" />
-      </mat-form-field>
-
-      <div class="consultant-form-submit">
-        <button mat-flat-button color="primary" type="submit" [disabled]="saving() || !form.name.trim() || !form.departmentId">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          Add consultant
-        </button>
+  <section class="hms-card-surface consultant-tabs">
+    @if (filterDepartmentId() !== null) {
+      <div class="consultant-filter-banner">
+        <span>Showing consultants in <strong>{{ filterDepartmentName() ?? 'selected department' }}</strong></span>
+        <button mat-button type="button" (click)="clearFilter()">Show all</button>
       </div>
-    </form>
-  </section>
-
-  <section class="hms-card-surface consultant-list">
-    @if (loading()) {
-      <mat-progress-bar mode="indeterminate" />
     }
 
-    @if (!loading() && consultants().length === 0) {
-      <app-empty-state
-        icon="medical_services"
-        title="No consultants yet"
-        message="Add the first consultant using the form above."
-      />
-    } @else if (consultants().length > 0) {
-      <table mat-table [dataSource]="consultants()" class="consultant-table">
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef>Name</th>
-          <td mat-cell *matCellDef="let consultant">{{ consultant.name }}</td>
-        </ng-container>
+    <app-table-search placeholder="Search consultants..." [value]="searchTerm()" (valueChange)="onSearch($event)" class="consultant-search" />
 
-        <ng-container matColumnDef="department">
-          <th mat-header-cell *matHeaderCellDef>Department</th>
-          <td mat-cell *matCellDef="let consultant">{{ consultant.departmentName }}</td>
-        </ng-container>
+    <mat-tab-group (selectedIndexChange)="onTabChange($event)">
+      <mat-tab label="Active Consultants">
+        <div class="consultant-tab-body">
+          @if (loadingActive()) {
+            <mat-progress-bar mode="indeterminate" />
+          }
 
-        <ng-container matColumnDef="specialization">
-          <th mat-header-cell *matHeaderCellDef>Specialization</th>
-          <td mat-cell *matCellDef="let consultant">{{ consultant.specialization || '—' }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="fee">
-          <th mat-header-cell *matHeaderCellDef>Fee</th>
-          <td mat-cell *matCellDef="let consultant">{{ consultant.consultationFee | number: '1.0-2' }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
-          <td mat-cell *matCellDef="let consultant">
-            <app-status-badge
-              [label]="consultant.active ? 'Active' : 'Inactive'"
-              [tone]="consultant.active ? 'success' : 'neutral'"
+          @if (!loadingActive() && activeConsultants().length === 0) {
+            <app-empty-state
+              icon="medical_services"
+              title="No consultants yet"
+              message="Add the first consultant above."
             />
-          </td>
-        </ng-container>
+          } @else if (filteredActiveConsultants().length === 0) {
+            <app-empty-state icon="search_off" title="No matches" message="No consultants match your search." />
+          } @else if (filteredActiveConsultants().length > 0) {
+            <table mat-table [dataSource]="activePagination.page()" class="consultant-table">
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Consultants</th>
+                <td mat-cell *matCellDef="let consultant">{{ consultant.name }}</td>
+              </ng-container>
 
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef class="consultant-actions-header"></th>
-          <td mat-cell *matCellDef="let consultant" class="consultant-actions-cell">
-            @if (consultant.active) {
-              <button mat-stroked-button color="warn" type="button" (click)="deactivate(consultant)">
-                Deactivate
-              </button>
-            }
-          </td>
-        </ng-container>
+              <ng-container matColumnDef="department">
+                <th mat-header-cell *matHeaderCellDef>Departments</th>
+                <td mat-cell *matCellDef="let consultant">{{ consultant.departmentName }}</td>
+              </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-      </table>
-    }
+              <ng-container matColumnDef="fee">
+                <th mat-header-cell *matHeaderCellDef>Fee</th>
+                <td mat-cell *matCellDef="let consultant">{{ consultant.consultationFee | number: '1.0-2' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="timings">
+                <th mat-header-cell *matHeaderCellDef>Update Timings</th>
+                <td mat-cell *matCellDef="let consultant">
+                  <button
+                    mat-icon-button
+                    type="button"
+                    [attr.aria-label]="'Update timings for ' + consultant.name"
+                    (click)="openTimingsDialog(consultant)"
+                  >
+                    <mat-icon aria-hidden="true">schedule</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="edit">
+                <th mat-header-cell *matHeaderCellDef>Edit</th>
+                <td mat-cell *matCellDef="let consultant">
+                  <button
+                    mat-icon-button
+                    type="button"
+                    [attr.aria-label]="'Edit ' + consultant.name"
+                    (click)="openEditDialog(consultant)"
+                  >
+                    <mat-icon aria-hidden="true">edit</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="deactivate">
+                <th mat-header-cell *matHeaderCellDef>Deactivate</th>
+                <td mat-cell *matCellDef="let consultant">
+                  <button
+                    mat-icon-button
+                    type="button"
+                    color="warn"
+                    [attr.aria-label]="'Deactivate ' + consultant.name"
+                    (click)="deactivate(consultant)"
+                  >
+                    <mat-icon aria-hidden="true">cancel</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="createdBy">
+                <th mat-header-cell *matHeaderCellDef>Created by & Date</th>
+                <td mat-cell *matCellDef="let consultant">
+                  {{ consultant.createdBy ?? '—' }}
+                  @if (consultant.createdAt) {
+                    <span class="consultant-audit-date">{{ consultant.createdAt | date: 'dd/MM/yyyy' }}</span>
+                  }
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="updatedBy">
+                <th mat-header-cell *matHeaderCellDef>Edited by & Date</th>
+                <td mat-cell *matCellDef="let consultant">
+                  @if (consultant.updatedBy) {
+                    {{ consultant.updatedBy }}
+                    <span class="consultant-audit-date">{{ consultant.updatedAt | date: 'dd/MM/yyyy' }}</span>
+                  } @else {
+                    —
+                  }
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="activeColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: activeColumns"></tr>
+            </table>
+            <mat-paginator
+              [length]="activePagination.length()"
+              [pageIndex]="activePagination.pageIndex()"
+              [pageSize]="activePagination.pageSize()"
+              [pageSizeOptions]="[5, 10, 25, 50]"
+              (page)="activePagination.onPage($event)"
+            />
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab label="De-Activated Consultants">
+        <div class="consultant-tab-body">
+          @if (loadingInactive()) {
+            <mat-progress-bar mode="indeterminate" />
+          }
+
+          @if (!loadingInactive() && inactiveConsultants().length === 0) {
+            <app-empty-state
+              icon="inbox"
+              title="No de-activated consultants"
+              message="Deactivated consultants will appear here."
+            />
+          } @else if (filteredInactiveConsultants().length === 0) {
+            <app-empty-state icon="search_off" title="No matches" message="No consultants match your search." />
+          } @else if (filteredInactiveConsultants().length > 0) {
+            <table mat-table [dataSource]="inactivePagination.page()" class="consultant-table">
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Consultants</th>
+                <td mat-cell *matCellDef="let consultant">{{ consultant.name }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="department">
+                <th mat-header-cell *matHeaderCellDef>Departments</th>
+                <td mat-cell *matCellDef="let consultant">{{ consultant.departmentName }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="deactivatedAt">
+                <th mat-header-cell *matHeaderCellDef>Deactivated Date</th>
+                <td mat-cell *matCellDef="let consultant">{{ consultant.deactivatedAt ? (consultant.deactivatedAt | date: 'dd/MM/yyyy') : '—' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="deactivatedBy">
+                <th mat-header-cell *matHeaderCellDef>Deactivated by</th>
+                <td mat-cell *matCellDef="let consultant">{{ consultant.deactivatedBy ?? '—' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef class="consultant-actions-header">Activate</th>
+                <td mat-cell *matCellDef="let consultant" class="consultant-actions-cell">
+                  <button
+                    mat-icon-button
+                    color="primary"
+                    type="button"
+                    [attr.aria-label]="'Activate ' + consultant.name"
+                    (click)="restore(consultant)"
+                  >
+                    <mat-icon aria-hidden="true">power_settings_new</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="inactiveColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: inactiveColumns"></tr>
+            </table>
+            <mat-paginator
+              [length]="inactivePagination.length()"
+              [pageIndex]="inactivePagination.pageIndex()"
+              [pageSize]="inactivePagination.pageSize()"
+              [pageSizeOptions]="[5, 10, 25, 50]"
+              (page)="inactivePagination.onPage($event)"
+            />
+          }
+        </div>
+      </mat-tab>
+    </mat-tab-group>
   </section>
 </div>

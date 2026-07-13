@@ -1,0 +1,25 @@
+<h2 mat-dialog-title>Cancel appointment - {{ data.patientName }}</h2>
+
+<mat-dialog-content class="cancel-dialog-content">
+  @if (fixedCancelledBy) {
+    <p class="cancel-dialog-line">Cancelling on behalf of: <strong>{{ cancelledByLabel[fixedCancelledBy] }}</strong></p>
+  } @else {
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Cancelled by</mat-label>
+      <mat-select [(ngModel)]="cancelledBy">
+        <mat-option value="HOSPITAL">Hospital</mat-option>
+        <mat-option value="PATIENT">Patient</mat-option>
+      </mat-select>
+    </mat-form-field>
+  }
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Reason</mat-label>
+    <textarea matInput rows="3" [(ngModel)]="reason" required cdkFocusInitial></textarea>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" mat-dialog-close>Back</button>
+  <button mat-flat-button color="warn" type="button" [disabled]="!isValid" (click)="submit()">Cancel appointment</button>
+</mat-dialog-actions>

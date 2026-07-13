@@ -1,0 +1,100 @@
+.refund-tabs {
+  overflow-x: auto;
+}
+
+.refund-tab-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-4) var(--hms-space-2) var(--hms-space-2);
+}
+
+// Payment Refund tab
+.refund-search-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--hms-space-3);
+}
+
+.refund-details-section h3 {
+  margin: 0 0 var(--hms-space-3);
+}
+
+.refund-invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--hms-space-4);
+
+  th,
+  td {
+    text-align: left;
+    padding: var(--hms-space-2);
+    border-bottom: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
+  }
+}
+
+.refund-already-refunded {
+  color: var(--hms-color-text-muted, rgba(0, 0, 0, 0.6));
+}
+
+.refund-remarks-field {
+  grid-column: 1 / -1;
+}
+
+.refund-error {
+  color: var(--hms-color-danger, #b3261e);
+  font-size: 0.85rem;
+  margin: var(--hms-space-2) 0 0;
+}
+
+.refund-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--hms-space-2);
+  margin-top: var(--hms-space-3);
+}
+
+// Refund Report tab
+.refund-report-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--hms-space-3);
+}
+
+.refund-report-table {
+  width: 100%;
+}
+
+.refund-report-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hms-space-5, 32px);
+  padding: var(--hms-space-4);
+}
+
+.refund-report-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  span {
+    font-size: 0.8rem;
+    color: var(--hms-color-text-muted, rgba(0, 0, 0, 0.6));
+  }
+
+  strong {
+    font-size: 1.1rem;
+    color: var(--hms-color-primary, #1565c0);
+  }
+}
+
+.refund-report-invoice-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--hms-color-primary, #1565c0);
+  text-decoration: underline;
+  cursor: pointer;
+}

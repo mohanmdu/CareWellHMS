@@ -1,0 +1,196 @@
+<div class="hms-page">
+  <app-page-header title="General Users" subtitle="Directory of staff with system access and their role." />
+
+  <section class="hms-card-surface general-user-form">
+    <form class="hms-form-grid" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Name</mat-label>
+        <input matInput name="name" [(ngModel)]="form.name" required />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Mobile Number</mat-label>
+        <input
+          matInput
+          name="mobileNumber"
+          inputmode="numeric"
+          maxlength="10"
+          [ngModel]="form.mobileNumber"
+          (input)="onMobileInput($event)"
+          required
+        />
+        @if (form.mobileNumber && form.mobileNumber.length !== 10) {
+          <mat-hint>Must be exactly 10 digits</mat-hint>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Role</mat-label>
+        <mat-select name="roleId" [(ngModel)]="form.roleId" required>
+          @for (role of roles(); track role.id) {
+            <mat-option [value]="role.id">{{ role.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Email ID</mat-label>
+        <input matInput name="email" type="email" [(ngModel)]="form.email" />
+      </mat-form-field>
+
+      <div class="general-user-form-submit">
+        <button mat-flat-button color="primary" type="submit" [disabled]="!isValid || saving()">
+          {{ editingUser() ? 'Update' : 'Submit' }}
+        </button>
+        @if (editingUser()) {
+          <button mat-button type="button" (click)="cancelEdit()">Cancel</button>
+        }
+      </div>
+    </form>
+  </section>
+
+  <section class="hms-card-surface general-user-tabs">
+    <app-table-search placeholder="Search users..." [value]="searchTerm()" (valueChange)="onSearch($event)" class="general-user-search" />
+
+    <mat-tab-group (selectedIndexChange)="onTabChange($event)">
+      <mat-tab label="Active General Users">
+        <div class="general-user-tab-body">
+          @if (loadingActive()) {
+            <mat-progress-bar mode="indeterminate" />
+          }
+
+          @if (!loadingActive() && activeUsers().length === 0) {
+            <app-empty-state icon="group" title="No users yet" message="Add the first user above." />
+          } @else if (filteredActiveUsers().length === 0) {
+            <app-empty-state icon="search_off" title="No matches" message="No users match your search." />
+          } @else if (filteredActiveUsers().length > 0) {
+            <table mat-table [dataSource]="activePagination.page()" class="general-user-table">
+              <ng-container matColumnDef="sno">
+                <th mat-header-cell *matHeaderCellDef>S No</th>
+                <td mat-cell *matCellDef="let user; let i = index">
+                  {{ activePagination.pageIndex() * activePagination.pageSize() + i + 1 }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let user">{{ user.name }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="userId">
+                <th mat-header-cell *matHeaderCellDef>User ID</th>
+                <td mat-cell *matCellDef="let user">{{ user.id }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="role">
+                <th mat-header-cell *matHeaderCellDef>Role</th>
+                <td mat-cell *matCellDef="let user">{{ user.roleName }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="fromDate">
+                <th mat-header-cell *matHeaderCellDef>From Date</th>
+                <td mat-cell *matCellDef="let user">{{ user.createdAt ? (user.createdAt | date: 'dd-MM-yyyy') : '—' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="createdBy">
+                <th mat-header-cell *matHeaderCellDef>Created By</th>
+                <td mat-cell *matCellDef="let user">{{ user.createdBy ?? '—' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="deactivate">
+                <th mat-header-cell *matHeaderCellDef>De-Activate</th>
+                <td mat-cell *matCellDef="let user">
+                  <button mat-stroked-button color="warn" type="button" (click)="deactivate(user)">De-activate</button>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="edit">
+                <th mat-header-cell *matHeaderCellDef>Edit</th>
+                <td mat-cell *matCellDef="let user">
+                  <button mat-icon-button type="button" [attr.aria-label]="'Edit ' + user.name" (click)="editUser(user)">
+                    <mat-icon aria-hidden="true">edit</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="activeColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: activeColumns"></tr>
+            </table>
+            <mat-paginator
+              [length]="activePagination.length()"
+              [pageIndex]="activePagination.pageIndex()"
+              [pageSize]="activePagination.pageSize()"
+              [pageSizeOptions]="[5, 10, 25, 50]"
+              (page)="activePagination.onPage($event)"
+            />
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab label="De-Activated General Users">
+        <div class="general-user-tab-body">
+          @if (loadingInactive()) {
+            <mat-progress-bar mode="indeterminate" />
+          }
+
+          @if (!loadingInactive() && inactiveUsers().length === 0) {
+            <app-empty-state icon="inbox" title="No de-activated users" message="Deactivated users will appear here." />
+          } @else if (filteredInactiveUsers().length === 0) {
+            <app-empty-state icon="search_off" title="No matches" message="No users match your search." />
+          } @else if (filteredInactiveUsers().length > 0) {
+            <table mat-table [dataSource]="inactivePagination.page()" class="general-user-table">
+              <ng-container matColumnDef="sno">
+                <th mat-header-cell *matHeaderCellDef>S No</th>
+                <td mat-cell *matCellDef="let user; let i = index">
+                  {{ inactivePagination.pageIndex() * inactivePagination.pageSize() + i + 1 }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let user">{{ user.name }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="userId">
+                <th mat-header-cell *matHeaderCellDef>User ID</th>
+                <td mat-cell *matCellDef="let user">{{ user.id }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="role">
+                <th mat-header-cell *matHeaderCellDef>Role</th>
+                <td mat-cell *matCellDef="let user">{{ user.roleName }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="fromDate">
+                <th mat-header-cell *matHeaderCellDef>From Date</th>
+                <td mat-cell *matCellDef="let user">{{ user.createdAt ? (user.createdAt | date: 'dd-MM-yyyy') : '—' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="toDate">
+                <th mat-header-cell *matHeaderCellDef>To Date</th>
+                <td mat-cell *matCellDef="let user">{{ user.deactivatedAt ? (user.deactivatedAt | date: 'dd-MM-yyyy') : '—' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="activate">
+                <th mat-header-cell *matHeaderCellDef>Activate</th>
+                <td mat-cell *matCellDef="let user">
+                  <button mat-flat-button color="primary" type="button" (click)="restore(user)">Activate</button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="inactiveColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: inactiveColumns"></tr>
+            </table>
+            <mat-paginator
+              [length]="inactivePagination.length()"
+              [pageIndex]="inactivePagination.pageIndex()"
+              [pageSize]="inactivePagination.pageSize()"
+              [pageSizeOptions]="[5, 10, 25, 50]"
+              (page)="inactivePagination.onPage($event)"
+            />
+          }
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </section>
+</div>

@@ -23,7 +23,7 @@ import { BillingItemService } from './billing-item.service';
 /**
  * Categories are a simple { id, name, active } master, so the left column is
  * the shared MasterCrudComponent<T> in embedded mode; items carry a category
- * + price and stay hand-built (§5.2), like Consultants/Drugs.
+ * + price and stay hand-built (§5.2), like Consultants.
  */
 @Component({
   selector: 'app-billing-catalog',

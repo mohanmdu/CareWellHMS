@@ -1,0 +1,26 @@
+.patient-history-search-section,
+.patient-history-patient-section,
+.patient-history-list-section {
+  padding: var(--hms-space-4) var(--hms-space-5);
+  margin-bottom: var(--hms-space-3);
+}
+
+.patient-history-patient-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hms-space-3);
+}
+
+.patient-history-patient-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  td {
+    padding: var(--hms-space-1, 4px) var(--hms-space-2);
+  }
+}
+
+.patient-history-table {
+  width: 100%;
+}

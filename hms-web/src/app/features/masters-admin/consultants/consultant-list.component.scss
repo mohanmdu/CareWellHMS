@@ -1,14 +1,12 @@
-.consultant-form {
-  padding: var(--hms-space-5);
-}
-
-.consultant-form-submit {
-  display: flex;
-  align-items: center;
-}
-
-.consultant-list {
+.consultant-tabs {
   overflow-x: auto;
+}
+
+.consultant-tab-body {
+  padding: var(--hms-space-4) 0 var(--hms-space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
 }
 
 .consultant-table {
@@ -20,5 +18,26 @@
 }
 
 .consultant-actions-header {
-  width: 140px;
+  width: 100px;
+}
+
+.consultant-audit-date {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--hms-color-text-muted, rgba(0, 0, 0, 0.6));
+}
+
+.consultant-filter-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--hms-space-3) var(--hms-space-2);
+  margin: var(--hms-space-3) var(--hms-space-2) 0;
+  background: var(--hms-color-surface-muted, rgba(0, 0, 0, 0.03));
+  border-radius: var(--hms-radius-md, 8px);
+}
+
+.consultant-search {
+  display: block;
+  padding: var(--hms-space-4) var(--hms-space-2) 0;
 }

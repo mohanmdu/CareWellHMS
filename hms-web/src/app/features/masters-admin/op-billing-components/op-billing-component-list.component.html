@@ -1,0 +1,97 @@
+<div class="hms-page">
+  <app-page-header title="OP Billing Components" subtitle="Priced line items available for OP Direct Billing.">
+    <button mat-flat-button color="primary" type="button" (click)="openAddDialog()">
+      <mat-icon aria-hidden="true">add</mat-icon>
+      Add Component
+    </button>
+  </app-page-header>
+
+  <section class="hms-card-surface op-billing-component-tabs">
+    <mat-tab-group (selectedIndexChange)="onTabChange($event)">
+      <mat-tab label="Active">
+        <div class="op-billing-component-tab-body">
+          @if (loadingActive()) {
+            <mat-progress-bar mode="indeterminate" />
+          }
+
+          @if (!loadingActive() && activeComponents().length === 0) {
+            <app-empty-state icon="sell" title="No components yet" message="Add the first component above." />
+          } @else if (activeComponents().length > 0) {
+            <table mat-table [dataSource]="activeComponents()" class="op-billing-component-table">
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Component Name</th>
+                <td mat-cell *matCellDef="let component">{{ component.name }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="category">
+                <th mat-header-cell *matHeaderCellDef>Category</th>
+                <td mat-cell *matCellDef="let component">{{ component.categoryName }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="amount">
+                <th mat-header-cell *matHeaderCellDef>Amount</th>
+                <td mat-cell *matCellDef="let component">{{ component.amount | number: '1.0-2' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef class="op-billing-component-actions-header"></th>
+                <td mat-cell *matCellDef="let component" class="op-billing-component-actions-cell">
+                  <div class="op-billing-component-actions-row">
+                    <button mat-icon-button type="button" [attr.aria-label]="'Edit ' + component.name" (click)="openEditDialog(component)">
+                      <mat-icon aria-hidden="true">edit</mat-icon>
+                    </button>
+                    <button mat-icon-button type="button" color="warn" [attr.aria-label]="'Deactivate ' + component.name" (click)="deactivate(component)">
+                      <mat-icon aria-hidden="true">delete</mat-icon>
+                    </button>
+                  </div>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+            </table>
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Inactive">
+        <div class="op-billing-component-tab-body">
+          @if (loadingInactive()) {
+            <mat-progress-bar mode="indeterminate" />
+          }
+
+          @if (!loadingInactive() && inactiveComponents().length === 0) {
+            <app-empty-state icon="inbox" title="No inactive components" message="Deactivated components will appear here." />
+          } @else if (inactiveComponents().length > 0) {
+            <table mat-table [dataSource]="inactiveComponents()" class="op-billing-component-table">
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Component Name</th>
+                <td mat-cell *matCellDef="let component">{{ component.name }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="category">
+                <th mat-header-cell *matHeaderCellDef>Category</th>
+                <td mat-cell *matCellDef="let component">{{ component.categoryName }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="amount">
+                <th mat-header-cell *matHeaderCellDef>Amount</th>
+                <td mat-cell *matCellDef="let component">{{ component.amount | number: '1.0-2' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef class="op-billing-component-actions-header"></th>
+                <td mat-cell *matCellDef="let component" class="op-billing-component-actions-cell">
+                  <button mat-stroked-button color="primary" type="button" (click)="restore(component)">Restore</button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+            </table>
+          }
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </section>
+</div>

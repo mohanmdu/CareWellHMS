@@ -1,64 +1,181 @@
 <div class="hms-page">
-  <app-page-header title="Appointments" subtitle="All booked, confirmed, cancelled and completed appointments." />
+  <app-page-header title="Appointments" subtitle="Approve pending appointments and review the full history." />
 
   <section class="hms-card-surface appointment-list-section">
-    @if (loading()) {
-      <mat-progress-bar mode="indeterminate" />
-    }
+    <mat-tab-group (selectedIndexChange)="onTabChange($event)">
+      @for (tab of statusTabs; track tab.label) {
+        <mat-tab [label]="tab.label" />
+      }
+    </mat-tab-group>
 
-    @if (!loading() && appointments().length === 0) {
-      <app-empty-state icon="event" title="No appointments yet" message="Booked appointments will appear here." />
-    } @else if (appointments().length > 0) {
-      <table mat-table [dataSource]="appointments()" class="appointment-table">
-        <ng-container matColumnDef="patient">
-          <th mat-header-cell *matHeaderCellDef>Patient</th>
-          <td mat-cell *matCellDef="let appointment">{{ appointment.patientName }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="consultant">
-          <th mat-header-cell *matHeaderCellDef>Consultant</th>
-          <td mat-cell *matCellDef="let appointment">{{ appointment.consultantName }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="department">
-          <th mat-header-cell *matHeaderCellDef>Department</th>
-          <td mat-cell *matCellDef="let appointment">{{ appointment.departmentName }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="date">
-          <th mat-header-cell *matHeaderCellDef>Date</th>
-          <td mat-cell *matCellDef="let appointment">{{ appointment.appointmentDate }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="time">
-          <th mat-header-cell *matHeaderCellDef>Time</th>
-          <td mat-cell *matCellDef="let appointment">{{ appointment.slotTime }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
-          <td mat-cell *matCellDef="let appointment">
-            <app-status-badge [label]="appointment.status" [tone]="statusTone[appointment.status]" />
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef class="appointment-actions-header"></th>
-          <td mat-cell *matCellDef="let appointment" class="appointment-actions-cell">
-            @if (appointment.status === 'BOOKED') {
-              <button mat-stroked-button color="primary" type="button" (click)="confirm(appointment)">
-                Confirm
-              </button>
+    <div class="appointment-filters">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>From date</mat-label>
+        <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" (ngModelChange)="onFiltersChange()" />
+        <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+        <mat-datepicker #fromPicker />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>To date</mat-label>
+        <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" (ngModelChange)="onFiltersChange()" />
+        <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+        <mat-datepicker #toPicker />
+      </mat-form-field>
+      @if (!isDirectBillingTab()) {
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Department</mat-label>
+          <mat-select [(ngModel)]="departmentId" (ngModelChange)="refresh()">
+            <mat-option [value]="null">All departments</mat-option>
+            @for (department of departments(); track department.id) {
+              <mat-option [value]="department.id">{{ department.name }}</mat-option>
             }
-            @if (appointment.status === 'BOOKED' || appointment.status === 'CONFIRMED') {
-              <button mat-stroked-button color="warn" type="button" (click)="cancel(appointment)">Cancel</button>
-            }
-          </td>
-        </ng-container>
+          </mat-select>
+        </mat-form-field>
+      }
+      <app-table-search
+        [placeholder]="isDirectBillingTab() ? 'Search patient or invoice no...' : 'Search patient, doctor or department...'"
+        [value]="searchTerm()"
+        (valueChange)="onSearch($event)"
+        class="appointment-search"
+      />
+    </div>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-      </table>
+    @if (isDirectBillingTab()) {
+      @if (loadingDirectBilling()) {
+        <mat-progress-bar mode="indeterminate" />
+      }
+
+      @if (!loadingDirectBilling() && directBillingEntries().length === 0) {
+        <app-empty-state icon="receipt_long" title="No direct billing entries" message="No OP direct billing entries match these filters." />
+      } @else if (filteredDirectBillingEntries().length === 0) {
+        <app-empty-state icon="search_off" title="No matches" message="No direct billing entries match your search." />
+      } @else if (filteredDirectBillingEntries().length > 0) {
+        <table mat-table [dataSource]="directBillingPagination.page()" class="appointment-table">
+          <ng-container matColumnDef="patient">
+            <th mat-header-cell *matHeaderCellDef>Patient</th>
+            <td mat-cell *matCellDef="let entry">{{ entry.patientName }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="invoiceNumber">
+            <th mat-header-cell *matHeaderCellDef>Invoice No</th>
+            <td mat-cell *matCellDef="let entry">{{ entry.invoiceNumber }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="amount">
+            <th mat-header-cell *matHeaderCellDef>Amount</th>
+            <td mat-cell *matCellDef="let entry">{{ entry.totalAmount | number: '1.0-2' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="paymentMode">
+            <th mat-header-cell *matHeaderCellDef>Payment Mode</th>
+            <td mat-cell *matCellDef="let entry">{{ directBillingPaymentModeLabel(entry) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="billedBy">
+            <th mat-header-cell *matHeaderCellDef>Billed By</th>
+            <td mat-cell *matCellDef="let entry">{{ entry.billedBy }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="billedAt">
+            <th mat-header-cell *matHeaderCellDef>Billed At</th>
+            <td mat-cell *matCellDef="let entry">{{ entry.billedAt | date: 'dd-MM-yyyy HH:mm' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="directBillingActions">
+            <th mat-header-cell *matHeaderCellDef class="appointment-actions-header"></th>
+            <td mat-cell *matCellDef="let entry" class="appointment-actions-cell">
+              <div class="appointment-actions-row">
+                <button mat-stroked-button color="primary" type="button" (click)="viewDirectBillingReceipt(entry)">
+                  View Receipt
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="directBillingColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: directBillingColumns"></tr>
+        </table>
+        <mat-paginator
+          [length]="directBillingPagination.length()"
+          [pageIndex]="directBillingPagination.pageIndex()"
+          [pageSize]="directBillingPagination.pageSize()"
+          [pageSizeOptions]="[10, 25, 50]"
+          (page)="directBillingPagination.onPage($event)"
+        />
+      }
+    } @else {
+      @if (loading()) {
+        <mat-progress-bar mode="indeterminate" />
+      }
+
+      @if (!loading() && appointments().length === 0) {
+        <app-empty-state icon="event" title="No appointments" message="No appointments match these filters." />
+      } @else if (filteredAppointments().length === 0) {
+        <app-empty-state icon="search_off" title="No matches" message="No appointments match your search." />
+      } @else if (filteredAppointments().length > 0) {
+        <table mat-table [dataSource]="pagination.page()" class="appointment-table">
+          <ng-container matColumnDef="patient">
+            <th mat-header-cell *matHeaderCellDef>Patient</th>
+            <td mat-cell *matCellDef="let appointment">{{ appointment.patientName }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="consultant">
+            <th mat-header-cell *matHeaderCellDef>Consultant</th>
+            <td mat-cell *matCellDef="let appointment">{{ appointment.consultantName }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="department">
+            <th mat-header-cell *matHeaderCellDef>Department</th>
+            <td mat-cell *matCellDef="let appointment">{{ appointment.departmentName }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let appointment">{{ appointment.appointmentDate }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="time">
+            <th mat-header-cell *matHeaderCellDef>Time</th>
+            <td mat-cell *matCellDef="let appointment">{{ appointment.slotTime }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let appointment">
+              <app-status-badge [label]="appointment.status" [tone]="statusTone[appointment.status]" />
+              @if (appointment.status === 'CANCELLED' && appointment.cancelledBy) {
+                <span class="appointment-cancelled-by">by {{ appointment.cancelledBy | titlecase }}</span>
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="appointment-actions-header"></th>
+            <td mat-cell *matCellDef="let appointment" class="appointment-actions-cell">
+              <div class="appointment-actions-row">
+                @if (appointment.status === 'BOOKED') {
+                  <button mat-stroked-button color="primary" type="button" (click)="approve(appointment)">
+                    Approve
+                  </button>
+                }
+                @if (appointment.status === 'BOOKED' || appointment.status === 'CONFIRMED') {
+                  <button mat-stroked-button color="warn" type="button" (click)="cancel(appointment)">Cancel</button>
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+        <mat-paginator
+          [length]="pagination.length()"
+          [pageIndex]="pagination.pageIndex()"
+          [pageSize]="pagination.pageSize()"
+          [pageSizeOptions]="[10, 25, 50]"
+          (page)="pagination.onPage($event)"
+        />
+      }
     }
   </section>
 </div>

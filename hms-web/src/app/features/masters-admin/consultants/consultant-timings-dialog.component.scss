@@ -1,0 +1,10 @@
+.timings-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+}
+
+.timings-dialog-subtitle {
+  margin: 0 0 var(--hms-space-2);
+  font-weight: 600;
+}

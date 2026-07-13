@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/masters/consultants")
@@ -20,7 +21,12 @@ public class ConsultantController {
 
     @GetMapping
     public List<ConsultantDto> list() {
-        return service.findAll();
+        return service.findActive();
+    }
+
+    @GetMapping("/inactive")
+    public List<ConsultantDto> inactive() {
+        return service.findInactive();
     }
 
     @GetMapping("/{id}")
@@ -43,5 +49,16 @@ public class ConsultantController {
     public ResponseEntity<Void> deactivate(@PathVariable Long id) {
         service.deactivate(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/restore")
+    public ResponseEntity<Void> restore(@PathVariable Long id) {
+        service.restore(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/image")
+    public ConsultantDto uploadImage(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+        return service.uploadImage(id, file);
     }
 }

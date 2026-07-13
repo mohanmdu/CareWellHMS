@@ -1,0 +1,77 @@
+<h2 mat-dialog-title>OP Direct Billing Receipt</h2>
+
+<mat-dialog-content class="direct-billing-receipt-dialog-content">
+  <div class="receipt" #receiptContent>
+    <div class="receipt-header">
+      @if (clinicSettings()?.logoUrl; as logo) {
+        <img [src]="logo" alt="" class="receipt-logo" />
+      }
+      <div class="receipt-clinic-info">
+        <strong class="receipt-clinic-name">{{ clinicSettings()?.name ?? 'Hospital' }}</strong>
+        @if (clinicSettings()?.address) {
+          <span>{{ clinicSettings()?.address }}</span>
+        }
+      </div>
+    </div>
+
+    <div class="receipt-meta">
+      <span>Invoice No: {{ receipt.invoiceNumber }}</span>
+      <span>Dated: {{ receipt.billedAt | date: 'dd-MM-yyyy' }}</span>
+    </div>
+    <div class="receipt-meta">
+      <span>Patient Name: {{ receipt.patientName }}</span>
+      <span>Patient ID: {{ receipt.patientRegistrationNumber }}</span>
+    </div>
+    <div class="receipt-meta">
+      <span>Age &amp; Gender: {{ receipt.age ?? '—' }}, {{ receipt.gender ?? '—' }}</span>
+    </div>
+
+    <table class="receipt-items-table">
+      <thead>
+        <tr>
+          <th>S.No</th>
+          <th>Category</th>
+          <th>Component</th>
+          <th>Qty</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of receipt.items; track item.id; let i = $index) {
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td>{{ item.categoryName }}</td>
+            <td>{{ item.componentName }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.amount | number: '1.0-2' }}</td>
+          </tr>
+        }
+        <tr class="receipt-total-row">
+          <td></td>
+          <td></td>
+          <td></td>
+          <td>Total ({{ paymentModeLabels[receipt.paymentMode] }})</td>
+          <td>{{ receipt.totalAmount | number: '1.0-2' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p class="receipt-words">Received sum of Rupees <strong>{{ amountInWords }}</strong> Only</p>
+    @if (receipt.remarks) {
+      <p class="receipt-remarks">Remarks: {{ receipt.remarks }}</p>
+    }
+
+    <p class="receipt-signature">Cashier</p>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="direct-billing-receipt-actions">
+  <button mat-button type="button" (click)="goTo('/appointments')">Go to Appointments</button>
+  <button mat-button type="button" (click)="goTo('/appointments/reports/collection')">Collection Report</button>
+  <button mat-button type="button" (click)="goTo('/appointments/refunds')">Refund &amp; Report</button>
+  <button mat-button type="button" (click)="print()">
+    <mat-icon aria-hidden="true">print</mat-icon>
+    Print
+  </button>
+  <button mat-flat-button color="primary" type="button" (click)="close()">Done</button>
+</mat-dialog-actions>

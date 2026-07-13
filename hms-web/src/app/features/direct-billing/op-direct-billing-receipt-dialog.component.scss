@@ -1,0 +1,13 @@
+@use '../../shared/receipt/receipt';
+
+.direct-billing-receipt-dialog-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 480px;
+  max-height: 70vh;
+}
+
+.direct-billing-receipt-actions {
+  flex-wrap: wrap;
+  gap: var(--hms-space-2);
+}

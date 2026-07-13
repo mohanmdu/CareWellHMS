@@ -16,6 +16,11 @@
   overflow-x: auto;
 }
 
+.master-crud-search {
+  display: block;
+  margin-bottom: var(--hms-space-3);
+}
+
 .master-crud-table {
   width: 100%;
 }
@@ -24,6 +29,26 @@
   text-align: right;
 }
 
+.master-crud-actions-row {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  padding: var(--hms-space-2) 0;
+}
+
 .master-crud-actions-header {
-  width: 140px;
+  width: 0;
+  white-space: nowrap;
+}
+
+.master-crud-tab-body {
+  padding-top: var(--hms-space-3);
+}
+
+.master-crud-edit-field {
+  width: 100%;
+  max-width: 280px;
 }

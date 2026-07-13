@@ -1,0 +1,70 @@
+<div class="hms-page">
+  <app-page-header title="Patient Past History" subtitle="Search a patient to review their full visit history." />
+
+  @if (!patient()) {
+    <section class="hms-card-surface patient-history-search-section">
+      <app-patient-search (patientSelected)="selectPatient($event)" />
+    </section>
+  } @else {
+    <section class="hms-card-surface patient-history-patient-section">
+      <table class="patient-history-patient-table">
+        <tbody>
+          <tr>
+            <td><strong>Patient ID</strong>: {{ patient()!.registrationNumber }}</td>
+            <td><strong>Name</strong>: {{ patient()!.firstName }} {{ patient()!.lastName }}</td>
+            <td><strong>Mobile</strong>: {{ patient()!.mobileNumber }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <button mat-button type="button" (click)="reset()">Change Patient</button>
+    </section>
+
+    <section class="hms-card-surface patient-history-list-section">
+      @if (loading()) {
+        <mat-progress-bar mode="indeterminate" />
+      }
+
+      @if (!loading() && appointments().length === 0) {
+        <app-empty-state icon="history" title="No visits yet" message="This patient has no appointment history." />
+      } @else if (appointments().length > 0) {
+        <table mat-table [dataSource]="appointments()" class="patient-history-table">
+          <ng-container matColumnDef="appointmentDate">
+            <th mat-header-cell *matHeaderCellDef>Appoint Date</th>
+            <td mat-cell *matCellDef="let appointment">
+              {{ appointment.appointmentDate | date: 'dd-MM-yyyy' }} {{ appointment.slotTime }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="consultant">
+            <th mat-header-cell *matHeaderCellDef>Consultant Name</th>
+            <td mat-cell *matCellDef="let appointment">{{ appointment.consultantName }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="department">
+            <th mat-header-cell *matHeaderCellDef>Department</th>
+            <td mat-cell *matCellDef="let appointment">{{ appointment.departmentName }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let appointment">
+              <app-status-badge [label]="appointment.status" [tone]="statusTone[appointment.status]" />
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let appointment">
+              <button mat-stroked-button color="primary" type="button" (click)="viewDetails(appointment)">
+                View Details
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      }
+    </section>
+  }
+</div>

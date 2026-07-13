@@ -35,15 +35,17 @@
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef class="invoice-actions-header"></th>
           <td mat-cell *matCellDef="let invoice" class="invoice-actions-cell">
-            <button mat-button type="button" (click)="toggle(invoice)">
-              {{ expandedInvoiceId() === invoice.id ? 'Hide' : 'View receipt' }}
-            </button>
-            @if (invoice.status === 'DRAFT') {
-              <button mat-stroked-button color="primary" type="button" (click)="pay(invoice)">Mark Paid</button>
-            }
-            @if (invoice.status === 'DRAFT' || invoice.status === 'PAID') {
-              <button mat-stroked-button color="warn" type="button" (click)="cancel(invoice)">Cancel/Refund</button>
-            }
+            <div class="invoice-actions-row">
+              <button mat-button type="button" (click)="toggle(invoice)">
+                {{ expandedInvoiceId() === invoice.id ? 'Hide' : 'View receipt' }}
+              </button>
+              @if (invoice.status === 'DRAFT') {
+                <button mat-stroked-button color="primary" type="button" (click)="pay(invoice)">Mark Paid</button>
+              }
+              @if (invoice.status === 'DRAFT' || invoice.status === 'PAID') {
+                <button mat-stroked-button color="warn" type="button" (click)="cancel(invoice)">Cancel/Refund</button>
+              }
+            </div>
           </td>
         </ng-container>
 

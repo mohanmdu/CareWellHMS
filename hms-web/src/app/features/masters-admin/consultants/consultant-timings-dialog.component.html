@@ -1,0 +1,17 @@
+<h2 mat-dialog-title>Update Current Week Appointment Timings</h2>
+<p class="timings-dialog-subtitle">{{ consultantName }}</p>
+
+<mat-dialog-content class="timings-dialog-content">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  } @else {
+    <app-consultant-availability-form [initialAvailability]="initialAvailability()" />
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" mat-dialog-close>Cancel</button>
+  <button mat-flat-button color="primary" type="button" [disabled]="loading() || saving()" (click)="save()">
+    Update
+  </button>
+</mat-dialog-actions>

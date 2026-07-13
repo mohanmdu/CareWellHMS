@@ -1,0 +1,34 @@
+.supplier-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+}
+
+.supplier-header-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.supplier-tab-body {
+  padding: var(--hms-space-4) var(--hms-space-2) var(--hms-space-2);
+}
+
+.supplier-table {
+  width: 100%;
+}
+
+.supplier-actions-cell {
+  text-align: right;
+}
+
+.supplier-actions-row {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+  justify-content: flex-end;
+}
+
+.supplier-actions-header {
+  width: 0;
+  white-space: nowrap;
+}

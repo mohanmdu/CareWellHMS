@@ -1,0 +1,66 @@
+.availability-slots {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-3);
+  margin-bottom: var(--hms-space-3);
+}
+
+.availability-slots-label {
+  font-weight: 600;
+}
+
+.availability-slots-field {
+  width: 80px;
+}
+
+.availability-table-wrap {
+  overflow-x: auto;
+}
+
+.availability-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 860px;
+}
+
+.availability-session-range {
+  display: block;
+  font-weight: 400;
+  font-size: 0.7rem;
+  color: var(--hms-color-text-muted, rgba(0, 0, 0, 0.6));
+}
+
+.availability-table th,
+.availability-table td {
+  border: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
+  padding: var(--hms-space-2);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.availability-day-header,
+.availability-day-cell {
+  text-align: left;
+  font-weight: 600;
+}
+
+.availability-time-input {
+  padding: var(--hms-space-1, 4px) var(--hms-space-2);
+  border: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.2));
+  border-radius: 4px;
+}
+
+.availability-error {
+  color: var(--hms-color-danger, #b3261e);
+  font-size: 0.85rem;
+  margin: var(--hms-space-2) 0 0;
+}
+
+.availability-cell-invalid {
+  background-color: var(--hms-color-danger-bg, rgba(179, 38, 30, 0.08));
+}
+
+.availability-cell-invalid .availability-time-input {
+  border-color: var(--hms-color-danger, #b3261e);
+  border-width: 2px;
+}

@@ -9,7 +9,7 @@
   >
     <div class="shell-brand">
       <mat-icon aria-hidden="true">local_hospital</mat-icon>
-      <span>Navjeevan HMS</span>
+      <span> HMS</span>
     </div>
 
     <mat-nav-list>
@@ -20,6 +20,7 @@
             mat-list-item
             [routerLink]="item.route"
             routerLinkActive="shell-nav-active"
+            [routerLinkActiveOptions]="{ exact: true }"
             (click)="closeOnMobileNav()"
           >
             <mat-icon matListItemIcon aria-hidden="true">{{ item.icon }}</mat-icon>
@@ -35,7 +36,7 @@
       <button mat-icon-button type="button" (click)="toggleSidenav()" aria-label="Toggle navigation menu">
         <mat-icon>menu</mat-icon>
       </button>
-      <span class="shell-title">Navjeevan Hospital Management System</span>
+      <span class="shell-title"> Hospital Management System</span>
       <span class="shell-spacer"></span>
       <button mat-icon-button type="button" [matMenuTriggerFor]="userMenu" aria-label="Account menu">
         <mat-icon>account_circle</mat-icon>

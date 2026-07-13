@@ -1,0 +1,27 @@
+.op-billing-component-tabs {
+  overflow-x: auto;
+}
+
+.op-billing-component-tab-body {
+  padding: var(--hms-space-4) var(--hms-space-2) var(--hms-space-2);
+}
+
+.op-billing-component-table {
+  width: 100%;
+}
+
+.op-billing-component-actions-cell {
+  text-align: right;
+}
+
+.op-billing-component-actions-row {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+  justify-content: flex-end;
+}
+
+.op-billing-component-actions-header {
+  width: 0;
+  white-space: nowrap;
+}

@@ -49,6 +49,10 @@
 }
 
 .admission-actions-cell {
+  text-align: right;
+}
+
+.admission-actions-row {
   display: flex;
   align-items: center;
   gap: var(--hms-space-2);

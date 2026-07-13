@@ -2,11 +2,33 @@
   overflow-x: auto;
 }
 
+.appointment-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-4) var(--hms-space-2) var(--hms-space-2);
+}
+
+.appointment-search {
+  flex: 1 1 260px;
+}
+
+.appointment-cancelled-by {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--hms-color-text-muted, rgba(0, 0, 0, 0.6));
+}
+
 .appointment-table {
   width: 100%;
 }
 
 .appointment-actions-cell {
+  text-align: right;
+}
+
+.appointment-actions-row {
   display: flex;
   align-items: center;
   gap: var(--hms-space-2);

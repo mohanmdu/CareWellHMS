@@ -1,0 +1,48 @@
+<div class="hms-page">
+  <app-page-header title="Clinic Settings" subtitle="Hospital name, address and logo shown on printed receipts." />
+
+  <section class="hms-card-surface clinic-settings-section">
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    } @else {
+      <div class="clinic-logo-row">
+        @if (logoUrl()) {
+          <img [src]="logoUrl()" alt="" class="clinic-logo-preview" />
+        } @else {
+          <mat-icon aria-hidden="true" class="clinic-logo-fallback">local_hospital</mat-icon>
+        }
+        <button mat-stroked-button type="button" [disabled]="uploadingLogo()" (click)="logoInput.click()">
+          <mat-icon aria-hidden="true">upload</mat-icon>
+          {{ uploadingLogo() ? 'Uploading…' : 'Change logo' }}
+        </button>
+        <input #logoInput type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="onLogoSelected($event)" />
+      </div>
+
+      <form class="hms-form-grid clinic-settings-form" (ngSubmit)="save()">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Hospital name</mat-label>
+          <input matInput name="name" [(ngModel)]="form.name" required />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Phone</mat-label>
+          <input matInput name="phone" [(ngModel)]="form.phone" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Email</mat-label>
+          <input matInput name="email" type="email" [(ngModel)]="form.email" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="clinic-address-field">
+          <mat-label>Address</mat-label>
+          <textarea matInput name="address" rows="2" [(ngModel)]="form.address"></textarea>
+        </mat-form-field>
+
+        <div class="clinic-settings-submit">
+          <button mat-flat-button color="primary" type="submit" [disabled]="!isValid || saving()">Save</button>
+        </div>
+      </form>
+    }
+  </section>
+</div>

@@ -1,28 +1,49 @@
 <div class="patient-search">
   <form class="hms-inline-actions" (ngSubmit)="search()">
     <mat-form-field appearance="outline" class="patient-search-field" subscriptSizing="dynamic">
-      <mat-label>Search patient by name</mat-label>
-      <input matInput name="searchQuery" [(ngModel)]="searchQuery" />
+      <mat-label>Search by patient ID, name or mobile number</mat-label>
+      <input matInput name="searchQuery" [(ngModel)]="searchQuery" (ngModelChange)="onQueryChange()" />
       <mat-icon matPrefix aria-hidden="true">search</mat-icon>
     </mat-form-field>
     <button mat-flat-button color="primary" type="submit">Search</button>
   </form>
 
-  @if (searched() && searchResults().length === 0) {
-    <app-empty-state icon="person_search" title="No patients found" message="Try a different name or mobile number." />
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading() && searched() && searchResults().length === 0) {
+    <app-empty-state icon="person_search" title="No patients found" message="Try a different patient ID, name or mobile number." />
   } @else if (searchResults().length > 0) {
-    <ul class="patient-search-results">
-      @for (patient of searchResults(); track patient.id) {
-        <li class="patient-search-result">
-          <div>
-            <strong>{{ patient.firstName }} {{ patient.lastName }}</strong>
-            <span class="patient-search-result-meta">{{ patient.mobileNumber }}</span>
-          </div>
-          <button mat-stroked-button color="primary" type="button" (click)="select(patient)">Select</button>
-        </li>
-      }
-    </ul>
-  } @else {
+    <div class="patient-search-results-wrap">
+      <table class="patient-search-results">
+        <thead>
+          <tr>
+            <th>Patient ID</th>
+            <th>Name</th>
+            <th>Gender</th>
+            <th>Age</th>
+            <th>Mobile</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (patient of searchResults(); track patient.id) {
+            <tr>
+              <td>{{ patient.registrationNumber }}</td>
+              <td>{{ patient.firstName }} {{ patient.lastName }}</td>
+              <td>{{ patient.gender ?? '—' }}</td>
+              <td>{{ patient.age ?? '—' }}</td>
+              <td>{{ patient.mobileNumber }}</td>
+              <td>
+                <button mat-stroked-button color="primary" type="button" (click)="select(patient)">Select</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else if (!loading()) {
     <app-empty-state icon="person_search" title="Search for a patient" message="Results will appear here." />
   }
 </div>

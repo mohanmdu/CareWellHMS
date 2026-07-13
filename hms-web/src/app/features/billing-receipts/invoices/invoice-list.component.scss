@@ -7,6 +7,10 @@
 }
 
 .invoice-actions-cell {
+  text-align: right;
+}
+
+.invoice-actions-row {
   display: flex;
   align-items: center;
   gap: var(--hms-space-2);

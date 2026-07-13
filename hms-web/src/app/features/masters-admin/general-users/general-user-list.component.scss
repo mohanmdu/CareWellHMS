@@ -1,0 +1,29 @@
+.general-user-form {
+  padding: var(--hms-space-5);
+}
+
+.general-user-form-submit {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+}
+
+.general-user-tabs {
+  overflow-x: auto;
+}
+
+.general-user-search {
+  display: block;
+  padding: var(--hms-space-4) var(--hms-space-2) 0;
+}
+
+.general-user-tab-body {
+  padding: var(--hms-space-4) 0 var(--hms-space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+}
+
+.general-user-table {
+  width: 100%;
+}

@@ -1,0 +1,10 @@
+.cancel-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-2);
+  min-width: 340px;
+}
+
+.cancel-dialog-line {
+  margin: 0;
+}

@@ -14,8 +14,13 @@ export class DepartmentService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiBaseUrl}/masters/departments`;
 
+  /** Active departments only. */
   list(): Observable<Department[]> {
     return this.http.get<Department[]>(this.baseUrl);
+  }
+
+  listInactive(): Observable<Department[]> {
+    return this.http.get<Department[]>(`${this.baseUrl}/inactive`);
   }
 
   create(department: Pick<Department, 'name'>): Observable<Department> {
@@ -28,5 +33,9 @@ export class DepartmentService {
 
   deactivate(id: number): Observable<void> {
     return this.http.patch<void>(`${this.baseUrl}/${id}/deactivate`, {});
+  }
+
+  restore(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${id}/restore`, {});
   }
 }

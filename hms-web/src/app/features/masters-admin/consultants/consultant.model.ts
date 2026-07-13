@@ -3,9 +3,20 @@ export interface Consultant {
   name: string;
   departmentId: number;
   departmentName: string | null;
-  specialization: string | null;
+  specializationId: number | null;
+  specializationName: string | null;
   email: string | null;
   mobileNumber: string | null;
   consultationFee: number;
+  profile: string | null;
+  address: string | null;
+  acceptingAppointments: boolean;
+  imageUrl: string | null;
   active: boolean;
+  createdAt: string | null;
+  createdBy: string | null;
+  updatedAt: string | null;
+  updatedBy: string | null;
+  deactivatedAt: string | null;
+  deactivatedBy: string | null;
 }

@@ -1,0 +1,144 @@
+<h2 mat-dialog-title>OP Case Sheet</h2>
+
+<mat-dialog-content class="case-sheet-view-dialog-content">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  } @else if (caseSheet()) {
+    @let sheet = caseSheet()!;
+    <div #caseSheetContent>
+      <div class="receipt-header">
+        @if (clinicSettings()?.logoUrl; as logo) {
+          <img [src]="logo" alt="" class="receipt-logo" />
+        }
+        <div class="receipt-clinic-info">
+          <strong class="receipt-clinic-name">{{ clinicSettings()?.name ?? 'Hospital' }}</strong>
+          @if (clinicSettings()?.address) {
+            <span>{{ clinicSettings()?.address }}</span>
+          }
+        </div>
+      </div>
+
+      <table class="case-sheet-header-table">
+        <tbody>
+          <tr>
+            <td><strong>Patient ID</strong>: {{ sheet.header.patientRegistrationNumber }}</td>
+            <td><strong>Patient Name</strong>: {{ sheet.header.patientName }}</td>
+            <td><strong>Type</strong>: OP</td>
+          </tr>
+          <tr>
+            <td><strong>Gender</strong>: {{ sheet.header.gender }}</td>
+            <td><strong>Age</strong>: {{ sheet.header.age }}</td>
+            <td><strong>Mobile No</strong>: {{ sheet.header.mobileNumber }}</td>
+          </tr>
+          <tr>
+            <td><strong>Date</strong>: {{ sheet.header.appointmentDate | date: 'dd-MM-yyyy' }}</td>
+            <td><strong>Time</strong>: {{ sheet.header.slotTime }}</td>
+            <td><strong>Consultant</strong>: {{ sheet.header.consultantName }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <p><strong>Food &amp; Drug Allergy</strong>: {{ sheet.foodDrugAllergy || '—' }}</p>
+
+      <h3>Nurse's Assessment</h3>
+      <div class="case-sheet-field-row">
+        <span>Height (cm): {{ sheet.heightCm ?? '—' }}</span>
+        <span>Weight (kg): {{ sheet.weightKg ?? '—' }}</span>
+        <span>BMI: {{ sheet.bmi ?? '—' }}</span>
+      </div>
+      <div class="case-sheet-field-row">
+        <span>Temperature (F): {{ sheet.temperatureF ?? '—' }}</span>
+        <span>Pulse (Beat/Min): {{ sheet.pulseBpm ?? '—' }}</span>
+        <span>Respiration (Breath/Min): {{ sheet.respirationBpm ?? '—' }}</span>
+      </div>
+      <div class="case-sheet-field-row">
+        <span>BP: {{ sheet.bpSystolic ?? '—' }} / {{ sheet.bpDiastolic ?? '—' }}</span>
+        <span>SPO2: {{ sheet.spo2 ?? '—' }}</span>
+        <span>Body Fat %: {{ sheet.bodyFatPercent ?? '—' }}</span>
+      </div>
+
+      <h3>Doctor Initial Assessment</h3>
+      <p><strong>Chief Complaints</strong>: {{ sheet.chiefComplaints || '—' }}</p>
+      <div class="case-sheet-field-row">
+        <span>Past Medical Condition: {{ sheet.pastMedicalCondition || '—' }}</span>
+        <span>Current Medication: {{ sheet.currentMedication || '—' }}</span>
+      </div>
+
+      <h4>Lifestyle Assessment</h4>
+      <div class="case-sheet-field-row">
+        <span>Physical Activity: {{ sheet.physicalActivity || '—' }}</span>
+        <span>Sleep Duration (hrs): {{ sheet.sleepDurationHours || '—' }}</span>
+      </div>
+      <div class="case-sheet-field-row">
+        <span>Smoking: {{ sheet.smoking || '—' }}</span>
+        <span>Alcohol: {{ sheet.alcohol || '—' }}</span>
+      </div>
+      <div class="case-sheet-field-row">
+        <span>Surgery: {{ sheet.surgery || '—' }}</span>
+        <span>Family H/O: {{ sheet.familyHistory || '—' }}</span>
+      </div>
+
+      <div class="case-sheet-field-row">
+        <span>Provisional Diagnosis: {{ sheet.provisionalDiagnosis || '—' }}</span>
+        <span>CBG: {{ sheet.cbg || '—' }}</span>
+      </div>
+      <div class="case-sheet-field-row">
+        <span>Findings: {{ sheet.findings || '—' }}</span>
+        <span>Investigation: {{ sheet.investigation || '—' }}</span>
+      </div>
+      <div class="case-sheet-field-row">
+        <span>Doctor Notes 1: {{ sheet.doctorNotes1 || '—' }}</span>
+        <span>Doctor Notes 2: {{ sheet.doctorNotes2 || '—' }}</span>
+      </div>
+
+      <h3>Prescription</h3>
+      @if (sheet.prescriptionItems.length === 0) {
+        <p>No drugs prescribed.</p>
+      } @else {
+        <table mat-table [dataSource]="sheet.prescriptionItems" class="case-sheet-items-table">
+          <ng-container matColumnDef="drugName">
+            <th mat-header-cell *matHeaderCellDef>Drug Name</th>
+            <td mat-cell *matCellDef="let item">{{ item.drugName }}</td>
+          </ng-container>
+          <ng-container matColumnDef="qty">
+            <th mat-header-cell *matHeaderCellDef>Qty</th>
+            <td mat-cell *matCellDef="let item">{{ item.qty }}</td>
+          </ng-container>
+          <ng-container matColumnDef="intake">
+            <th mat-header-cell *matHeaderCellDef>Intake</th>
+            <td mat-cell *matCellDef="let item">{{ item.intake }}</td>
+          </ng-container>
+          <ng-container matColumnDef="morningDose">
+            <th mat-header-cell *matHeaderCellDef>Mor</th>
+            <td mat-cell *matCellDef="let item">{{ item.morningDose }}</td>
+          </ng-container>
+          <ng-container matColumnDef="afternoonDose">
+            <th mat-header-cell *matHeaderCellDef>Aft</th>
+            <td mat-cell *matCellDef="let item">{{ item.afternoonDose }}</td>
+          </ng-container>
+          <ng-container matColumnDef="eveningDose">
+            <th mat-header-cell *matHeaderCellDef>Eve</th>
+            <td mat-cell *matCellDef="let item">{{ item.eveningDose }}</td>
+          </ng-container>
+          <ng-container matColumnDef="nightDose">
+            <th mat-header-cell *matHeaderCellDef>Night</th>
+            <td mat-cell *matCellDef="let item">{{ item.nightDose }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="itemColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: itemColumns"></tr>
+        </table>
+      }
+
+      <p><strong>Diet</strong>: {{ sheet.diet || '—' }}</p>
+      <p><strong>Remarks</strong>: {{ sheet.remarks || '—' }}</p>
+      <p><strong>Review Date</strong>: {{ sheet.reviewDate ? (sheet.reviewDate | date: 'dd-MM-yyyy') : '—' }}</p>
+    </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="print()" [disabled]="loading()">
+    <mat-icon aria-hidden="true">print</mat-icon>
+    Print
+  </button>
+  <button mat-flat-button color="primary" type="button" (click)="close()">Done</button>
+</mat-dialog-actions>

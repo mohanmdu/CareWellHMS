@@ -1,0 +1,66 @@
+<div class="availability-slots">
+  <label class="availability-slots-label">Appointment slots per hour:</label>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="availability-slots-field">
+    <mat-select [(ngModel)]="slotsPerHour">
+      @for (option of slotsPerHourOptions; track option) {
+        <mat-option [value]="option">{{ option }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+</div>
+
+<div class="availability-table-wrap">
+  <table class="availability-table">
+    <thead>
+      <tr>
+        <th rowspan="2" class="availability-day-header">Day</th>
+        @for (session of sessions; track session) {
+          <th colspan="2">
+            {{ sessionLabels[session] }}
+            <span class="availability-session-range">({{ sessionRanges[session].start }}–{{ sessionRanges[session].end }}{{ sessionRanges[session].wraps ? ' next day' : '' }})</span>
+          </th>
+        }
+      </tr>
+      <tr>
+        @for (session of sessions; track session) {
+          <th>From Time</th>
+          <th>To Time</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (day of days; track day) {
+        <tr>
+          <td class="availability-day-cell">{{ dayLabels[day] }}</td>
+          @for (session of sessions; track session) {
+            <td [class.availability-cell-invalid]="cellInvalid(day, session)">
+              <input
+                type="time"
+                class="availability-time-input"
+                [min]="sessionRanges[session].start"
+                [max]="sessionRanges[session].end"
+                [(ngModel)]="rows[day][session].startTime"
+              />
+            </td>
+            <td [class.availability-cell-invalid]="cellInvalid(day, session)">
+              <input
+                type="time"
+                class="availability-time-input"
+                [min]="sessionRanges[session].start"
+                [max]="sessionRanges[session].end"
+                [(ngModel)]="rows[day][session].endTime"
+              />
+            </td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+@if (!isValid) {
+  <p class="availability-error">
+    Enter both a From and To time for each session, within that session's window, with From before To
+    (Night wraps past midnight).
+  </p>
+}

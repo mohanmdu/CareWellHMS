@@ -1,0 +1,237 @@
+<div class="hms-page">
+  <app-page-header title="Refund" subtitle="Process refunds against billed invoices and review the refund history." />
+
+  <section class="hms-card-surface refund-tabs">
+    <mat-tab-group (selectedIndexChange)="onTabChange($event)">
+      <mat-tab label="Payment Refund">
+        <div class="refund-tab-body">
+          <div class="refund-search-row">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Invoice Number</mat-label>
+              <input matInput type="number" [(ngModel)]="invoiceNumberInput" (keydown.enter)="searchInvoice()" />
+            </mat-form-field>
+            <button
+              mat-flat-button
+              color="primary"
+              type="button"
+              [disabled]="!invoiceNumberInput || searching()"
+              (click)="searchInvoice()"
+            >
+              Search
+            </button>
+          </div>
+
+          @if (searching()) {
+            <mat-progress-bar mode="indeterminate" />
+          }
+
+          @if (candidate(); as candidate) {
+            <div class="refund-details-section">
+              <h3>Refund Details</h3>
+              <table class="refund-invoice-table">
+                <thead>
+                  <tr>
+                    <th>Patient ID</th>
+                    <th>Patient Name</th>
+                    <th>Consultant</th>
+                    <th>Invoice No</th>
+                    <th>Invoice Amount</th>
+                    <th>Paid Amount</th>
+                    <th>Created By</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{{ candidate.patientRegistrationNumber }}</td>
+                    <td>{{ candidate.patientName }}</td>
+                    <td>{{ candidate.consultantName ?? 'Direct Billing' }}</td>
+                    <td>{{ candidate.invoiceNumber }}</td>
+                    <td>{{ candidate.invoicedAmount | number: '1.0-2' }}</td>
+                    <td>{{ candidate.paidAmount | number: '1.0-2' }}</td>
+                    <td>{{ candidate.billedBy }}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              @if (candidate.alreadyRefunded) {
+                <p class="refund-already-refunded">
+                  This invoice was already refunded on {{ candidate.refundedAt | date: 'dd-MM-yyyy' }}
+                  (Refund No {{ candidate.refundNumber }}, Amount {{ candidate.refundAmount | number: '1.0-2' }}).
+                </p>
+              } @else if (!formVisible()) {
+                <button mat-flat-button color="primary" type="button" (click)="approveRefund()">Approve Refund</button>
+              } @else {
+                <div class="refund-form hms-form-grid">
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>Refund Amount</mat-label>
+                    <input
+                      matInput
+                      type="number"
+                      min="0"
+                      [max]="candidate.paidAmount ?? 0"
+                      name="refundAmount"
+                      [(ngModel)]="form.refundAmount"
+                      required
+                    />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="refund-remarks-field">
+                    <mat-label>Remarks</mat-label>
+                    <input matInput name="reason" [(ngModel)]="form.reason" />
+                  </mat-form-field>
+                </div>
+
+                @if (!isValid) {
+                  <p class="refund-error">Refund amount must be greater than 0 and no more than the paid amount.</p>
+                }
+
+                @if (confirming()) {
+                  <mat-progress-bar mode="indeterminate" />
+                }
+
+                <div class="refund-form-actions">
+                  <button mat-button type="button" (click)="cancelForm()">Cancel</button>
+                  <button
+                    mat-flat-button
+                    color="primary"
+                    type="button"
+                    [disabled]="!isValid || confirming()"
+                    (click)="confirm()"
+                  >
+                    Confirm
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Refund Report">
+        <div class="refund-tab-body">
+          <div class="refund-report-filters">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>From date</mat-label>
+              <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" />
+              <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+              <mat-datepicker #fromPicker />
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>To date</mat-label>
+              <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" />
+              <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+              <mat-datepicker #toPicker />
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Consultant</mat-label>
+              <mat-select [(ngModel)]="consultantId">
+                <mat-option [value]="null">All consultants</mat-option>
+                @for (consultant of consultants(); track consultant.id) {
+                  <mat-option [value]="consultant.id">{{ consultant.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <button mat-flat-button color="primary" type="button" (click)="searchReport()">Search</button>
+            <button mat-stroked-button type="button" [disabled]="entries().length === 0" (click)="print()">
+              <mat-icon aria-hidden="true">print</mat-icon>
+              Print
+            </button>
+            <button mat-stroked-button type="button" [disabled]="entries().length === 0" (click)="export()">
+              <mat-icon aria-hidden="true">download</mat-icon>
+              Export CSV
+            </button>
+          </div>
+
+          @if (loadingReport()) {
+            <mat-progress-bar mode="indeterminate" />
+          }
+
+          @if (!loadingReport() && reportSearched() && entries().length === 0) {
+            <app-empty-state icon="currency_exchange" title="No refunds" message="No refunds match these filters." />
+          } @else if (entries().length > 0) {
+            <div #reportContent>
+              <table mat-table [dataSource]="entries()" class="refund-report-table">
+                <ng-container matColumnDef="serial">
+                  <th mat-header-cell *matHeaderCellDef>S.No</th>
+                  <td mat-cell *matCellDef="let entry; let i = index">{{ i + 1 }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="refundNumber">
+                  <th mat-header-cell *matHeaderCellDef>Refund No</th>
+                  <td mat-cell *matCellDef="let entry">
+                    <button type="button" class="refund-report-invoice-link" (click)="viewReceipt(entry)">
+                      {{ entry.refundNumber }}
+                    </button>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="patientId">
+                  <th mat-header-cell *matHeaderCellDef>Patient ID</th>
+                  <td mat-cell *matCellDef="let entry">{{ entry.patientRegistrationNumber }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="patientName">
+                  <th mat-header-cell *matHeaderCellDef>Patient Name</th>
+                  <td mat-cell *matCellDef="let entry">{{ entry.patientName }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="type">
+                  <th mat-header-cell *matHeaderCellDef>Type</th>
+                  <td mat-cell *matCellDef="let entry">{{ entry.type }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="invoiceNumber">
+                  <th mat-header-cell *matHeaderCellDef>Invoice No</th>
+                  <td mat-cell *matCellDef="let entry">
+                    <button type="button" class="refund-report-invoice-link" (click)="viewReceipt(entry)">
+                      {{ entry.invoiceNumber }}
+                    </button>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="invoicedAmount">
+                  <th mat-header-cell *matHeaderCellDef>Invoice Amount</th>
+                  <td mat-cell *matCellDef="let entry">{{ entry.invoicedAmount | number: '1.0-2' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="paidAmount">
+                  <th mat-header-cell *matHeaderCellDef>Paid Amount</th>
+                  <td mat-cell *matCellDef="let entry">{{ entry.paidAmount | number: '1.0-2' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="refundAmount">
+                  <th mat-header-cell *matHeaderCellDef>Refund Amount</th>
+                  <td mat-cell *matCellDef="let entry">{{ entry.refundAmount | number: '1.0-2' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="reason">
+                  <th mat-header-cell *matHeaderCellDef>Reason</th>
+                  <td mat-cell *matCellDef="let entry">{{ entry.reason }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="refundedAt">
+                  <th mat-header-cell *matHeaderCellDef>Refund Date</th>
+                  <td mat-cell *matCellDef="let entry">{{ entry.refundedAt | date: 'dd-MM-yyyy hh:mm a' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="refundedBy">
+                  <th mat-header-cell *matHeaderCellDef>Refunded By</th>
+                  <td mat-cell *matCellDef="let entry">{{ entry.refundedBy }}</td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+              </table>
+
+              <div class="refund-report-summary">
+                <div class="refund-report-summary-item">
+                  <span>Total Refund Amount</span>
+                  <strong>{{ totalRefundAmount() | number: '1.0-2' }}</strong>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </section>
+</div>

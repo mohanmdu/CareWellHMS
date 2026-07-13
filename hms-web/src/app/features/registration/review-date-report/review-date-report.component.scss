@@ -1,0 +1,18 @@
+.review-date-report-section {
+  overflow-x: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-4) var(--hms-space-2) var(--hms-space-2);
+}
+
+.review-date-report-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--hms-space-3);
+}
+
+.review-date-report-table {
+  width: 100%;
+}

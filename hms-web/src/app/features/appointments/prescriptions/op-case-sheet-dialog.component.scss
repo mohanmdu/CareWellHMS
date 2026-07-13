@@ -1,0 +1,59 @@
+.case-sheet-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-4);
+  min-width: 720px;
+  max-width: 900px;
+  max-height: 75vh;
+}
+
+.case-sheet-section h3 {
+  margin: 0 0 var(--hms-space-2);
+}
+
+.case-sheet-header-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--hms-space-3);
+
+  td {
+    padding: var(--hms-space-1, 4px) var(--hms-space-2);
+    font-size: 0.9rem;
+  }
+}
+
+.case-sheet-full-field {
+  width: 100%;
+  margin-bottom: var(--hms-space-2);
+}
+
+.case-sheet-lifestyle {
+  border: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.15));
+  border-radius: var(--hms-radius-md, 8px);
+  padding: var(--hms-space-3);
+  margin: var(--hms-space-2) 0;
+
+  h4 {
+    margin: 0 0 var(--hms-space-2);
+  }
+}
+
+.case-sheet-items-table {
+  width: 100%;
+  margin-bottom: var(--hms-space-3);
+}
+
+.case-sheet-item-add-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--hms-space-2);
+}
+
+.case-sheet-drug-field {
+  flex: 1 1 220px;
+}
+
+.case-sheet-narrow-field {
+  width: 80px;
+}

@@ -87,11 +87,17 @@ button:focus-visible,
   box-shadow: var(--hms-shadow-sm);
 }
 
+// padding-top gives an outline mat-form-field's floated label (which sits
+// above the field's own top border) clearance from whatever sits right above
+// this grid - without it, a dialog's title/header can clip the top of the
+// first row's labels when the fields are pre-filled (edit dialogs) and their
+// labels render already-floated instead of animating up from resting.
 .hms-form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: var(--hms-space-4);
   align-items: start;
+  padding-top: var(--hms-space-2);
 }
 
 .hms-inline-actions {

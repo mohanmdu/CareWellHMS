@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * REST equivalent of the legacy getDepartments / addDepartment / deptEdit /
- * updateDept / deptDeactivate Struts actions (migration doc §4.6, §5 example table).
+ * updateDept / deptDeactivate Struts actions (migration doc §4.6, §5 example
+ * table), extended with an inactive list and restore to match the
+ * Patient Registration active/inactive pattern.
  */
 @RestController
 @RequestMapping("/api/masters/departments")
@@ -24,7 +26,12 @@ public class DepartmentController {
 
     @GetMapping
     public List<DepartmentDto> list() {
-        return service.findAll();
+        return service.findActive();
+    }
+
+    @GetMapping("/inactive")
+    public List<DepartmentDto> inactive() {
+        return service.findInactive();
     }
 
     @GetMapping("/{id}")
@@ -46,6 +53,12 @@ public class DepartmentController {
     @PatchMapping("/{id}/deactivate")
     public ResponseEntity<Void> deactivate(@PathVariable Long id) {
         service.deactivate(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/restore")
+    public ResponseEntity<Void> restore(@PathVariable Long id) {
+        service.restore(id);
         return ResponseEntity.noContent().build();
     }
 }

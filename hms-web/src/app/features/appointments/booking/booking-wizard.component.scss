@@ -9,34 +9,18 @@
   padding: var(--hms-space-4) var(--hms-space-2) 0;
 }
 
-.booking-new-patient-toggle {
-  align-self: flex-start;
-}
-
-.booking-new-patient-submit {
+.booking-patient-details {
   display: flex;
-  align-items: center;
-}
-
-.booking-selected-patient {
-  display: flex;
-  align-items: center;
-  gap: var(--hms-space-3);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--hms-space-2);
   padding: var(--hms-space-3) var(--hms-space-4);
-  border: 1px solid var(--hms-color-border);
-  border-radius: var(--hms-radius-md);
+  border: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
+  border-radius: var(--hms-radius-md, 8px);
 
-  mat-icon {
-    color: var(--hms-color-primary);
+  h4 {
+    margin: 0;
   }
-
-  button {
-    margin-left: auto;
-  }
-}
-
-.booking-patient-line {
-  margin: 0;
 }
 
 .booking-notes-field {
@@ -63,4 +47,194 @@
   dd {
     margin: 0;
   }
+}
+
+// Step 1: doctor grid
+.booking-doctor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--hms-space-4);
+}
+
+.booking-doctor-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--hms-space-2);
+  padding: var(--hms-space-4);
+  border: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
+  border-radius: var(--hms-radius-md, 8px);
+  text-align: center;
+}
+
+.booking-doctor-photo {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.booking-doctor-photo-fallback {
+  width: 72px;
+  height: 72px;
+  font-size: 72px;
+  color: var(--hms-color-text-muted, rgba(0, 0, 0, 0.3));
+}
+
+.booking-doctor-meta {
+  color: var(--hms-color-text-muted, rgba(0, 0, 0, 0.6));
+  font-size: 0.85rem;
+}
+
+// Step 2: weekly strip + slots
+.booking-doctor-line {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-3);
+  margin: 0;
+}
+
+.booking-week-nav {
+  display: flex;
+  justify-content: space-between;
+}
+
+.booking-week-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(110px, 1fr));
+  gap: var(--hms-space-2);
+  overflow-x: auto;
+}
+
+.booking-day-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--hms-space-1, 4px);
+  padding: var(--hms-space-3);
+  border: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
+  border-radius: var(--hms-radius-md, 8px);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+
+  &:hover {
+    border-color: var(--hms-color-primary);
+  }
+}
+
+.booking-day-tile-selected {
+  border-color: var(--hms-color-primary);
+  background: var(--hms-color-surface-muted, rgba(0, 0, 0, 0.04));
+}
+
+.booking-day-label {
+  font-weight: 600;
+}
+
+.booking-day-date {
+  font-size: 0.8rem;
+  color: var(--hms-color-text-muted, rgba(0, 0, 0, 0.6));
+}
+
+.booking-session-badge {
+  font-size: 0.7rem;
+  color: var(--hms-color-text-muted, rgba(0, 0, 0, 0.7));
+}
+
+.booking-session-badge-closed {
+  opacity: 0.5;
+}
+
+.booking-session-block h4 {
+  margin: 0 0 var(--hms-space-2);
+}
+
+.booking-no-slots {
+  color: var(--hms-color-text-muted, rgba(0, 0, 0, 0.6));
+  margin: 0;
+}
+
+.booking-slot-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hms-space-2);
+}
+
+.booking-slot-button {
+  padding: var(--hms-space-2) var(--hms-space-3);
+  border: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.2));
+  border-radius: var(--hms-radius-md, 8px);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    text-decoration: line-through;
+  }
+
+  &:not(:disabled):hover {
+    border-color: var(--hms-color-primary);
+  }
+}
+
+.booking-slot-selected {
+  border-color: var(--hms-color-primary);
+  background: var(--hms-color-primary);
+  color: var(--hms-color-on-primary, #fff);
+}
+
+.booking-slot-next-day {
+  display: inline-block;
+  margin-left: var(--hms-space-1, 4px);
+  font-size: 0.65rem;
+  vertical-align: super;
+  opacity: 0.7;
+}
+
+.booking-booked-section h4 {
+  margin: var(--hms-space-2) 0;
+}
+
+.booking-booked-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    text-align: left;
+    padding: var(--hms-space-2);
+    border-bottom: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.1));
+  }
+}
+
+.booking-booked-actions {
+  display: flex;
+  gap: var(--hms-space-2);
+}
+
+// Success panel
+.booking-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-6, 48px) var(--hms-space-4);
+}
+
+.booking-success-icon {
+  font-size: 56px;
+  width: 56px;
+  height: 56px;
+  color: var(--hms-color-success, #2e7d32);
+}
+
+.booking-success-actions {
+  display: flex;
+  gap: var(--hms-space-3);
+  flex-wrap: wrap;
+  justify-content: center;
 }

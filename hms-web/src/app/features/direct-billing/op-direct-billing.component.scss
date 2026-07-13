@@ -1,0 +1,59 @@
+.direct-billing-search-section,
+.direct-billing-patient-section,
+.direct-billing-items-section,
+.direct-billing-payment-section {
+  padding: var(--hms-space-4) var(--hms-space-5);
+  margin-bottom: var(--hms-space-3);
+}
+
+.direct-billing-patient-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hms-space-3);
+}
+
+.direct-billing-patient-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  td {
+    padding: var(--hms-space-1, 4px) var(--hms-space-2);
+  }
+}
+
+.direct-billing-items-section h3 {
+  margin: 0 0 var(--hms-space-3);
+}
+
+.direct-billing-items-table {
+  width: 100%;
+  margin-bottom: var(--hms-space-2);
+}
+
+.direct-billing-total {
+  text-align: right;
+  font-weight: 600;
+  margin: 0 0 var(--hms-space-4);
+}
+
+.direct-billing-add-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--hms-space-2);
+}
+
+.direct-billing-narrow-field {
+  width: 90px;
+}
+
+.direct-billing-full-field {
+  grid-column: 1 / -1;
+}
+
+.direct-billing-submit-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--hms-space-3);
+}

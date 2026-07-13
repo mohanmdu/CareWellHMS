@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import lombok.Getter;
@@ -58,4 +59,40 @@ public class Appointment extends Auditable {
 
     @Column(name = "cancellation_reason")
     private String cancellationReason;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "cancelled_by", length = 16)
+    private CancelledBy cancelledBy;
+
+    // Set together by AppointmentService.bill() when approving moves straight
+    // to COMPLETED (see migration doc for the approval-time billing flow).
+    @Column(name = "paid_amount")
+    private Double paidAmount;
+
+    @Column(name = "discount_amount")
+    private Double discountAmount;
+
+    @Column(name = "doctor_referral_amount")
+    private Double doctorReferralAmount;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_mode", length = 32)
+    private PaymentMode paymentMode;
+
+    @Column(name = "billing_remarks", length = 500)
+    private String billingRemarks;
+
+    @Column(name = "billed_at")
+    private Instant billedAt;
+
+    @Column(name = "invoice_number")
+    private Long invoiceNumber;
+
+    @Column(name = "billed_by", length = 100)
+    private String billedBy;
+
+    // Reserved for a future refund flow - nothing writes a non-null/non-zero
+    // value here yet, but the Collection Report already has a column for it.
+    @Column(name = "refund_amount")
+    private Double refundAmount;
 }

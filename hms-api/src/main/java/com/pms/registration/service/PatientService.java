@@ -9,7 +9,6 @@ import com.pms.registration.repository.PatientAuditLogRepository;
 import com.pms.registration.repository.PatientRepository;
 import java.time.Year;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,19 +33,16 @@ public class PatientService {
 
     private final PatientRepository repository;
     private final PatientAuditLogRepository auditLogRepository;
-    private final AtomicInteger sequence = new AtomicInteger(0);
 
     public PatientService(PatientRepository repository, PatientAuditLogRepository auditLogRepository) {
         this.repository = repository;
         this.auditLogRepository = auditLogRepository;
-        this.sequence.set((int) repository.count());
     }
 
     public List<PatientDto> search(String query) {
         List<Patient> patients = (query == null || query.isBlank())
                 ? repository.findByActiveTrueOrderByIdDesc()
-                : repository.findByActiveTrueAndFirstNameContainingIgnoreCaseOrActiveTrueAndLastNameContainingIgnoreCase(
-                        query, query);
+                : repository.searchActive(query);
         return patients.stream().map(this::toDto).toList();
     }
 
@@ -109,8 +105,20 @@ public class PatientService {
         recordAudit("PERMANENT_DELETE", name);
     }
 
+    /**
+     * Derives the next number from the highest one already in the table
+     * (scoped to the current year's prefix) rather than a row count or an
+     * in-memory counter seeded at startup - those drift out of sync with
+     * what's actually stored whenever a patient is permanently deleted,
+     * causing this to reissue an already-used registration number.
+     */
     private String nextRegistrationNumber() {
-        return "NF-" + Year.now().getValue() + "-" + String.format("%05d", sequence.incrementAndGet());
+        String prefix = "NF-" + Year.now().getValue() + "-";
+        int next = repository
+                .findTopByRegistrationNumberStartingWithOrderByRegistrationNumberDesc(prefix)
+                .map(p -> Integer.parseInt(p.getRegistrationNumber().substring(prefix.length())) + 1)
+                .orElse(1);
+        return prefix + String.format("%05d", next);
     }
 
     private void applyFields(Patient patient, PatientDto dto) {

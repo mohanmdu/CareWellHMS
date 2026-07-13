@@ -1,46 +1,49 @@
-import { DecimalPipe } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { DatePipe, DecimalPipe } from '@angular/common';
+import { Component, computed, inject, signal } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { ActivatedRoute, Router } from '@angular/router';
+import { forkJoin, Observable } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
+import { MatTabsModule } from '@angular/material/tabs';
 import { ConfirmDialogService } from '../../../shared/services/confirm-dialog.service';
 import { NotificationService } from '../../../shared/services/notification.service';
+import { TablePagination } from '../../../shared/table/table-pagination';
+import { TableSearchComponent } from '../../../shared/table/table-search.component';
 import { EmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
-import { StatusBadgeComponent } from '../../../shared/ui/status-badge/status-badge.component';
 import { Department } from '../departments/department.model';
 import { DepartmentService } from '../departments/department.service';
+import { Specialization } from '../specializations/specialization.model';
+import { SpecializationService } from '../specializations/specialization.service';
+import { ConsultantFormDialogComponent, ConsultantFormDialogResult } from './consultant-form-dialog.component';
+import { ConsultantTimingsDialogComponent } from './consultant-timings-dialog.component';
 import { Consultant } from './consultant.model';
 import { ConsultantService } from './consultant.service';
 
 /**
- * Consultants carry more fields than the generic { name, active } master
- * shape (department, specialization, fee, contact details), so this screen
- * is hand-built rather than driven by shared/master-crud - but still shares
- * the page-header/status-badge/table primitives so it reads as the same
- * system as Departments/Roles.
+ * Consultants: one screen, two tabs (Active / De-Activated), mirroring
+ * Departments/Patient Registration. Add/Edit both use ConsultantFormDialogComponent;
+ * deactivate is soft (moves a consultant to the De-Activated tab, restorable).
  */
 @Component({
   selector: 'app-consultant-list',
   standalone: true,
   imports: [
     DecimalPipe,
-    FormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
+    DatePipe,
+    MatTabsModule,
     MatButtonModule,
     MatIconModule,
     MatTableModule,
     MatProgressBarModule,
+    MatPaginatorModule,
     PageHeaderComponent,
-    StatusBadgeComponent,
-    EmptyStateComponent
+    EmptyStateComponent,
+    TableSearchComponent
   ],
   templateUrl: './consultant-list.component.html',
   styleUrl: './consultant-list.component.scss'
@@ -48,80 +51,175 @@ import { ConsultantService } from './consultant.service';
 export class ConsultantListComponent {
   private readonly service = inject(ConsultantService);
   private readonly departmentService = inject(DepartmentService);
+  private readonly specializationService = inject(SpecializationService);
   private readonly notification = inject(NotificationService);
   private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly dialog = inject(MatDialog);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
-  readonly displayedColumns = ['name', 'department', 'specialization', 'fee', 'status', 'actions'];
+  readonly activeColumns = ['name', 'department', 'fee', 'timings', 'edit', 'deactivate', 'createdBy', 'updatedBy'];
+  readonly inactiveColumns = ['name', 'department', 'deactivatedAt', 'deactivatedBy', 'actions'];
 
-  consultants = signal<Consultant[]>([]);
+  activeConsultants = signal<Consultant[]>([]);
+  inactiveConsultants = signal<Consultant[]>([]);
   departments = signal<Department[]>([]);
-  loading = signal(false);
-  saving = signal(false);
+  specializations = signal<Specialization[]>([]);
+  loadingActive = signal(false);
+  loadingInactive = signal(false);
 
-  form = {
-    name: '',
-    departmentId: null as number | null,
-    specialization: '',
-    email: '',
-    mobileNumber: '',
-    consultationFee: 0
-  };
+  /** Set when arriving from the "View consultants" link on a department row. */
+  filterDepartmentId = signal<number | null>(null);
+  searchTerm = signal('');
+
+  filteredActiveConsultants = computed(() => this.filterBySearch(this.filterByDepartment(this.activeConsultants())));
+  filteredInactiveConsultants = computed(() =>
+    this.filterBySearch(this.filterByDepartment(this.inactiveConsultants()))
+  );
+  activePagination = new TablePagination(this.filteredActiveConsultants);
+  inactivePagination = new TablePagination(this.filteredInactiveConsultants);
+
+  filterDepartmentName = computed(() => {
+    const departmentId = this.filterDepartmentId();
+    return departmentId === null ? null : (this.departments().find((d) => d.id === departmentId)?.name ?? null);
+  });
 
   constructor() {
-    this.refresh();
+    this.refreshActive();
     this.departmentService.list().subscribe({
       next: (departments) => this.departments.set(departments.filter((d) => d.active)),
       error: () => this.notification.error('Failed to load departments.')
     });
+    this.specializationService.list().subscribe({
+      next: (specializations) => this.specializations.set(specializations.filter((s) => s.active)),
+      error: () => this.notification.error('Failed to load specializations.')
+    });
+    this.route.queryParamMap.subscribe((params) => {
+      const raw = params.get('departmentId');
+      this.filterDepartmentId.set(raw ? Number(raw) : null);
+    });
   }
 
-  refresh(): void {
-    this.loading.set(true);
+  private filterByDepartment(consultants: Consultant[]): Consultant[] {
+    const departmentId = this.filterDepartmentId();
+    return departmentId === null ? consultants : consultants.filter((c) => c.departmentId === departmentId);
+  }
+
+  private filterBySearch(consultants: Consultant[]): Consultant[] {
+    const term = this.searchTerm().trim().toLowerCase();
+    if (!term) {
+      return consultants;
+    }
+    return consultants.filter(
+      (c) => c.name.toLowerCase().includes(term) || (c.departmentName ?? '').toLowerCase().includes(term)
+    );
+  }
+
+  onSearch(term: string): void {
+    this.searchTerm.set(term);
+    this.activePagination.reset();
+    this.inactivePagination.reset();
+  }
+
+  clearFilter(): void {
+    this.router.navigate([], { queryParams: {} });
+  }
+
+  refreshActive(): void {
+    this.loadingActive.set(true);
     this.service.list().subscribe({
       next: (consultants) => {
-        this.consultants.set(consultants);
-        this.loading.set(false);
+        this.activeConsultants.set(consultants);
+        this.activePagination.reset();
+        this.loadingActive.set(false);
       },
       error: () => {
-        this.loading.set(false);
+        this.loadingActive.set(false);
         this.notification.error('Failed to load consultants.');
       }
     });
   }
 
-  add(): void {
-    if (!this.form.name.trim() || !this.form.departmentId) {
+  refreshInactive(): void {
+    this.loadingInactive.set(true);
+    this.service.listInactive().subscribe({
+      next: (consultants) => {
+        this.inactiveConsultants.set(consultants);
+        this.inactivePagination.reset();
+        this.loadingInactive.set(false);
+      },
+      error: () => {
+        this.loadingInactive.set(false);
+        this.notification.error('Failed to load de-activated consultants.');
+      }
+    });
+  }
+
+  onTabChange(index: number): void {
+    if (index === 1) {
+      this.refreshInactive();
+    }
+  }
+
+  openAddDialog(): void {
+    this.openFormDialog();
+  }
+
+  openEditDialog(consultant: Consultant): void {
+    this.openFormDialog(consultant);
+  }
+
+  private openFormDialog(consultant?: Consultant): void {
+    this.dialog
+      .open(ConsultantFormDialogComponent, {
+        width: '760px',
+        maxWidth: '95vw',
+        data: { consultant, departments: this.departments(), specializations: this.specializations() }
+      })
+      .afterClosed()
+      .subscribe((result?: ConsultantFormDialogResult) => {
+        if (!result) {
+          return;
+        }
+        const save$ = consultant?.id
+          ? this.service.update(consultant.id, result.input)
+          : this.service.create(result.input);
+        save$.subscribe({
+          next: (saved) => {
+            this.notification.success(consultant ? 'Consultant updated.' : 'Consultant added.');
+            const followUps: Observable<unknown>[] = [];
+            if (result.imageFile && saved.id !== null) {
+              followUps.push(this.service.uploadImage(saved.id, result.imageFile));
+            }
+            if (result.availability && saved.id !== null) {
+              followUps.push(this.service.saveAvailability(saved.id, result.availability));
+            }
+            if (followUps.length === 0) {
+              this.refreshActive();
+              return;
+            }
+            forkJoin(followUps).subscribe({
+              next: () => this.refreshActive(),
+              error: () => {
+                this.notification.error('Consultant saved, but some details failed to save.');
+                this.refreshActive();
+              }
+            });
+          },
+          error: (err) => this.notification.error(err.error?.message ?? 'Failed to save consultant.')
+        });
+      });
+  }
+
+  openTimingsDialog(consultant: Consultant): void {
+    if (consultant.id === null) {
       return;
     }
-    this.saving.set(true);
-    this.service
-      .create({
-        name: this.form.name.trim(),
-        departmentId: this.form.departmentId,
-        specialization: this.form.specialization,
-        email: this.form.email,
-        mobileNumber: this.form.mobileNumber,
-        consultationFee: this.form.consultationFee
-      })
-      .subscribe({
-        next: () => {
-          this.saving.set(false);
-          this.form = {
-            name: '',
-            departmentId: null,
-            specialization: '',
-            email: '',
-            mobileNumber: '',
-            consultationFee: 0
-          };
-          this.notification.success('Consultant added.');
-          this.refresh();
-        },
-        error: () => {
-          this.saving.set(false);
-          this.notification.error('Failed to create consultant.');
-        }
-      });
+    this.dialog.open(ConsultantTimingsDialogComponent, {
+      width: '960px',
+      maxWidth: '95vw',
+      data: { consultantId: consultant.id, consultantName: consultant.name }
+    });
   }
 
   deactivate(consultant: Consultant): void {
@@ -131,7 +229,7 @@ export class ConsultantListComponent {
     this.confirmDialog
       .confirm({
         title: `Deactivate ${consultant.name}?`,
-        message: 'This consultant will no longer be available for new appointments.',
+        message: 'The consultant will be moved to De-Activated Consultants and can be restored later.',
         confirmLabel: 'Deactivate',
         destructive: true
       })
@@ -142,10 +240,25 @@ export class ConsultantListComponent {
         this.service.deactivate(consultant.id).subscribe({
           next: () => {
             this.notification.success('Consultant deactivated.');
-            this.refresh();
+            this.refreshActive();
+            this.refreshInactive();
           },
           error: () => this.notification.error('Failed to deactivate consultant.')
         });
       });
+  }
+
+  restore(consultant: Consultant): void {
+    if (consultant.id === null) {
+      return;
+    }
+    this.service.restore(consultant.id).subscribe({
+      next: () => {
+        this.notification.success('Consultant restored.');
+        this.refreshActive();
+        this.refreshInactive();
+      },
+      error: () => this.notification.error('Failed to restore consultant.')
+    });
   }
 }

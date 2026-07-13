@@ -42,6 +42,10 @@
 }
 
 .insurance-actions-cell {
+  text-align: right;
+}
+
+.insurance-actions-row {
   display: flex;
   align-items: center;
   gap: var(--hms-space-2);

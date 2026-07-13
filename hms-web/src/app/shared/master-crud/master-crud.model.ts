@@ -18,4 +18,18 @@ export interface MasterCrudConfig<T> {
   list: () => Observable<T[]>;
   create: (name: string) => Observable<T>;
   deactivate: (id: number) => Observable<void>;
+  /**
+   * Optional - when all three of listInactive/update/restore are provided,
+   * the screen gains an Active/Inactive tab split (lazy-loading the inactive
+   * tab, same as the app's other tabbed masters) plus inline Edit and
+   * Restore actions. Omitting them preserves today's single-list,
+   * deactivate-only behavior for existing consumers (Department,
+   * Specialization, Role).
+   */
+  listInactive?: () => Observable<T[]>;
+  update?: (id: number, name: string) => Observable<T>;
+  restore?: (id: number) => Observable<void>;
+  /** Overrides the tabbed view's tab labels (default 'Active'/'Inactive') - e.g. Pharmacy's masters use 'Activate'/'DeActivated'. */
+  activeTabLabel?: string;
+  inactiveTabLabel?: string;
 }

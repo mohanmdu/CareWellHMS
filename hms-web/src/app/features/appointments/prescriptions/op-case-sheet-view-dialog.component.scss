@@ -1,0 +1,36 @@
+@use '../../../shared/receipt/receipt';
+
+.case-sheet-view-dialog-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 640px;
+  max-width: 860px;
+  max-height: 75vh;
+}
+
+.case-sheet-header-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--hms-space-2);
+
+  td {
+    padding: var(--hms-space-1, 4px) var(--hms-space-2);
+    font-size: 0.9rem;
+  }
+}
+
+.case-sheet-field-row {
+  display: flex;
+  gap: var(--hms-space-4);
+  margin: 2px 0;
+  font-size: 0.9rem;
+
+  span {
+    flex: 1;
+  }
+}
+
+.case-sheet-items-table {
+  width: 100%;
+  margin-bottom: var(--hms-space-3);
+}

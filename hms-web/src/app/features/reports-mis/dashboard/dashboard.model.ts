@@ -3,6 +3,5 @@ export interface Dashboard {
   activeAdmissions: number;
   todaysAppointments: number;
   totalOpRevenue: number;
-  totalPharmacyRevenue: number;
   pendingInsuranceClaims: number;
 }

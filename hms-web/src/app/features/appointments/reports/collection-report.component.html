@@ -1,0 +1,157 @@
+<div class="hms-page">
+  <app-page-header title="Collection Report" subtitle="Review billed appointments by doctor and receptionist." />
+
+  <section class="hms-card-surface collection-report-section">
+    <div class="collection-report-filters">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>From date</mat-label>
+        <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" />
+        <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+        <mat-datepicker #fromPicker />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>To date</mat-label>
+        <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" />
+        <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+        <mat-datepicker #toPicker />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Consultant</mat-label>
+        <mat-select [(ngModel)]="consultantId">
+          <mat-option [value]="null">All consultants</mat-option>
+          @for (consultant of consultants(); track consultant.id) {
+            <mat-option [value]="consultant.id">{{ consultant.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Payment Mode</mat-label>
+        <mat-select [(ngModel)]="paymentMode">
+          <mat-option [value]="null">All modes</mat-option>
+          @for (mode of paymentModes; track mode) {
+            <mat-option [value]="mode">{{ paymentModeLabels[mode] }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="button" (click)="search()">Search</button>
+      <button mat-stroked-button type="button" [disabled]="entries().length === 0" (click)="print()">
+        <mat-icon aria-hidden="true">print</mat-icon>
+        Print
+      </button>
+      <button mat-stroked-button type="button" [disabled]="entries().length === 0" (click)="export()">
+        <mat-icon aria-hidden="true">download</mat-icon>
+        Export CSV
+      </button>
+    </div>
+
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    @if (!loading() && searched() && entries().length === 0) {
+      <app-empty-state
+        icon="receipt_long"
+        title="No collections"
+        message="No billed appointments match these filters."
+      />
+    } @else if (entries().length > 0) {
+      <div #reportContent>
+        <table mat-table [dataSource]="entries()" class="collection-report-table">
+          <ng-container matColumnDef="serial">
+            <th mat-header-cell *matHeaderCellDef>S.No</th>
+            <td mat-cell *matCellDef="let entry; let i = index">{{ i + 1 }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="patientName">
+            <th mat-header-cell *matHeaderCellDef>Patient Name</th>
+            <td mat-cell *matCellDef="let entry">{{ entry.patientName }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="patientId">
+            <th mat-header-cell *matHeaderCellDef>Patient ID</th>
+            <td mat-cell *matCellDef="let entry">{{ entry.patientRegistrationNumber }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="billedAt">
+            <th mat-header-cell *matHeaderCellDef>Date &amp; Time</th>
+            <td mat-cell *matCellDef="let entry">{{ entry.billedAt | date: 'dd-MM-yyyy hh:mm a' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="paymentMode">
+            <th mat-header-cell *matHeaderCellDef>Payment Mode</th>
+            <td mat-cell *matCellDef="let entry">
+              {{ paymentModeLabel(entry.paymentMode) }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="consultantName">
+            <th mat-header-cell *matHeaderCellDef>Consultant Name</th>
+            <td mat-cell *matCellDef="let entry">{{ entry.consultantName ?? 'Direct Billing' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="billedBy">
+            <th mat-header-cell *matHeaderCellDef>User Name</th>
+            <td mat-cell *matCellDef="let entry">{{ entry.billedBy }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="invoiceNumber">
+            <th mat-header-cell *matHeaderCellDef>Invoice No</th>
+            <td mat-cell *matCellDef="let entry">
+              <button type="button" class="collection-report-invoice-link" (click)="viewReceipt(entry)">
+                {{ entry.invoiceNumber }}
+              </button>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="invoicedAmount">
+            <th mat-header-cell *matHeaderCellDef>Invoice Amount</th>
+            <td mat-cell *matCellDef="let entry">{{ entry.invoicedAmount | number: '1.0-2' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="doctorReferralAmount">
+            <th mat-header-cell *matHeaderCellDef>Doctor Referral Amount</th>
+            <td mat-cell *matCellDef="let entry">{{ entry.doctorReferralAmount | number: '1.0-2' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="paidAmount">
+            <th mat-header-cell *matHeaderCellDef>Receipt Amount</th>
+            <td mat-cell *matCellDef="let entry">{{ entry.paidAmount | number: '1.0-2' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="refundAmount">
+            <th mat-header-cell *matHeaderCellDef>Refund Amount</th>
+            <td mat-cell *matCellDef="let entry">
+              {{ entry.refundAmount | number: '1.0-2' }}
+              @if (entry.refundAmount && entry.refundAmount > 0) {
+                <app-status-badge label="Refunded" tone="warning" />
+              }
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+
+        @let totalsValue = totals();
+        <div class="collection-report-summary">
+          <div class="collection-report-summary-item">
+            <span>Invoice Amount</span>
+            <strong>{{ totalsValue.invoicedAmount | number: '1.0-2' }}</strong>
+          </div>
+          <div class="collection-report-summary-item">
+            <span>Doctor Referral Amount</span>
+            <strong>{{ totalsValue.doctorReferralAmount | number: '1.0-2' }}</strong>
+          </div>
+          <div class="collection-report-summary-item">
+            <span>Refund Amount</span>
+            <strong>{{ totalsValue.refundAmount | number: '1.0-2' }}</strong>
+          </div>
+          <div class="collection-report-summary-item collection-report-summary-total">
+            <span>Total Collection Amount</span>
+            <strong>{{ totalsValue.totalCollection | number: '1.0-2' }}</strong>
+          </div>
+        </div>
+      </div>
+    }
+  </section>
+</div>

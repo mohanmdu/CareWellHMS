@@ -22,46 +22,151 @@
     </form>
   </section>
 
-  <section class="hms-card-surface master-crud-list">
-    @if (loading()) {
-      <mat-progress-bar mode="indeterminate" />
-    }
-
-    @if (!loading() && items().length === 0) {
-      <app-empty-state
-        icon="inbox"
-        [title]="'No ' + config().entityLabel + 's yet'"
-        [message]="'Add the first ' + config().entityLabel + ' using the form above.'"
-      />
-    } @else if (items().length > 0) {
-      <table mat-table [dataSource]="items()" class="master-crud-table">
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef>Name</th>
-          <td mat-cell *matCellDef="let item">{{ config().getName(item) }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
-          <td mat-cell *matCellDef="let item">
-            <app-status-badge
-              [label]="config().getActive(item) ? 'Active' : 'Inactive'"
-              [tone]="config().getActive(item) ? 'success' : 'neutral'"
-            />
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef class="master-crud-actions-header"></th>
-          <td mat-cell *matCellDef="let item" class="master-crud-actions-cell">
-            @if (config().getActive(item)) {
-              <button mat-stroked-button color="warn" type="button" (click)="deactivate(item)">Deactivate</button>
+  @if (tabbed()) {
+    <section class="hms-card-surface master-crud-list">
+      <mat-tab-group (selectedIndexChange)="onTabChange($event)">
+        <mat-tab [label]="config().activeTabLabel ?? 'Active'">
+          <div class="master-crud-tab-body">
+            <ng-container [ngTemplateOutlet]="activeListBody" />
+          </div>
+        </mat-tab>
+        <mat-tab [label]="config().inactiveTabLabel ?? 'Inactive'">
+          <div class="master-crud-tab-body">
+            @if (loadingInactive()) {
+              <mat-progress-bar mode="indeterminate" />
             }
-          </td>
-        </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-      </table>
-    }
-  </section>
+            @if (inactiveItems().length > 0) {
+              <app-table-search
+                [placeholder]="'Search ' + config().entityLabel + 's...'"
+                [value]="inactiveSearchTerm()"
+                (valueChange)="onInactiveSearch($event)"
+                class="master-crud-search"
+              />
+            }
+
+            @if (!loadingInactive() && inactiveItems().length === 0) {
+              <app-empty-state icon="inbox" title="No inactive records" [message]="'Deactivated ' + config().entityLabel + 's will appear here.'" />
+            } @else if (filteredInactiveItems().length === 0) {
+              <app-empty-state icon="search_off" title="No matches" [message]="'No ' + config().entityLabel + 's match your search.'" />
+            } @else if (filteredInactiveItems().length > 0) {
+              <table mat-table [dataSource]="inactivePagination.page()" class="master-crud-table">
+                <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef>Name</th>
+                  <td mat-cell *matCellDef="let item">{{ config().getName(item) }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef>Status</th>
+                  <td mat-cell *matCellDef="let item">
+                    <app-status-badge label="Inactive" tone="neutral" />
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef class="master-crud-actions-header"></th>
+                  <td mat-cell *matCellDef="let item" class="master-crud-actions-cell">
+                    <button mat-stroked-button color="primary" type="button" (click)="restore(item)">Restore</button>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+              </table>
+              <mat-paginator
+                [length]="inactivePagination.length()"
+                [pageIndex]="inactivePagination.pageIndex()"
+                [pageSize]="inactivePagination.pageSize()"
+                [pageSizeOptions]="[5, 10, 25, 50]"
+                (page)="inactivePagination.onPage($event)"
+              />
+            }
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </section>
+  } @else {
+    <section class="hms-card-surface master-crud-list">
+      <ng-container [ngTemplateOutlet]="activeListBody" />
+    </section>
+  }
+</ng-template>
+
+<ng-template #activeListBody>
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (items().length > 0) {
+    <app-table-search
+      [placeholder]="'Search ' + config().entityLabel + 's...'"
+      [value]="searchTerm()"
+      (valueChange)="onSearch($event)"
+      class="master-crud-search"
+    />
+  }
+
+  @if (!loading() && items().length === 0) {
+    <app-empty-state
+      icon="inbox"
+      [title]="'No ' + config().entityLabel + 's yet'"
+      [message]="'Add the first ' + config().entityLabel + ' using the form above.'"
+    />
+  } @else if (filteredItems().length === 0) {
+    <app-empty-state icon="search_off" title="No matches" [message]="'No ' + config().entityLabel + 's match your search.'" />
+  } @else if (filteredItems().length > 0) {
+    <table mat-table [dataSource]="pagination.page()" class="master-crud-table">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <td mat-cell *matCellDef="let item">
+          @if (editingId() === config().getId(item)) {
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="master-crud-edit-field">
+              <input matInput [(ngModel)]="editingName" (keydown.enter)="saveEdit(item)" />
+            </mat-form-field>
+          } @else {
+            {{ config().getName(item) }}
+          }
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let item">
+          <app-status-badge
+            [label]="config().getActive(item) ? 'Active' : 'Inactive'"
+            [tone]="config().getActive(item) ? 'success' : 'neutral'"
+          />
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef class="master-crud-actions-header"></th>
+        <td mat-cell *matCellDef="let item" class="master-crud-actions-cell">
+          <div class="master-crud-actions-row">
+            @if (editingId() === config().getId(item)) {
+              <button mat-button type="button" (click)="cancelEdit()">Cancel</button>
+              <button mat-flat-button color="primary" type="button" (click)="saveEdit(item)">Save</button>
+            } @else {
+              @if (config().update) {
+                <button mat-stroked-button type="button" (click)="startEdit(item)">Edit</button>
+              }
+              @if (config().getActive(item)) {
+                <button mat-stroked-button color="warn" type="button" (click)="deactivate(item)">Deactivate</button>
+              }
+            }
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+    <mat-paginator
+      [length]="pagination.length()"
+      [pageIndex]="pagination.pageIndex()"
+      [pageSize]="pagination.pageSize()"
+      [pageSizeOptions]="[5, 10, 25, 50]"
+      (page)="pagination.onPage($event)"
+    />
+  }
 </ng-template>

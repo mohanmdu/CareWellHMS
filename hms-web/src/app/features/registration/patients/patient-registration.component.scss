@@ -14,6 +14,10 @@
 }
 
 .patient-actions-cell {
+  text-align: right;
+}
+
+.patient-actions-row {
   display: flex;
   align-items: center;
   gap: var(--hms-space-2);

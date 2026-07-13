@@ -51,23 +51,25 @@
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef class="patient-actions-header"></th>
                 <td mat-cell *matCellDef="let patient" class="patient-actions-cell">
-                  <button
-                    mat-icon-button
-                    type="button"
-                    [attr.aria-label]="'Edit ' + patient.firstName"
-                    (click)="openEditDialog(patient)"
-                  >
-                    <mat-icon aria-hidden="true">edit</mat-icon>
-                  </button>
-                  <button
-                    mat-icon-button
-                    type="button"
-                    color="warn"
-                    [attr.aria-label]="'Delete ' + patient.firstName"
-                    (click)="deletePatient(patient)"
-                  >
-                    <mat-icon aria-hidden="true">delete</mat-icon>
-                  </button>
+                  <div class="patient-actions-row">
+                    <button
+                      mat-icon-button
+                      type="button"
+                      [attr.aria-label]="'Edit ' + patient.firstName"
+                      (click)="openEditDialog(patient)"
+                    >
+                      <mat-icon aria-hidden="true">edit</mat-icon>
+                    </button>
+                    <button
+                      mat-icon-button
+                      type="button"
+                      color="warn"
+                      [attr.aria-label]="'Delete ' + patient.firstName"
+                      (click)="deletePatient(patient)"
+                    >
+                      <mat-icon aria-hidden="true">delete</mat-icon>
+                    </button>
+                  </div>
                 </td>
               </ng-container>
 
@@ -121,12 +123,14 @@
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef class="patient-actions-header"></th>
                 <td mat-cell *matCellDef="let patient" class="patient-actions-cell">
-                  <button mat-stroked-button color="primary" type="button" (click)="restorePatient(patient)">
-                    Restore
-                  </button>
-                  <button mat-stroked-button color="warn" type="button" (click)="permanentlyDeletePatient(patient)">
-                    Delete permanently
-                  </button>
+                  <div class="patient-actions-row">
+                    <button mat-stroked-button color="primary" type="button" (click)="restorePatient(patient)">
+                      Restore
+                    </button>
+                    <button mat-stroked-button color="warn" type="button" (click)="permanentlyDeletePatient(patient)">
+                      Delete permanently
+                    </button>
+                  </div>
                 </td>
               </ng-container>
 

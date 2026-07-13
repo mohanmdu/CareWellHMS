@@ -1,0 +1,51 @@
+.collection-report-section {
+  overflow-x: auto;
+}
+
+.collection-report-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-4) var(--hms-space-2) var(--hms-space-2);
+}
+
+.collection-report-table {
+  width: 100%;
+}
+
+.collection-report-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hms-space-5, 32px);
+  padding: var(--hms-space-4);
+}
+
+.collection-report-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  span {
+    font-size: 0.8rem;
+    color: var(--hms-color-text-muted, rgba(0, 0, 0, 0.6));
+  }
+
+  strong {
+    font-size: 1.1rem;
+  }
+}
+
+.collection-report-summary-total strong {
+  color: var(--hms-color-primary, #1565c0);
+}
+
+.collection-report-invoice-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--hms-color-primary, #1565c0);
+  text-decoration: underline;
+  cursor: pointer;
+}

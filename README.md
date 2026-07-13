@@ -1,4 +1,4 @@
-# Navjeevan HMS Modernization
+# HMS Modernization
 
 This folder contains the target-state modernization of the legacy Struts2/Hibernate3
 Hospital Management System at `d:/project/Navjeevan/Navjeenna`.

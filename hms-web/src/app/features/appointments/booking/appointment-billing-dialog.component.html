@@ -1,0 +1,161 @@
+@if (step() === 'billing') {
+  <h2 mat-dialog-title>Approve Appointment</h2>
+
+  <mat-dialog-content class="billing-dialog-content">
+    <div class="billing-section">
+      <h3>Invoice Details</h3>
+      <table class="billing-invoice-table">
+        <thead>
+          <tr>
+            <th>Invoice No</th>
+            <th>Patient ID</th>
+            <th>Name</th>
+            <th>Invoiced Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ nextInvoiceNumber() ?? '—' }}</td>
+            <td>{{ appointment.patientRegistrationNumber }}</td>
+            <td>{{ appointment.patientName }}</td>
+            <td>{{ appointment.invoicedAmount | number: '1.0-2' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="billing-section">
+      <h3>Billing Details</h3>
+      <div class="hms-form-grid">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Paying Amount</mat-label>
+          <input matInput type="number" min="0" name="paidAmount" [(ngModel)]="form.paidAmount" required />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Discount Amount</mat-label>
+          <input matInput type="number" min="0" name="discountAmount" [(ngModel)]="form.discountAmount" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Doctor Referral Amount</mat-label>
+          <input matInput type="number" min="0" name="doctorReferralAmount" [(ngModel)]="form.doctorReferralAmount" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Payment Mode</mat-label>
+          <mat-select name="paymentMode" [(ngModel)]="form.paymentMode" required>
+            @for (mode of paymentModes; track mode) {
+              <mat-option [value]="mode">{{ paymentModeLabels[mode] }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="billing-remarks-field">
+          <mat-label>Remarks</mat-label>
+          <input matInput name="remarks" [(ngModel)]="form.remarks" />
+        </mat-form-field>
+      </div>
+    </div>
+
+    @if (saving()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" mat-dialog-close>Cancel</button>
+    <button mat-flat-button color="primary" type="button" [disabled]="!isValid || saving()" (click)="submit()">
+      Submit
+    </button>
+  </mat-dialog-actions>
+} @else if (billedAppointment()) {
+  @let billed = billedAppointment()!;
+  <h2 mat-dialog-title>Payment Receipt</h2>
+
+  <mat-dialog-content class="billing-dialog-content">
+    <div class="receipt" #receiptContent>
+      <div class="receipt-header">
+        @if (clinicSettings()?.logoUrl; as logo) {
+          <img [src]="logo" alt="" class="receipt-logo" />
+        }
+        <div class="receipt-clinic-info">
+          <strong class="receipt-clinic-name">{{ clinicSettings()?.name ?? 'Hospital' }}</strong>
+          @if (clinicSettings()?.address) {
+            <span>{{ clinicSettings()?.address }}</span>
+          }
+          <span>
+            @if (clinicSettings()?.phone) {
+              Phone: {{ clinicSettings()?.phone }}
+            }
+            @if (clinicSettings()?.email) {
+              &nbsp;&middot; Email: {{ clinicSettings()?.email }}
+            }
+          </span>
+        </div>
+      </div>
+
+      <div class="receipt-meta">
+        <span>Invoice No: {{ billed.invoiceNumber }}</span>
+        <span>Dated: {{ today | date: 'dd-MM-yyyy' }}</span>
+      </div>
+      <div class="receipt-meta">
+        <span>Consultant Name: {{ billed.consultantName }}</span>
+      </div>
+      <div class="receipt-meta">
+        <span>Patient Name: {{ billed.patientName }}</span>
+        <span>Patient ID: {{ billed.patientRegistrationNumber }}</span>
+      </div>
+      <div class="receipt-meta">
+        <span>Age &amp; Gender: {{ billed.patientAge ?? '—' }}, {{ billed.patientGender ?? '—' }}</span>
+      </div>
+
+      <table class="receipt-items-table">
+        <thead>
+          <tr>
+            <th>S.No</th>
+            <th>Description</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>Consulting Fee</td>
+            <td>{{ billed.invoicedAmount | number: '1.0-2' }}</td>
+          </tr>
+          @if (billed.discountAmount) {
+            <tr>
+              <td></td>
+              <td>Discount</td>
+              <td>-{{ billed.discountAmount | number: '1.0-2' }}</td>
+            </tr>
+          }
+          @if (billed.doctorReferralAmount) {
+            <tr>
+              <td></td>
+              <td>Doctor Referral</td>
+              <td>-{{ billed.doctorReferralAmount | number: '1.0-2' }}</td>
+            </tr>
+          }
+          <tr class="receipt-total-row">
+            <td></td>
+            <td>Amount Paid ({{ paymentModeLabels[billed.paymentMode!] }})</td>
+            <td>{{ billed.paidAmount | number: '1.0-2' }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="receipt-words">Received sum of Rupees <strong>{{ amountInWords }}</strong> Only</p>
+      @if (billed.billingRemarks) {
+        <p class="receipt-remarks">Remarks: {{ billed.billingRemarks }}</p>
+      }
+
+      <p class="receipt-signature">Cashier</p>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="billing-receipt-actions">
+    <button mat-button type="button" (click)="print()">
+      <mat-icon aria-hidden="true">print</mat-icon>
+      Print
+    </button>
+    <button mat-flat-button color="primary" type="button" (click)="close()">Done</button>
+  </mat-dialog-actions>
+}

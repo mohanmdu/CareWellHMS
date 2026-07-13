@@ -5,6 +5,5 @@ public record DashboardDto(
         long activeAdmissions,
         long todaysAppointments,
         double totalOpRevenue,
-        double totalPharmacyRevenue,
         long pendingInsuranceClaims) {
 }

@@ -21,6 +21,20 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'registration/patients/history',
+        loadComponent: () =>
+          import('./features/registration/patient-history/patient-past-history.component').then(
+            (m) => m.PatientPastHistoryComponent
+          )
+      },
+      {
+        path: 'registration/patients/review-date-report',
+        loadComponent: () =>
+          import('./features/registration/review-date-report/review-date-report.component').then(
+            (m) => m.ReviewDateReportComponent
+          )
+      },
+      {
         path: 'registration/patients/logs',
         loadComponent: () =>
           import('./features/registration/patients/patient-logs.component').then((m) => m.PatientLogsComponent)
@@ -50,15 +64,87 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'masters/specializations',
+        loadComponent: () =>
+          import('./features/masters-admin/specializations/specialization-list.component').then(
+            (m) => m.SpecializationListComponent
+          )
+      },
+      {
+        path: 'masters/general-users',
+        loadComponent: () =>
+          import('./features/masters-admin/general-users/general-user-list.component').then(
+            (m) => m.GeneralUserListComponent
+          )
+      },
+      {
+        path: 'masters/general-users/logs',
+        loadComponent: () =>
+          import('./features/masters-admin/general-users/general-user-logs.component').then(
+            (m) => m.GeneralUserLogsComponent
+          )
+      },
+      {
+        path: 'masters/clinic-settings',
+        loadComponent: () =>
+          import('./features/masters-admin/clinic-settings/clinic-settings-list.component').then(
+            (m) => m.ClinicSettingsListComponent
+          )
+      },
+      {
+        path: 'masters/op-billing-categories',
+        loadComponent: () =>
+          import('./features/masters-admin/op-billing-categories/op-billing-category-list.component').then(
+            (m) => m.OpBillingCategoryListComponent
+          )
+      },
+      {
+        path: 'masters/op-billing-components',
+        loadComponent: () =>
+          import('./features/masters-admin/op-billing-components/op-billing-component-list.component').then(
+            (m) => m.OpBillingComponentListComponent
+          )
+      },
+      {
         path: 'appointments/book',
         loadComponent: () =>
           import('./features/appointments/booking/booking-wizard.component').then((m) => m.BookingWizardComponent)
+      },
+      {
+        path: 'appointments/direct-billing',
+        loadComponent: () =>
+          import('./features/direct-billing/op-direct-billing.component').then((m) => m.OpDirectBillingComponent)
       },
       {
         path: 'appointments',
         loadComponent: () =>
           import('./features/appointments/booking/appointment-list.component').then(
             (m) => m.AppointmentListComponent
+          )
+      },
+      {
+        path: 'appointments/reports/collection',
+        loadComponent: () =>
+          import('./features/appointments/reports/collection-report.component').then(
+            (m) => m.CollectionReportComponent
+          )
+      },
+      {
+        path: 'appointments/refunds',
+        loadComponent: () => import('./features/appointments/refunds/refund.component').then((m) => m.RefundComponent)
+      },
+      {
+        path: 'appointments/prescriptions',
+        loadComponent: () =>
+          import('./features/appointments/prescriptions/patient-prescription.component').then(
+            (m) => m.PatientPrescriptionComponent
+          )
+      },
+      {
+        path: 'appointments/audit-logs',
+        loadComponent: () =>
+          import('./features/appointments/audit-logs/appointment-audit-log.component').then(
+            (m) => m.AppointmentAuditLogComponent
           )
       },
       {
@@ -95,22 +181,11 @@ export const routes: Routes = [
           )
       },
       {
-        path: 'pharmacy/drugs',
-        loadComponent: () => import('./features/pharmacy/drugs/drug-list.component').then((m) => m.DrugListComponent)
-      },
-      {
-        path: 'pharmacy/stock',
+        path: 'pharmacy/inventory-master',
         loadComponent: () =>
-          import('./features/pharmacy/batches/drug-batch-list.component').then((m) => m.DrugBatchListComponent)
-      },
-      {
-        path: 'pharmacy/dispense',
-        loadComponent: () =>
-          import('./features/pharmacy/sales/sale-create.component').then((m) => m.SaleCreateComponent)
-      },
-      {
-        path: 'pharmacy/sales',
-        loadComponent: () => import('./features/pharmacy/sales/sale-list.component').then((m) => m.SaleListComponent)
+          import('./features/pharmacy/inventory-master/inventory-master.component').then(
+            (m) => m.InventoryMasterComponent
+          )
       },
       {
         path: 'ip/rooms',

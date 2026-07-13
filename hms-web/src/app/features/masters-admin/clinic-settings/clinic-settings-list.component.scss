@@ -1,0 +1,37 @@
+.clinic-settings-section {
+  padding: var(--hms-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-4);
+}
+
+.clinic-logo-row {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-3);
+}
+
+.clinic-logo-preview {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  border: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
+  border-radius: var(--hms-radius-md, 8px);
+}
+
+.clinic-logo-fallback {
+  width: 64px;
+  height: 64px;
+  font-size: 64px;
+  color: var(--hms-color-text-muted, rgba(0, 0, 0, 0.3));
+}
+
+.clinic-address-field {
+  grid-column: 1 / -1;
+}
+
+.clinic-settings-submit {
+  display: flex;
+  align-items: center;
+  grid-column: 1 / -1;
+}
