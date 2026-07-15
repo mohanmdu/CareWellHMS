@@ -1,0 +1,60 @@
+<div class="dues-tab-body">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  <mat-tab-group (selectedIndexChange)="onTabChange($event)">
+    <mat-tab label="Current Dues">
+      <ng-container [ngTemplateOutlet]="duesTable" [ngTemplateOutletContext]="{ $implicit: currentDues() }" />
+    </mat-tab>
+    <mat-tab label="OP Dues">
+      <ng-container [ngTemplateOutlet]="duesTable" [ngTemplateOutletContext]="{ $implicit: opDues() }" />
+    </mat-tab>
+    <mat-tab label="IP Dues">
+      <ng-container [ngTemplateOutlet]="duesTable" [ngTemplateOutletContext]="{ $implicit: ipDues() }" />
+    </mat-tab>
+    <mat-tab label="Others Dues">
+      <ng-container [ngTemplateOutlet]="duesTable" [ngTemplateOutletContext]="{ $implicit: othersDues() }" />
+    </mat-tab>
+    <mat-tab label="Insurance Patients Dues">
+      <app-empty-state icon="health_and_safety" title="Not available yet" message="Insurance-linked dues aren't tracked yet - a separate integration." />
+    </mat-tab>
+  </mat-tab-group>
+</div>
+
+<ng-template #duesTable let-entries>
+  @if (entries.length === 0) {
+    <app-empty-state icon="check_circle" title="No outstanding dues" message="Nothing due here right now." />
+  } @else {
+    <table mat-table [dataSource]="entries" class="dues-table">
+      <ng-container matColumnDef="billNumber">
+        <th mat-header-cell *matHeaderCellDef>Bill No</th>
+        <td mat-cell *matCellDef="let entry">
+          <a href="javascript:void(0)" (click)="viewBill(entry)">{{ entry.billNumber }}</a>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="patientName">
+        <th mat-header-cell *matHeaderCellDef>Patient Name</th>
+        <td mat-cell *matCellDef="let entry">{{ entry.patientName }}</td>
+      </ng-container>
+      <ng-container matColumnDef="totalAmount">
+        <th mat-header-cell *matHeaderCellDef>Invoice Amount</th>
+        <td mat-cell *matCellDef="let entry">{{ entry.totalAmount | number: '1.2-2' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="discountAmount">
+        <th mat-header-cell *matHeaderCellDef>Discount</th>
+        <td mat-cell *matCellDef="let entry">{{ entry.discountAmount ?? 0 | number: '1.2-2' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="amountPaid">
+        <th mat-header-cell *matHeaderCellDef>Paid Amount</th>
+        <td mat-cell *matCellDef="let entry">{{ entry.amountPaid | number: '1.2-2' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="balanceAmount">
+        <th mat-header-cell *matHeaderCellDef>Due</th>
+        <td mat-cell *matCellDef="let entry">{{ entry.balanceAmount | number: '1.2-2' }}</td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+  }
+</ng-template>

@@ -1,0 +1,11 @@
+<mat-tab-group (selectedIndexChange)="onTabChange($event)">
+  <mat-tab label="Raise PO">
+    <app-raise-po />
+  </mat-tab>
+  <mat-tab label="Pending Approval">
+    <app-po-pending-list />
+  </mat-tab>
+  <mat-tab label="Approved POs">
+    <app-po-approved-list />
+  </mat-tab>
+</mat-tab-group>

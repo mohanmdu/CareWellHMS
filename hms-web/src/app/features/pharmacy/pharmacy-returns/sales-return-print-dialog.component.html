@@ -1,0 +1,78 @@
+<h2 mat-dialog-title>Sales Return</h2>
+
+<mat-dialog-content class="sales-return-print-dialog-content">
+  <div class="return-slip" #printContent>
+    <div class="return-slip-header">
+      <div>{{ clinicSettings()?.name ?? 'Pharmacy' }}</div>
+    </div>
+    <div class="return-slip-header-row">
+      <div>
+        @if (clinicSettings()?.address) {
+          <div>{{ clinicSettings()?.address }}</div>
+        }
+        @if (clinicSettings()?.phone) {
+          <div>Ph: {{ clinicSettings()?.phone }}</div>
+        }
+      </div>
+      <div>Return Date: {{ returnDate | date: 'dd-MM-yyyy HH:mm' }}</div>
+    </div>
+
+    <div class="return-slip-title">Sales Return ({{ pharmacyReturn.status }})</div>
+
+    <div class="return-slip-meta">
+      <span>Return ID: {{ pharmacyReturn.id }}</span>
+      <span>Invoice No: {{ pharmacyReturn.billNumber }}</span>
+    </div>
+    <div class="return-slip-meta">
+      <span>PID: {{ pharmacyReturn.patientRegistrationNumber }}</span>
+      <span>Name: {{ pharmacyReturn.patientName }}</span>
+    </div>
+    <div class="return-slip-meta">
+      <span>Return Type: {{ returnTypeLabels[pharmacyReturn.returnType] }}</span>
+    </div>
+
+    <table class="return-slip-items-table">
+      <thead>
+        <tr>
+          <th>S.No</th>
+          <th>Product Name</th>
+          <th>Batch No</th>
+          <th>Return Qty</th>
+          <th>MRP</th>
+          <th>Net Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of pharmacyReturn.items; track item.id; let i = $index) {
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td>{{ item.productName }}</td>
+            <td>{{ item.batch }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.mrp | number: '1.2-2' }}</td>
+            <td>{{ item.netAmount | number: '1.2-2' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <div class="return-slip-totals">
+      <span>Sum Amount: Rs. {{ pharmacyReturn.totalAmount | number: '1.2-2' }}</span>
+    </div>
+
+    <p class="return-slip-words">Refunded the Sum of {{ amountInWords }} Only</p>
+    <div class="return-slip-totals">
+      <span>Return Amount: Rs. {{ pharmacyReturn.totalAmount | number: '1.2-2' }}</span>
+    </div>
+
+    <p class="return-slip-signature">{{ signedBy }}<br />Pharmacist</p>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="print()">
+    <mat-icon aria-hidden="true">print</mat-icon>
+    Print
+  </button>
+  <button mat-flat-button color="primary" type="button" (click)="close()">Done</button>
+</mat-dialog-actions>

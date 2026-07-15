@@ -1,0 +1,94 @@
+<h2 mat-dialog-title>Pharmacy Bill</h2>
+
+<mat-dialog-content class="pharmacy-bill-print-dialog-content">
+  <div class="bill" #printContent>
+    <div class="bill-header">
+      <div>{{ clinicSettings()?.name ?? 'Pharmacy' }}</div>
+    </div>
+    <div class="bill-header-row">
+      <div>
+        @if (clinicSettings()?.address) {
+          <div>{{ clinicSettings()?.address }}</div>
+        }
+        @if (clinicSettings()?.phone) {
+          <div>Ph: {{ clinicSettings()?.phone }}</div>
+        }
+      </div>
+      <div>Date: {{ sale.billedAt | date: 'dd-MM-yyyy HH:mm' }}</div>
+    </div>
+
+    <div class="bill-title">{{ invoiceTitle(sale.billingType) }}</div>
+
+    <div class="bill-meta">
+      <span>Name: {{ sale.patientName }}</span>
+      <span>Invoice No: {{ sale.billNumber }}</span>
+    </div>
+    @if (sale.consultantName) {
+      <div class="bill-meta">
+        <span>Dr.Name: {{ sale.consultantName }}</span>
+      </div>
+    }
+
+    <table class="bill-items-table">
+      <thead>
+        <tr>
+          <th>S.No</th>
+          <th>P.Name</th>
+          <th>Batch No</th>
+          <th>HSN/SAC</th>
+          <th>Exp.Date</th>
+          <th>Qty</th>
+          <th>MRP</th>
+          <th>SGST</th>
+          <th>CGST</th>
+          <th>Tot Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of sale.items; track item.id; let i = $index) {
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td>{{ item.productName }}</td>
+            <td>{{ item.batch }}</td>
+            <td>{{ item.hsnSac }}</td>
+            <td>{{ item.expiryDate }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.mrp | number: '1.2-2' }}</td>
+            <td>{{ item.sgstPercent }}% {{ item.sgstAmount | number: '1.2-2' }}</td>
+            <td>{{ item.cgstPercent }}% {{ item.cgstAmount | number: '1.2-2' }}</td>
+            <td>{{ item.netAmount | number: '1.2-2' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <div class="bill-totals">
+      <span>Total: Rs. {{ sale.totalAmount | number: '1.2-2' }}</span>
+      @if (sale.discountAmount) {
+        <span>Discount: Rs. {{ sale.discountAmount | number: '1.2-2' }}</span>
+      }
+      <span>Net Total: Rs. {{ (sale.totalAmount - (sale.discountAmount ?? 0)) | number: '1.2-2' }}</span>
+    </div>
+
+    <p class="bill-words">Received the sum of {{ amountInWords }} Only by {{ sale.paymentMode }}</p>
+    @if (sale.balanceAmount > 0) {
+      <p class="bill-words">Balance Amount: Rs. {{ sale.balanceAmount | number: '1.2-2' }} (Total Due)</p>
+    }
+
+    <p class="bill-signature">{{ sale.billedBy }}<br />Pharmacist</p>
+
+    <div class="bill-footer">
+      <p>***We Care with Personal Touch &amp; Health Care With a Heart***</p>
+      <p>***GET WELL SOON***</p>
+      <p>***GOODS ONCE SOLD CANNOT BE TAKEN BACK*** ***NO EXCHANGE***</p>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="print()">
+    <mat-icon aria-hidden="true">print</mat-icon>
+    Print
+  </button>
+  <button mat-flat-button color="primary" type="button" (click)="close()">Done</button>
+</mat-dialog-actions>

@@ -1,0 +1,72 @@
+<div class="hms-page">
+  <app-page-header title="Sales Return Approval" subtitle="Review and approve pending sales returns." />
+
+  <section class="hms-card-surface approval-list-filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>From</mat-label>
+      <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" (ngModelChange)="refresh()" />
+      <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+      <mat-datepicker #fromPicker />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>To</mat-label>
+      <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" (ngModelChange)="refresh()" />
+      <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+      <mat-datepicker #toPicker />
+    </mat-form-field>
+    <button mat-flat-button color="primary" type="button" (click)="refresh()">Submit</button>
+    <button mat-icon-button type="button" (click)="export()" aria-label="Export to Excel" title="Export to Excel">
+      <mat-icon aria-hidden="true">file_download</mat-icon>
+    </button>
+  </section>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  <section class="hms-card-surface approval-list-body">
+    <div #listContent>
+      @if (!loading() && entries().length === 0) {
+        <app-empty-state icon="assignment_return" title="No pending returns" message="Sales returns awaiting approval will appear here." />
+      } @else if (entries().length > 0) {
+        <table class="approval-list-table">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Patient UHID</th>
+              <th>Patient Name</th>
+              <th>Location</th>
+              <th>Date &amp; Time</th>
+              <th>Updated By</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (entry of entries(); track entry.id; let i = $index) {
+              <tr>
+                <td>{{ i + 1 }}</td>
+                <td>{{ entry.patientRegistrationNumber }}</td>
+                <td>{{ entry.patientName }}</td>
+                <td>{{ entry.locationName }}</td>
+                <td>{{ entry.submittedAt | date: 'dd-MM-yyyy HH:mm' }}</td>
+                <td>{{ entry.submittedBy }}</td>
+                <td>
+                  <button mat-stroked-button color="primary" type="button" (click)="view(entry)">View</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </section>
+
+  @if (entries().length > 0) {
+    <div class="approval-list-print-row">
+      <button mat-flat-button type="button" (click)="print()">
+        <mat-icon aria-hidden="true">print</mat-icon>
+        Print
+      </button>
+    </div>
+  }
+</div>

@@ -1,0 +1,48 @@
+.raise-po {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-4) var(--hms-space-2) var(--hms-space-2);
+}
+
+.raise-po-supplier-row {
+  display: flex;
+}
+
+.raise-po-supplier-field {
+  min-width: 320px;
+}
+
+.raise-po-table {
+  width: 100%;
+}
+
+.raise-po-hint {
+  margin: 0;
+  color: var(--hms-color-text-muted, rgba(0, 0, 0, 0.6));
+  font-size: 0.875rem;
+}
+
+.raise-po-add-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--hms-space-3);
+}
+
+.raise-po-product-field {
+  flex: 1 1 260px;
+}
+
+.raise-po-narrow-field {
+  width: 100px;
+}
+
+.raise-po-comments-field {
+  width: 100%;
+}
+
+.raise-po-submit-row {
+  display: flex;
+  justify-content: flex-end;
+}

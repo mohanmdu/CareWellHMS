@@ -1,0 +1,16 @@
+.detailed-sales-report {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-4) var(--hms-space-2) var(--hms-space-2);
+}
+
+.detailed-sales-report-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hms-space-3);
+}
+
+.detailed-sales-report-table {
+  width: 100%;
+}

@@ -1,0 +1,22 @@
+.sales-report {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-4) var(--hms-space-2) var(--hms-space-2);
+}
+
+.sales-report-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hms-space-3);
+}
+
+.sales-report-table {
+  width: 100%;
+}
+
+.sales-report-total {
+  margin: 0;
+  text-align: right;
+  font-weight: var(--hms-font-weight-semibold, 600);
+}

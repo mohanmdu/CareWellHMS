@@ -1,0 +1,32 @@
+<div class="hms-page">
+  <app-page-header title="Pharmacy Billing" subtitle="Bill pharmacy sales for a department/location." />
+
+  @if (!selectedLocationId()) {
+    <section class="hms-card-surface location-grid-section">
+      <h3>Select Location</h3>
+      @if (locations().length === 0) {
+        <app-empty-state
+          icon="local_pharmacy"
+          title="No Pharmacy Locations yet"
+          message="Add at least one location in Inventory Master > Pharmacy Location Master before billing." />
+      } @else {
+        <div class="location-grid">
+          @for (location of locations(); track location.id) {
+            <button mat-stroked-button type="button" class="location-tile" (click)="selectLocation(location.id!)">
+              <mat-icon aria-hidden="true">local_pharmacy</mat-icon>
+              {{ location.name }}
+            </button>
+          }
+        </div>
+      }
+    </section>
+  } @else {
+    <div class="location-back-row">
+      <button mat-button type="button" (click)="changeLocation()">
+        <mat-icon aria-hidden="true">arrow_back</mat-icon>
+        Change Location
+      </button>
+    </div>
+    <app-pharmacy-request-search [locationId]="selectedLocationId()!" />
+  }
+</div>

@@ -1,0 +1,31 @@
+<h2 mat-dialog-title>Approve Purchase Order #{{ purchaseOrder.poNumber }}</h2>
+
+<mat-dialog-content class="po-approve-dialog-content">
+  <p class="po-approve-supplier">Supplier: {{ purchaseOrder.supplierName }}</p>
+
+  <table mat-table [dataSource]="purchaseOrder.items" class="po-approve-table">
+    <ng-container matColumnDef="productName">
+      <th mat-header-cell *matHeaderCellDef>Drug Name</th>
+      <td mat-cell *matCellDef="let item">{{ item.productName }}</td>
+    </ng-container>
+    <ng-container matColumnDef="productTypeName">
+      <th mat-header-cell *matHeaderCellDef>Drug Type</th>
+      <td mat-cell *matCellDef="let item">{{ item.productTypeName }}</td>
+    </ng-container>
+    <ng-container matColumnDef="orderQty">
+      <th mat-header-cell *matHeaderCellDef>Order Qty</th>
+      <td mat-cell *matCellDef="let item">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="po-approve-qty-field">
+          <input matInput type="number" min="1" [(ngModel)]="orderQtyByItemId[item.id]" />
+        </mat-form-field>
+      </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="itemColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: itemColumns"></tr>
+  </table>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="close()">Cancel</button>
+  <button mat-flat-button color="primary" type="button" [disabled]="!isValid" (click)="approve()">Approve</button>
+</mat-dialog-actions>

@@ -1,0 +1,50 @@
+.hms-page > * + * {
+  margin-top: var(--hms-space-4);
+}
+
+.return-entry-search,
+.return-entry-invoice,
+.return-entry-summary,
+.return-entry-items,
+.return-entry-submit {
+  padding: var(--hms-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+}
+
+.return-entry-back-row {
+  display: flex;
+}
+
+.return-entry-invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  td {
+    padding: var(--hms-space-1) var(--hms-space-2);
+  }
+}
+
+.return-entry-table {
+  width: 100%;
+}
+
+.return-entry-qty-field {
+  width: 90px;
+}
+
+.return-entry-total {
+  margin: 0;
+  font-weight: var(--hms-font-weight-semibold, 600);
+  text-align: right;
+}
+
+.return-entry-full-field {
+  grid-column: 1 / -1;
+}
+
+.return-entry-submit-row {
+  display: flex;
+  justify-content: flex-end;
+}

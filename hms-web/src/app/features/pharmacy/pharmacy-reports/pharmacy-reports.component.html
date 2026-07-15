@@ -1,0 +1,20 @@
+<div class="hms-page">
+  <app-page-header title="Pharmacy Reports" subtitle="Sales, outstanding dues, and detailed sales/return/credit reports." />
+
+  <section class="hms-card-surface pharmacy-reports-tabs">
+    <mat-tab-group>
+      <mat-tab label="Sales Report">
+        <app-sales-report />
+      </mat-tab>
+      <mat-tab label="Sales Report with Dues">
+        <app-sales-report-dues />
+      </mat-tab>
+      <mat-tab label="Detailed Sales Report">
+        <app-detailed-sales-report />
+      </mat-tab>
+      <mat-tab label="Sales Return Report">
+        <app-sales-return-report />
+      </mat-tab>
+    </mat-tab-group>
+  </section>
+</div>

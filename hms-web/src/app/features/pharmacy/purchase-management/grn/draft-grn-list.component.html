@@ -1,0 +1,45 @@
+<div class="draft-grn-list-tab-body">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (entries().length > 0) {
+    <app-table-search placeholder="Search supplier or invoice no..." [value]="searchTerm()" (valueChange)="onSearch($event)" class="draft-grn-search" />
+  }
+
+  @if (!loading() && entries().length === 0) {
+    <app-empty-state icon="drafts" title="No draft GRNs" message="GRNs saved as draft will appear here for editing later." />
+  } @else if (filteredEntries().length === 0) {
+    <app-empty-state icon="search_off" title="No matches" message="No draft GRNs match your search." />
+  } @else if (filteredEntries().length > 0) {
+    <table mat-table [dataSource]="filteredEntries()" class="draft-grn-list-table">
+      <ng-container matColumnDef="supplierName">
+        <th mat-header-cell *matHeaderCellDef>Supplier Name</th>
+        <td mat-cell *matCellDef="let entry">{{ entry.supplierName }}</td>
+      </ng-container>
+      <ng-container matColumnDef="invoiceNo">
+        <th mat-header-cell *matHeaderCellDef>Invoice No</th>
+        <td mat-cell *matCellDef="let entry">{{ entry.invoiceNo }}</td>
+      </ng-container>
+      <ng-container matColumnDef="grnDate">
+        <th mat-header-cell *matHeaderCellDef>GRN Date</th>
+        <td mat-cell *matCellDef="let entry">{{ entry.grnDate }}</td>
+      </ng-container>
+      <ng-container matColumnDef="grnAmount">
+        <th mat-header-cell *matHeaderCellDef>GRN Amount</th>
+        <td mat-cell *matCellDef="let entry">{{ entry.grnAmount | number: '1.2-2' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef class="draft-grn-actions-header"></th>
+        <td mat-cell *matCellDef="let entry" class="draft-grn-actions-cell">
+          <div class="draft-grn-actions-row">
+            <button mat-stroked-button color="primary" type="button" (click)="editDraft(entry)">Edit</button>
+            <button mat-stroked-button color="warn" type="button" (click)="deleteDraft(entry)">Delete</button>
+          </div>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+  }
+</div>

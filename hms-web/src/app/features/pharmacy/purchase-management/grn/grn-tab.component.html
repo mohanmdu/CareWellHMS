@@ -1,0 +1,11 @@
+<mat-tab-group [selectedIndex]="tabIndex()" (selectedIndexChange)="onTabChange($event)">
+  <mat-tab label="Direct GRN">
+    <app-grn-form [grnId]="editingGrnId()" (saved)="onSaved()" />
+  </mat-tab>
+  <mat-tab label="Draft GRN">
+    <app-draft-grn-list (edit)="editDraft($event)" />
+  </mat-tab>
+  <mat-tab label="GRN Report">
+    <app-grn-list />
+  </mat-tab>
+</mat-tab-group>

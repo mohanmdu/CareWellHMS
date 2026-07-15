@@ -1,0 +1,35 @@
+package com.pms.pharmacy.entity;
+
+import com.pms.common.Auditable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+/**
+ * Physical dispensing/billing location for Pharmacy Billing (e.g. ER, IP,
+ * Major OT, Minor OT, Pharmacy) - deliberately separate from the clinical
+ * Department master (which only backs Consultant assignment).
+ */
+@Entity
+@Table(name = "pharmacy_location")
+@Getter
+@Setter
+@NoArgsConstructor
+public class PharmacyLocation extends Auditable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String name;
+
+    @Column(nullable = false)
+    private boolean active = true;
+}

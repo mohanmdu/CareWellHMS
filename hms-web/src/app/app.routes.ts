@@ -188,6 +188,41 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'pharmacy/purchase-management',
+        loadComponent: () =>
+          import('./features/pharmacy/purchase-management/purchase-management.component').then(
+            (m) => m.PurchaseManagementComponent
+          )
+      },
+      {
+        path: 'pharmacy/billing',
+        loadComponent: () =>
+          import('./features/pharmacy/pharmacy-billing/pharmacy-billing.component').then(
+            (m) => m.PharmacyBillingComponent
+          )
+      },
+      {
+        path: 'pharmacy/reports',
+        loadComponent: () =>
+          import('./features/pharmacy/pharmacy-reports/pharmacy-reports.component').then(
+            (m) => m.PharmacyReportsComponent
+          )
+      },
+      {
+        path: 'pharmacy/returns/new',
+        loadComponent: () =>
+          import('./features/pharmacy/pharmacy-returns/sales-return-entry.component').then(
+            (m) => m.SalesReturnEntryComponent
+          )
+      },
+      {
+        path: 'pharmacy/returns/approval',
+        loadComponent: () =>
+          import('./features/pharmacy/pharmacy-returns/sales-return-approval-list.component').then(
+            (m) => m.SalesReturnApprovalListComponent
+          )
+      },
+      {
         path: 'ip/rooms',
         loadComponent: () =>
           import('./features/ip-admission/rooms/room-catalog.component').then((m) => m.RoomCatalogComponent)

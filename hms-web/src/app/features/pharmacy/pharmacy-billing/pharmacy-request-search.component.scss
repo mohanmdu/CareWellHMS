@@ -1,0 +1,38 @@
+.request-search {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-4);
+}
+
+.request-search-section {
+  padding: var(--hms-space-4);
+}
+
+.request-search-patient-section {
+  padding: var(--hms-space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hms-space-3);
+}
+
+.request-search-patient-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.request-search-requests-section {
+  padding: var(--hms-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+}
+
+.request-search-requests-table {
+  width: 100%;
+}
+
+.request-search-others-row {
+  display: flex;
+  justify-content: flex-end;
+}

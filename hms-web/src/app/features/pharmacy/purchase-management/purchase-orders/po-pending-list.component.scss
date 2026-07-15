@@ -1,0 +1,23 @@
+.po-list-tab-body {
+  padding: var(--hms-space-4) var(--hms-space-2) var(--hms-space-2);
+}
+
+.po-list-table {
+  width: 100%;
+}
+
+.po-list-actions-cell {
+  text-align: right;
+}
+
+.po-list-actions-row {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+  justify-content: flex-end;
+}
+
+.po-list-actions-header {
+  width: 0;
+  white-space: nowrap;
+}

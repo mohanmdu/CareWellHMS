@@ -1,0 +1,49 @@
+.grn-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-4);
+  padding: var(--hms-space-4) var(--hms-space-2) var(--hms-space-2);
+}
+
+.grn-items-table {
+  width: 100%;
+}
+
+.grn-totals-row {
+  margin: 0;
+  font-weight: var(--hms-font-weight-semibold, 600);
+  text-align: right;
+}
+
+.grn-hint {
+  margin: 0;
+  color: var(--hms-color-text-muted, rgba(0, 0, 0, 0.6));
+  font-size: 0.875rem;
+}
+
+.grn-add-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--hms-space-3);
+}
+
+.grn-product-field {
+  flex: 1 1 220px;
+}
+
+.grn-narrow-field {
+  width: 110px;
+}
+
+// Wider than grn-narrow-field - "Expiry Date"/"Manufacture Date" plus the
+// datepicker toggle icon collapse/overlap the label at 110px.
+.grn-date-field {
+  width: 160px;
+}
+
+.grn-actions-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--hms-space-2);
+}

@@ -1,0 +1,65 @@
+<h2 mat-dialog-title>{{ title }}</h2>
+
+<mat-dialog-content class="po-print-dialog-content">
+  <div class="receipt" #printContent>
+    <div class="receipt-header">
+      @if (clinicSettings()?.logoUrl; as logo) {
+        <img [src]="logo" alt="" class="receipt-logo" />
+      }
+      <div class="receipt-clinic-info">
+        <strong class="receipt-clinic-name">{{ clinicSettings()?.name ?? 'Hospital' }}</strong>
+        @if (clinicSettings()?.address) {
+          <span>{{ clinicSettings()?.address }}</span>
+        }
+      </div>
+    </div>
+
+    <div class="receipt-meta">
+      <span>PO No: {{ purchaseOrder.poNumber }}</span>
+      <span>Date: {{ purchaseOrder.createdAt | date: 'dd-MM-yyyy' }}</span>
+    </div>
+    <div class="receipt-meta">
+      <span>Supplier: {{ purchaseOrder.supplierName }}</span>
+      @if (purchaseOrder.supplierContactPersonName) {
+        <span>Contact: {{ purchaseOrder.supplierContactPersonName }}</span>
+      }
+    </div>
+    <div class="receipt-meta">
+      <span>Address: {{ purchaseOrder.supplierAddress }}</span>
+      <span>Mobile: {{ purchaseOrder.supplierMobileNumber }}</span>
+    </div>
+
+    <table class="receipt-items-table">
+      <thead>
+        <tr>
+          <th>S.No</th>
+          <th>Drug Name</th>
+          <th>Drug Type</th>
+          <th>Quantity</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of purchaseOrder.items; track item.id; let i = $index) {
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td>{{ item.productName }}</td>
+            <td>{{ item.productTypeName }}</td>
+            <td>{{ item.orderQty ?? item.totalQty }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (purchaseOrder.comments) {
+      <p class="receipt-remarks">Comments: {{ purchaseOrder.comments }}</p>
+    }
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="print()">
+    <mat-icon aria-hidden="true">print</mat-icon>
+    Print
+  </button>
+  <button mat-flat-button color="primary" type="button" (click)="close()">Done</button>
+</mat-dialog-actions>

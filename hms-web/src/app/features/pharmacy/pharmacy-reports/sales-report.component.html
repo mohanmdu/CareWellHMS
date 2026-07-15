@@ -1,0 +1,89 @@
+<div class="sales-report">
+  <div class="sales-report-filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>From date</mat-label>
+      <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" (ngModelChange)="refresh()" />
+      <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+      <mat-datepicker #fromPicker />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>To date</mat-label>
+      <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" (ngModelChange)="refresh()" />
+      <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+      <mat-datepicker #toPicker />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Type</mat-label>
+      <mat-select [(ngModel)]="source" (ngModelChange)="refresh()">
+        @for (filter of sourceFilters; track filter.label) {
+          <mat-option [value]="filter.value">{{ filter.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Mode</mat-label>
+      <mat-select [(ngModel)]="paymentMode" (ngModelChange)="refresh()">
+        @for (filter of modeFilters; track filter.label) {
+          <mat-option [value]="filter.value">{{ filter.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Location</mat-label>
+      <mat-select [(ngModel)]="locationId" (ngModelChange)="refresh()">
+        <mat-option [value]="null">All</mat-option>
+        @for (location of locations(); track location.id) {
+          <mat-option [value]="location.id">{{ location.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Pharmacy User</mat-label>
+      <input matInput [(ngModel)]="billedBy" (ngModelChange)="refresh()" />
+    </mat-form-field>
+  </div>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading() && entries().length === 0) {
+    <app-empty-state icon="receipt_long" title="No sales" message="No pharmacy sales match these filters." />
+  } @else if (entries().length > 0) {
+    <table mat-table [dataSource]="entries()" class="sales-report-table">
+      <ng-container matColumnDef="billNumber">
+        <th mat-header-cell *matHeaderCellDef>Bill No</th>
+        <td mat-cell *matCellDef="let entry">
+          <a href="javascript:void(0)" (click)="viewBill(entry)">{{ entry.billNumber }}</a>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="patientName">
+        <th mat-header-cell *matHeaderCellDef>Customer Name</th>
+        <td mat-cell *matCellDef="let entry">{{ entry.patientName }}</td>
+      </ng-container>
+      <ng-container matColumnDef="source">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let entry">{{ entry.source }}</td>
+      </ng-container>
+      <ng-container matColumnDef="paymentMode">
+        <th mat-header-cell *matHeaderCellDef>Payment Mode</th>
+        <td mat-cell *matCellDef="let entry">{{ entry.paymentMode }}</td>
+      </ng-container>
+      <ng-container matColumnDef="billedAt">
+        <th mat-header-cell *matHeaderCellDef>Date &amp; Time</th>
+        <td mat-cell *matCellDef="let entry">{{ entry.billedAt | date: 'dd-MM-yyyy HH:mm' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="billedBy">
+        <th mat-header-cell *matHeaderCellDef>Updated By</th>
+        <td mat-cell *matCellDef="let entry">{{ entry.billedBy }}</td>
+      </ng-container>
+      <ng-container matColumnDef="totalAmount">
+        <th mat-header-cell *matHeaderCellDef>Amount</th>
+        <td mat-cell *matCellDef="let entry">{{ entry.totalAmount | number: '1.2-2' }}</td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+    <p class="sales-report-total">Total Amount: {{ totalAmount() | number: '1.2-2' }}</p>
+  }
+</div>

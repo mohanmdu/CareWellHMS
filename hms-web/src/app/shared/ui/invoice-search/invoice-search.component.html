@@ -1,0 +1,20 @@
+<div class="invoice-search">
+  <form class="hms-inline-actions" (ngSubmit)="search()">
+    <mat-form-field appearance="outline" class="invoice-search-field" subscriptSizing="dynamic">
+      <mat-label>Invoice Number</mat-label>
+      <input matInput type="number" name="billNumberInput" [(ngModel)]="billNumberInput" />
+      <mat-icon matPrefix aria-hidden="true">receipt_long</mat-icon>
+    </mat-form-field>
+    <button mat-flat-button color="primary" type="submit">Submit</button>
+  </form>
+
+  @if (searching()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!searching() && notFound()) {
+    <app-empty-state icon="search_off" title="Invoice not found" message="Check the Invoice Number and try again." />
+  } @else if (!searching()) {
+    <app-empty-state icon="receipt_long" title="Search for an invoice" message="Enter the Invoice Number to load its billed items." />
+  }
+</div>

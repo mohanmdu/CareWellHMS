@@ -57,7 +57,14 @@ export const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: 'Pharmacy',
-    items: [{ label: 'Inventory Master', route: '/pharmacy/inventory-master', icon: 'inventory_2' }]
+    items: [
+      { label: 'Inventory Master', route: '/pharmacy/inventory-master', icon: 'inventory_2' },
+      { label: 'Purchase Management', route: '/pharmacy/purchase-management', icon: 'shopping_cart' },
+      { label: 'Pharmacy Billing', route: '/pharmacy/billing', icon: 'point_of_sale' },
+      { label: 'Sales Return', route: '/pharmacy/returns/new', icon: 'assignment_return' },
+      { label: 'Sales Return Approval', route: '/pharmacy/returns/approval', icon: 'fact_check' },
+      { label: 'Pharmacy Reports', route: '/pharmacy/reports', icon: 'summarize' }
+    ]
   },
   {
     label: 'IP Admission',

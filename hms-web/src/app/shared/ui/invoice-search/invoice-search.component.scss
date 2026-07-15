@@ -1,0 +1,10 @@
+.invoice-search {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-4);
+}
+
+.invoice-search-field {
+  min-width: 220px;
+  flex: 1 1 220px;
+}

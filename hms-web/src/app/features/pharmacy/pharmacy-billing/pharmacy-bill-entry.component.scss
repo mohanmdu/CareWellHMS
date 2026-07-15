@@ -1,0 +1,71 @@
+.bill-entry {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-4);
+}
+
+.bill-entry-patient-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  td {
+    padding: var(--hms-space-1) var(--hms-space-2);
+  }
+}
+
+.bill-entry-items,
+.bill-entry-patient,
+.bill-entry-billing-info,
+.bill-entry-discount-info {
+  padding: var(--hms-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+}
+
+.bill-entry-table {
+  width: 100%;
+}
+
+.bill-entry-total {
+  margin: 0;
+  font-weight: var(--hms-font-weight-semibold, 600);
+  text-align: right;
+}
+
+.bill-entry-add-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--hms-space-3);
+}
+
+.bill-entry-product-field {
+  flex: 1 1 260px;
+}
+
+.bill-entry-narrow-field {
+  width: 110px;
+}
+
+.bill-entry-info-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--hms-space-4);
+}
+
+.bill-entry-full-field {
+  grid-column: 1 / -1;
+}
+
+.bill-entry-grand-total {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: var(--hms-font-weight-semibold, 600);
+  text-align: right;
+}
+
+.bill-entry-submit-row {
+  display: flex;
+  justify-content: flex-end;
+}
