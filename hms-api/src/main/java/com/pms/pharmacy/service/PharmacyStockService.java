@@ -38,6 +38,11 @@ public class PharmacyStockService {
                 .toList();
     }
 
+    /** Rich multi-column autocomplete for Stock Adjustment / Batch-wise Stock Modifier / Purchase Return. */
+    public List<PharmacyStockDto> search(String search) {
+        return repository.search(search).stream().map(this::toDto).toList();
+    }
+
     @Transactional
     public void creditFromGrnItem(GrnItem grnItem) {
         PharmacyStock stock = new PharmacyStock();
@@ -73,6 +78,55 @@ public class PharmacyStockService {
         repository.save(stock);
     }
 
+    /** Signed adjustment for Internal Receipt (always positive) / Stock Adjustment (either sign). */
+    @Transactional
+    public PharmacyStock adjust(Long stockId, int delta) {
+        PharmacyStock stock = getOrThrow(stockId);
+        int newQuantity = stock.getQuantityOnHand() + delta;
+        if (newQuantity < 0) {
+            throw new IllegalArgumentException(
+                    "Adjustment would take " + stock.getProductName() + " (batch " + stock.getBatch() + ") below zero - only "
+                            + stock.getQuantityOnHand() + " available");
+        }
+        stock.setQuantityOnHand(newQuantity);
+        return repository.save(stock);
+    }
+
+    @Transactional
+    public PharmacyStockDto updatePacking(Long stockId, int quantityOnHand, int packing) {
+        PharmacyStock stock = getOrThrow(stockId);
+        stock.setQuantityOnHand(quantityOnHand);
+        stock.setPacking(packing);
+        return toDto(repository.save(stock));
+    }
+
+    @Transactional
+    public PharmacyStockDto updateMrp(Long stockId, double mrp) {
+        PharmacyStock stock = getOrThrow(stockId);
+        stock.setMrp(mrp);
+        return toDto(repository.save(stock));
+    }
+
+    /**
+     * Guards GrnService.delete() for an already-APPROVED Grn - deleting one
+     * reverses the receipt entirely (including removing the stock row), so
+     * it's only safe while nothing has been sold/adjusted/returned from it yet.
+     */
+    public void assertUntouchedSinceGrn(GrnItem grnItem) {
+        PharmacyStock stock = repository.findByGrnItemId(grnItem.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Pharmacy Stock not found for GRN item: " + grnItem.getId()));
+        int originallyCredited = grnItem.getTotalQty() + grnItem.getFreeQty();
+        if (stock.getQuantityOnHand() != originallyCredited) {
+            throw new IllegalArgumentException(
+                    "Cannot delete GRN - stock for " + stock.getProductName() + " (batch " + stock.getBatch() + ") has already moved.");
+        }
+    }
+
+    @Transactional
+    public void deleteForGrnItem(GrnItem grnItem) {
+        repository.findByGrnItemId(grnItem.getId()).ifPresent(repository::delete);
+    }
+
     private PharmacyStock getOrThrow(Long id) {
         return repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Pharmacy Stock not found: " + id));
     }
@@ -88,6 +142,7 @@ public class PharmacyStockService {
                 stock.getManufactureDate(),
                 stock.getMrp(),
                 stock.getPurchaseRate(),
-                stock.getQuantityOnHand());
+                stock.getQuantityOnHand(),
+                stock.getPacking());
     }
 }

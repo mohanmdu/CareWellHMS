@@ -1,0 +1,115 @@
+<div class="stock-adjustment-report">
+  <div class="stock-adjustment-report-filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Location Name</mat-label>
+      <mat-select [(ngModel)]="locationId" (ngModelChange)="refresh()">
+        <mat-option [value]="null">All</mat-option>
+        @for (location of locations(); track location.id) {
+          <mat-option [value]="location.id">{{ location.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>From</mat-label>
+      <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" (ngModelChange)="refresh()" />
+      <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+      <mat-datepicker #fromPicker />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>To</mat-label>
+      <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" (ngModelChange)="refresh()" />
+      <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+      <mat-datepicker #toPicker />
+    </mat-form-field>
+    <button mat-flat-button color="primary" type="button" (click)="refresh()">Submit</button>
+  </div>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  <div #reportContent>
+    <h2>Stock Adjustment</h2>
+    @if (adjustments().length === 0) {
+      <app-empty-state icon="tune" title="No stock adjustments" message="No stock adjustments match these filters." />
+    } @else {
+      <table mat-table [dataSource]="adjustments()" class="stock-adjustment-report-table">
+        <ng-container matColumnDef="productName">
+          <th mat-header-cell *matHeaderCellDef>Product Name</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.productName }}</td>
+        </ng-container>
+        <ng-container matColumnDef="batch">
+          <th mat-header-cell *matHeaderCellDef>Batch No</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.batch }}</td>
+        </ng-container>
+        <ng-container matColumnDef="typeCode">
+          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <td mat-cell *matCellDef="let entry">{{ typeCode(entry) }}</td>
+        </ng-container>
+        <ng-container matColumnDef="quantity">
+          <th mat-header-cell *matHeaderCellDef>Qty</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.quantity }}</td>
+        </ng-container>
+        <ng-container matColumnDef="locationName">
+          <th mat-header-cell *matHeaderCellDef>Location</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.locationName }}</td>
+        </ng-container>
+        <ng-container matColumnDef="updatedBy">
+          <th mat-header-cell *matHeaderCellDef>Updated By</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.updatedBy }}</td>
+        </ng-container>
+        <ng-container matColumnDef="updatedAt">
+          <th mat-header-cell *matHeaderCellDef>Updated Date</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.updatedAt | date: 'dd-MM-yyyy HH:mm' }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    }
+
+    <h2>Intern Receipt</h2>
+    @if (internalReceipts().length === 0) {
+      <app-empty-state icon="move_to_inbox" title="No internal receipts" message="No internal receipts match these filters." />
+    } @else {
+      <table mat-table [dataSource]="internalReceipts()" class="stock-adjustment-report-table">
+        <ng-container matColumnDef="productName">
+          <th mat-header-cell *matHeaderCellDef>Product Name</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.productName }}</td>
+        </ng-container>
+        <ng-container matColumnDef="batch">
+          <th mat-header-cell *matHeaderCellDef>Batch No</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.batch }}</td>
+        </ng-container>
+        <ng-container matColumnDef="typeCode">
+          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <td mat-cell *matCellDef="let entry">{{ typeCode(entry) }}</td>
+        </ng-container>
+        <ng-container matColumnDef="quantity">
+          <th mat-header-cell *matHeaderCellDef>Qty</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.quantity }}</td>
+        </ng-container>
+        <ng-container matColumnDef="locationName">
+          <th mat-header-cell *matHeaderCellDef>Location</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.locationName }}</td>
+        </ng-container>
+        <ng-container matColumnDef="updatedBy">
+          <th mat-header-cell *matHeaderCellDef>Updated By</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.updatedBy }}</td>
+        </ng-container>
+        <ng-container matColumnDef="updatedAt">
+          <th mat-header-cell *matHeaderCellDef>Updated Date</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.updatedAt | date: 'dd-MM-yyyy HH:mm' }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    }
+  </div>
+
+  <div class="stock-adjustment-report-print-row">
+    <button mat-flat-button type="button" (click)="print()">
+      <mat-icon aria-hidden="true">print</mat-icon>
+      Print
+    </button>
+  </div>
+</div>

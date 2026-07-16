@@ -1,0 +1,22 @@
+.stock-adjustment-report {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-4) var(--hms-space-2) var(--hms-space-2);
+}
+
+.stock-adjustment-report-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hms-space-3);
+}
+
+.stock-adjustment-report-table {
+  width: 100%;
+  margin-bottom: var(--hms-space-4);
+}
+
+.stock-adjustment-report-print-row {
+  display: flex;
+  justify-content: center;
+}

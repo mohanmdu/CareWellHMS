@@ -57,9 +57,16 @@ export interface GrnListEntry {
   id: number;
   supplierName: string;
   invoiceNo: string;
+  invoiceDate: string;
+  netAmount: number;
+  sgstAmount: number;
+  cgstAmount: number;
+  invoiceAmount: number;
   grnDate: string;
   grnAmount: number;
   status: GrnStatus;
+  createdBy: string | null;
+  createdAt: string;
 }
 
 export interface GrnItemRequest {

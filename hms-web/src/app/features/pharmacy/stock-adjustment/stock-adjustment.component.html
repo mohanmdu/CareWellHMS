@@ -1,0 +1,19 @@
+<div class="hms-page">
+  <app-page-header title="Stock Adjustment" subtitle="Internal Receipt / Stock Adjustment, by location, and batch-wise corrections." />
+
+  <section class="hms-card-surface stock-adjustment-tabs">
+    <mat-tab-group>
+      <mat-tab label="Stock Adjustment">
+        @if (mainStoreLocationId()) {
+          <app-stock-adjustment-form [locationId]="mainStoreLocationId()!" locationName="Main Store" />
+        }
+      </mat-tab>
+      <mat-tab label="Stock Adjustment by Location">
+        <app-stock-adjustment-by-location />
+      </mat-tab>
+      <mat-tab label="Batch-wise Stock Modifier">
+        <app-batch-stock-modifier />
+      </mat-tab>
+    </mat-tab-group>
+  </section>
+</div>

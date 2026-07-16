@@ -23,4 +23,12 @@ public interface PharmacyReturnItemRepository extends JpaRepository<PharmacyRetu
             ORDER BY i.pharmacyReturn.approvedAt DESC
             """)
     List<PharmacyReturnItem> searchApprovedLines(@Param("fromInstant") Instant fromInstant, @Param("toInstant") Instant toInstant);
+
+    /** Stock Balance Report's "Return Qty" - total approved customer returns for a product. */
+    @Query("""
+            SELECT COALESCE(SUM(i.quantity), 0) FROM PharmacyReturnItem i
+            WHERE i.saleItem.stock.product.id = :productId
+              AND i.pharmacyReturn.status = com.pms.pharmacy.entity.PharmacyReturnStatus.APPROVED
+            """)
+    int sumApprovedQuantityByProductId(@Param("productId") Long productId);
 }

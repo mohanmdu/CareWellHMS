@@ -54,7 +54,7 @@ export class AppShellComponent {
   constructor() {
     effect(() => {
       this.sidenavOpened.set(!this.isHandset());
-    });
+    }, { allowSignalWrites: true });
   }
 
   toggleSidenav(): void {

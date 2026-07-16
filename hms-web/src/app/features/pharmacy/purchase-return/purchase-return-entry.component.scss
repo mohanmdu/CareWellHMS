@@ -1,0 +1,41 @@
+.hms-page > * + * {
+  margin-top: var(--hms-space-4);
+}
+
+.purchase-return-filters,
+.purchase-return-entry-section,
+.purchase-return-stock-section {
+  padding: var(--hms-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+}
+
+.purchase-return-filters {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.purchase-return-table {
+  width: 100%;
+}
+
+.purchase-return-total {
+  margin: 0;
+  font-weight: var(--hms-font-weight-semibold, 600);
+  text-align: right;
+}
+
+.purchase-return-remarks-field {
+  grid-column: 1 / -1;
+}
+
+.purchase-return-confirm-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.purchase-return-qty-field {
+  width: 90px;
+}

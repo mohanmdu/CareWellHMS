@@ -1,0 +1,89 @@
+<h2 mat-dialog-title>Purchase Return Receipt</h2>
+
+<mat-dialog-content class="purchase-return-print-dialog-content">
+  <div class="purchase-return-receipt" #printContent>
+    <div class="purchase-return-header-row">
+      <div>
+        <strong>{{ clinicSettings()?.name ?? 'Hospital' }}</strong>
+        @if (clinicSettings()?.address) {
+          <div>{{ clinicSettings()?.address }}</div>
+        }
+        @if (clinicSettings()?.phone) {
+          <div>Ph: {{ clinicSettings()?.phone }}</div>
+        }
+      </div>
+      <div>
+        <div>Return No: {{ purchaseReturn.id }}</div>
+        <div>Return Date: {{ purchaseReturn.createdAt | date: 'dd-MM-yyyy HH:mm' }}</div>
+      </div>
+    </div>
+
+    <div class="purchase-return-title">Purchase Return Receipt</div>
+
+    <div class="purchase-return-meta">
+      <span>Return Type: {{ returnTypeLabels[purchaseReturn.returnType] }}</span>
+      @if (purchaseReturn.remarks) {
+        <span>Remarks: {{ purchaseReturn.remarks }}</span>
+      }
+    </div>
+
+    <div class="purchase-return-supplier-card">
+      <strong>Supplier Details</strong>
+      <div>{{ purchaseReturn.supplierName }}</div>
+      @if (purchaseReturn.supplierAddress) {
+        <div>{{ purchaseReturn.supplierAddress }}</div>
+      }
+      @if (purchaseReturn.supplierMobileNumber) {
+        <div>Ph.No: {{ purchaseReturn.supplierMobileNumber }}</div>
+      }
+    </div>
+
+    <table class="purchase-return-items-table">
+      <thead>
+        <tr>
+          <th>S.No</th>
+          <th>P.Name</th>
+          <th>Batch No</th>
+          <th>Return Qty</th>
+          <th>MRP</th>
+          <th>Net Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of purchaseReturn.items; track item.id; let i = $index) {
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td>{{ item.productName }}</td>
+            <td>{{ item.batch }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.mrp | number: '1.2-2' }}</td>
+            <td>{{ item.netAmount | number: '1.2-2' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <div class="purchase-return-totals">
+      <span>Total Amount: Rs. {{ purchaseReturn.totalAmount | number: '1.2-2' }}</span>
+    </div>
+    <p>{{ amountInWords }} Only</p>
+
+    <p class="purchase-return-signature">{{ purchaseReturn.returnedBy }}<br />Pharmacist</p>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="printA4()">
+    <mat-icon aria-hidden="true">print</mat-icon>
+    Print
+  </button>
+  <button mat-button type="button" (click)="printDotMatrix()">
+    <mat-icon aria-hidden="true">print</mat-icon>
+    Dot Matrix Print
+  </button>
+  <button mat-button type="button" (click)="printThermal()">
+    <mat-icon aria-hidden="true">print</mat-icon>
+    Thermal Print
+  </button>
+  <button mat-flat-button color="primary" type="button" (click)="close()">Done</button>
+</mat-dialog-actions>

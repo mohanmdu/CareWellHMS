@@ -149,7 +149,7 @@ export class GrnFormComponent {
       if (id) {
         this.loadForView(id);
       }
-    });
+    }, { allowSignalWrites: true });
   }
 
   private loadForView(id: number): void {

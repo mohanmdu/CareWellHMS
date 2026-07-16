@@ -66,6 +66,10 @@ public class PharmacyStock extends Auditable {
     @Column(name = "quantity_on_hand", nullable = false)
     private int quantityOnHand;
 
+    // Live-editable "Qty per Pack" for Batch-wise Stock Modifier - distinct from
+    // GrnItem.packing, which is a receipt-time historical snapshot.
+    private Integer packing = 1;
+
     @Version
     private long version;
 }

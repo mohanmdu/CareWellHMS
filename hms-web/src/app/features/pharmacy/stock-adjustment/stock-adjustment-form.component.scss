@@ -1,0 +1,46 @@
+.stock-adjustment-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-4);
+  padding: var(--hms-space-2) var(--hms-space-2) var(--hms-space-4);
+}
+
+.stock-adjustment-header-row {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-4);
+}
+
+.stock-adjustment-type-field {
+  min-width: 240px;
+}
+
+.stock-adjustment-location-badge {
+  font-weight: var(--hms-font-weight-medium);
+  color: var(--hms-color-text-muted);
+}
+
+.stock-adjustment-table {
+  width: 100%;
+}
+
+.stock-adjustment-add-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--hms-space-3);
+}
+
+.stock-adjustment-narrow-field {
+  width: 130px;
+}
+
+.stock-adjustment-footer-row {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-3);
+}
+
+.stock-adjustment-reason-field {
+  flex: 1 1 320px;
+}

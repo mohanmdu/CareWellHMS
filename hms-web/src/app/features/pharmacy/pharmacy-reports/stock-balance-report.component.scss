@@ -1,0 +1,10 @@
+.stock-balance-report {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-4) var(--hms-space-2) var(--hms-space-2);
+}
+
+.stock-balance-report-table {
+  width: 100%;
+}

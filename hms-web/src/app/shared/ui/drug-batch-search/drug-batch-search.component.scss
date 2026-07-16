@@ -1,0 +1,19 @@
+.drug-batch-search-field {
+  min-width: 260px;
+  flex: 1 1 260px;
+}
+
+.drug-batch-option {
+  height: auto !important;
+  line-height: normal !important;
+  padding-top: var(--hms-space-2, 8px);
+  padding-bottom: var(--hms-space-2, 8px);
+}
+
+.drug-batch-option-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: var(--hms-space-2, 8px);
+  width: 100%;
+  font-size: 0.85rem;
+}

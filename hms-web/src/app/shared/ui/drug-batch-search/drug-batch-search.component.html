@@ -1,0 +1,19 @@
+<mat-form-field appearance="outline" subscriptSizing="dynamic" class="drug-batch-search-field">
+  <mat-label>Drug Name</mat-label>
+  <input matInput [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" [matAutocomplete]="auto" placeholder="Enter the name" />
+  <mat-autocomplete #auto="matAutocomplete" (optionSelected)="select($event.option.value)">
+    @for (stock of results(); track stock.id) {
+      <mat-option [value]="stock" class="drug-batch-option">
+        <div class="drug-batch-option-row">
+          <span class="drug-batch-col-name">{{ stock.productName }}</span>
+          <span class="drug-batch-col-batch">{{ stock.batch ?? '-' }}</span>
+          <span class="drug-batch-col-qty">Qty {{ stock.quantityOnHand }}</span>
+          <span class="drug-batch-col-mrp">MRP {{ stock.mrp ?? '-' }}</span>
+          <span class="drug-batch-col-exp">{{ stock.expiryDate ?? '-' }}</span>
+        </div>
+      </mat-option>
+    } @empty {
+      <mat-option disabled>No matching batches</mat-option>
+    }
+  </mat-autocomplete>
+</mat-form-field>

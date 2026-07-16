@@ -13,5 +13,6 @@ public record PharmacyStockDto(
         LocalDate manufactureDate,
         Double mrp,
         Double purchaseRate,
-        int quantityOnHand) {
+        int quantityOnHand,
+        Integer packing) {
 }

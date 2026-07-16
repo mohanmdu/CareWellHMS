@@ -9,4 +9,17 @@ export interface PharmacyStock {
   mrp: number | null;
   purchaseRate: number | null;
   quantityOnHand: number;
+  packing: number | null;
+}
+
+/** One row of the Stock Balance Report - the closing-stock formula per product. */
+export interface StockBalanceEntry {
+  productId: number;
+  productName: string;
+  openingStock: number;
+  saleQty: number;
+  returnQty: number;
+  internReceiptQty: number;
+  stockAdjustmentQty: number;
+  closingStock: number;
 }

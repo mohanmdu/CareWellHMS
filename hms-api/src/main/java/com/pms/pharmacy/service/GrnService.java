@@ -78,11 +78,22 @@ public class GrnService {
         return toDto(saved);
     }
 
+    /**
+     * DRAFT GRNs delete freely. An APPROVED GRN may only be deleted if none of
+     * its credited stock has moved since receipt (nothing sold/adjusted/
+     * returned from it yet) - deleting reverses the receipt entirely, including
+     * removing the stock rows it created.
+     */
     @Transactional
     public void delete(Long id) {
         Grn grn = getOrThrow(id);
         if (grn.getStatus() == GrnStatus.APPROVED) {
-            throw new IllegalArgumentException("GRN #" + id + " is already approved and cannot be deleted.");
+            for (GrnItem item : grn.getItems()) {
+                stockService.assertUntouchedSinceGrn(item);
+            }
+            for (GrnItem item : grn.getItems()) {
+                stockService.deleteForGrnItem(item);
+            }
         }
         repository.delete(grn);
     }
@@ -173,8 +184,23 @@ public class GrnService {
     }
 
     private GrnListEntryDto toListEntry(Grn grn) {
+        double sgstAmount = grn.getItems().stream().mapToDouble(GrnItem::getSgstAmount).sum();
+        double cgstAmount = grn.getItems().stream().mapToDouble(GrnItem::getCgstAmount).sum();
+        double netAmount = grn.getInvoiceAmount() - sgstAmount - cgstAmount;
         return new GrnListEntryDto(
-                grn.getId(), grn.getSupplier().getName(), grn.getInvoiceNo(), grn.getGrnDate(), grn.getGrnAmount(), grn.getStatus());
+                grn.getId(),
+                grn.getSupplier().getName(),
+                grn.getInvoiceNo(),
+                grn.getInvoiceDate(),
+                netAmount,
+                sgstAmount,
+                cgstAmount,
+                grn.getInvoiceAmount(),
+                grn.getGrnDate(),
+                grn.getGrnAmount(),
+                grn.getStatus(),
+                grn.getCreatedBy(),
+                grn.getCreatedAt());
     }
 
     private GrnDto toDto(Grn grn) {

@@ -223,6 +223,20 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'pharmacy/stock-adjustment',
+        loadComponent: () =>
+          import('./features/pharmacy/stock-adjustment/stock-adjustment.component').then(
+            (m) => m.StockAdjustmentComponent
+          )
+      },
+      {
+        path: 'pharmacy/purchase-return',
+        loadComponent: () =>
+          import('./features/pharmacy/purchase-return/purchase-return-entry.component').then(
+            (m) => m.PurchaseReturnEntryComponent
+          )
+      },
+      {
         path: 'ip/rooms',
         loadComponent: () =>
           import('./features/ip-admission/rooms/room-catalog.component').then((m) => m.RoomCatalogComponent)

@@ -1,0 +1,42 @@
+<div class="stock-balance-report">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading() && entries().length === 0) {
+    <app-empty-state icon="inventory_2" title="No products" message="No active products found in Product Master." />
+  } @else if (entries().length > 0) {
+    <table mat-table [dataSource]="entries()" class="stock-balance-report-table">
+      <ng-container matColumnDef="productName">
+        <th mat-header-cell *matHeaderCellDef>Product Name</th>
+        <td mat-cell *matCellDef="let entry">{{ entry.productName }}</td>
+      </ng-container>
+      <ng-container matColumnDef="openingStock">
+        <th mat-header-cell *matHeaderCellDef>Opening Stock</th>
+        <td mat-cell *matCellDef="let entry">{{ entry.openingStock }}</td>
+      </ng-container>
+      <ng-container matColumnDef="saleQty">
+        <th mat-header-cell *matHeaderCellDef>Sale Qty</th>
+        <td mat-cell *matCellDef="let entry">{{ entry.saleQty }}</td>
+      </ng-container>
+      <ng-container matColumnDef="returnQty">
+        <th mat-header-cell *matHeaderCellDef>Return Qty</th>
+        <td mat-cell *matCellDef="let entry">{{ entry.returnQty }}</td>
+      </ng-container>
+      <ng-container matColumnDef="internReceiptQty">
+        <th mat-header-cell *matHeaderCellDef>Intern Receipt</th>
+        <td mat-cell *matCellDef="let entry">{{ entry.internReceiptQty }}</td>
+      </ng-container>
+      <ng-container matColumnDef="stockAdjustmentQty">
+        <th mat-header-cell *matHeaderCellDef>Stock Adjustment</th>
+        <td mat-cell *matCellDef="let entry">{{ entry.stockAdjustmentQty }}</td>
+      </ng-container>
+      <ng-container matColumnDef="closingStock">
+        <th mat-header-cell *matHeaderCellDef>Closing Stock</th>
+        <td mat-cell *matCellDef="let entry">{{ entry.closingStock }}</td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+  }
+</div>

@@ -1,0 +1,25 @@
+@if (!selectedLocation()) {
+  <div class="department-list-section">
+    <h3>Department List</h3>
+    @if (departmentTiles().length === 0) {
+      <app-empty-state icon="apartment" title="No departments available" message="IP/OP locations are not set up yet." />
+    } @else {
+      <div class="department-tile-grid">
+        @for (location of departmentTiles(); track location.id) {
+          <button mat-stroked-button type="button" class="department-tile" (click)="selectDepartment(location)">
+            <mat-icon aria-hidden="true">apartment</mat-icon>
+            {{ location.name }}
+          </button>
+        }
+      </div>
+    }
+  </div>
+} @else {
+  <div class="department-back-row">
+    <button mat-button type="button" (click)="changeDepartment()">
+      <mat-icon aria-hidden="true">arrow_back</mat-icon>
+      Change Department
+    </button>
+  </div>
+  <app-stock-adjustment-form [locationId]="selectedLocation()!.id!" [locationName]="selectedLocation()!.name" />
+}

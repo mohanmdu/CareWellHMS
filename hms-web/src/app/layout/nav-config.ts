@@ -63,6 +63,8 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: 'Pharmacy Billing', route: '/pharmacy/billing', icon: 'point_of_sale' },
       { label: 'Sales Return', route: '/pharmacy/returns/new', icon: 'assignment_return' },
       { label: 'Sales Return Approval', route: '/pharmacy/returns/approval', icon: 'fact_check' },
+      { label: 'Stock Adjustment', route: '/pharmacy/stock-adjustment', icon: 'tune' },
+      { label: 'Purchase Return', route: '/pharmacy/purchase-return', icon: 'undo' },
       { label: 'Pharmacy Reports', route: '/pharmacy/reports', icon: 'summarize' }
     ]
   },
