@@ -2,7 +2,20 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { PharmacySale, PharmacySaleListEntry, PharmacySaleRequest, PharmacySaleSource } from './pharmacy-sale.model';
+import {
+  PharmacySale,
+  PharmacySaleListEntry,
+  PharmacySalePaymentRequest,
+  PharmacySaleRequest,
+  PharmacySaleSource
+} from './pharmacy-sale.model';
+
+export interface PharmacySaleDueFilter {
+  source?: PharmacySaleSource;
+  locationId?: number;
+  pid?: string;
+  nameOrMobile?: string;
+}
 
 export interface PharmacySaleSearchFilter {
   fromDate?: string;
@@ -29,9 +42,17 @@ export class PharmacySaleService {
     return this.http.get<PharmacySaleListEntry[]>(this.baseUrl, { params });
   }
 
-  due(source?: PharmacySaleSource): Observable<PharmacySaleListEntry[]> {
-    const params = source ? new HttpParams().set('source', source) : undefined;
+  due(filter?: PharmacySaleDueFilter): Observable<PharmacySaleListEntry[]> {
+    let params = new HttpParams();
+    if (filter?.source) params = params.set('source', filter.source);
+    if (filter?.locationId) params = params.set('locationId', filter.locationId);
+    if (filter?.pid) params = params.set('pid', filter.pid);
+    if (filter?.nameOrMobile) params = params.set('nameOrMobile', filter.nameOrMobile);
     return this.http.get<PharmacySaleListEntry[]>(`${this.baseUrl}/due`, { params });
+  }
+
+  pay(id: number, request: PharmacySalePaymentRequest): Observable<PharmacySale> {
+    return this.http.patch<PharmacySale>(`${this.baseUrl}/${id}/payment`, request);
   }
 
   get(id: number): Observable<PharmacySale> {

@@ -4,3 +4,69 @@
   min-width: 560px;
   max-height: 70vh;
 }
+
+// On-screen preview only - the three print buttons each apply their own
+// dedicated style constant (A4/Dot Matrix/Thermal) inside the popup window.
+.purchase-return-receipt {
+  border: 1px solid var(--hms-color-border, #ccc);
+  padding: var(--hms-space-3);
+  font-size: 0.85rem;
+}
+
+.purchase-return-header-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--hms-space-4);
+  align-items: flex-start;
+  padding-bottom: var(--hms-space-2);
+  border-bottom: 1px solid var(--hms-color-border, #ccc);
+}
+
+.purchase-return-title {
+  text-align: center;
+  font-weight: 700;
+  text-decoration: underline;
+  margin: var(--hms-space-2) 0;
+}
+
+.purchase-return-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--hms-space-3);
+  margin: 2px 0 var(--hms-space-2);
+}
+
+.purchase-return-supplier-card {
+  border: 1px solid var(--hms-color-border, #ccc);
+  padding: var(--hms-space-2);
+  margin-bottom: var(--hms-space-2);
+}
+
+.purchase-return-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--hms-space-2);
+
+  th,
+  td {
+    border: 1px solid var(--hms-color-border, #ccc);
+    padding: 3px 6px;
+    text-align: left;
+  }
+
+  th:last-child,
+  td:last-child {
+    text-align: right;
+  }
+}
+
+.purchase-return-totals {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--hms-space-2);
+}
+
+.purchase-return-signature {
+  text-align: right;
+  margin-top: var(--hms-space-5, 32px);
+}

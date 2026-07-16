@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ClinicSettings } from './clinic-settings.model';
 
-export type ClinicSettingsInput = Pick<ClinicSettings, 'name' | 'address' | 'phone' | 'email'>;
+export type ClinicSettingsInput = Pick<ClinicSettings, 'name' | 'address' | 'phone' | 'email' | 'tinNo' | 'dlNo'>;
 
 /**
  * Hospital branding shown on printed receipts - this product deploys to

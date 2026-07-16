@@ -1,7 +1,30 @@
 <div class="dues-tab-body">
+  <div class="dues-filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Name/Mobile</mat-label>
+      <input matInput [(ngModel)]="nameOrMobile" name="nameOrMobile" (keyup.enter)="search()" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>PID</mat-label>
+      <input matInput [(ngModel)]="pid" name="pid" (keyup.enter)="search()" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Location Name</mat-label>
+      <mat-select [(ngModel)]="locationId" name="locationId">
+        <mat-option [value]="null">All</mat-option>
+        @for (location of locations(); track location.id) {
+          <mat-option [value]="location.id">{{ location.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <button mat-flat-button color="primary" type="button" (click)="search()">Search</button>
+  </div>
+
   @if (loading()) {
     <mat-progress-bar mode="indeterminate" />
   }
+
+  <div class="dues-total">Total Due: {{ totalDue() | number: '1.2-2' }}</div>
 
   <mat-tab-group (selectedIndexChange)="onTabChange($event)">
     <mat-tab label="Current Dues">
@@ -33,6 +56,10 @@
           <a href="javascript:void(0)" (click)="viewBill(entry)">{{ entry.billNumber }}</a>
         </td>
       </ng-container>
+      <ng-container matColumnDef="registrationNumber">
+        <th mat-header-cell *matHeaderCellDef>PID/CID</th>
+        <td mat-cell *matCellDef="let entry">{{ entry.registrationNumber }}</td>
+      </ng-container>
       <ng-container matColumnDef="patientName">
         <th mat-header-cell *matHeaderCellDef>Patient Name</th>
         <td mat-cell *matCellDef="let entry">{{ entry.patientName }}</td>
@@ -52,6 +79,12 @@
       <ng-container matColumnDef="balanceAmount">
         <th mat-header-cell *matHeaderCellDef>Due</th>
         <td mat-cell *matCellDef="let entry">{{ entry.balanceAmount | number: '1.2-2' }}</td>
+      </ng-container>
+      <ng-container matColumnDef="payNow">
+        <th mat-header-cell *matHeaderCellDef>Pay Now</th>
+        <td mat-cell *matCellDef="let entry">
+          <button mat-flat-button color="primary" type="button" (click)="payNow(entry)">Pay Now</button>
+        </td>
       </ng-container>
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>

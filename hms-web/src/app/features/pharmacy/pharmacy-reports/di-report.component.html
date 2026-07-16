@@ -1,0 +1,101 @@
+<div class="di-report-body">
+  <div class="di-report-filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Name/Mobile</mat-label>
+      <input matInput [(ngModel)]="nameOrMobile" name="nameOrMobile" (keyup.enter)="refresh()" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>From</mat-label>
+      <input matInput [matDatepicker]="fromPicker" [ngModel]="fromDate()" (ngModelChange)="fromDate.set($event)" />
+      <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+      <mat-datepicker #fromPicker />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>To</mat-label>
+      <input matInput [matDatepicker]="toPicker" [ngModel]="toDate()" (ngModelChange)="toDate.set($event)" />
+      <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+      <mat-datepicker #toPicker />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Type</mat-label>
+      <mat-select [(ngModel)]="type" name="type">
+        <mat-option [value]="null">All</mat-option>
+        @for (t of types; track t) {
+          <mat-option [value]="t">{{ typeLabels[t] }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <button mat-flat-button color="primary" type="button" (click)="refresh()">Submit</button>
+  </div>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  <div #reportContent>
+    @if (entries().length === 0) {
+      <app-empty-state icon="medication" title="No entries" message="No scheduled drugs were dispensed in this range." />
+    } @else {
+      <div class="di-report-table-wrap">
+      <table mat-table [dataSource]="entries()" class="di-report-table">
+        <ng-container matColumnDef="billNumber">
+          <th mat-header-cell *matHeaderCellDef>Bill No</th>
+          <td mat-cell *matCellDef="let entry">
+            <a href="javascript:void(0)" (click)="viewBill(entry)">{{ entry.billNumber }}</a>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef>Date</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.date | date: 'dd/MM/yyyy' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="registrationNumber">
+          <th mat-header-cell *matHeaderCellDef>UHID/CID</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.registrationNumber }}</td>
+        </ng-container>
+        <ng-container matColumnDef="patientName">
+          <th mat-header-cell *matHeaderCellDef>Patient Name</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.patientName }}</td>
+        </ng-container>
+        <ng-container matColumnDef="drName">
+          <th mat-header-cell *matHeaderCellDef>Dr. Name</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.drName }}</td>
+        </ng-container>
+        <ng-container matColumnDef="manufacturerName">
+          <th mat-header-cell *matHeaderCellDef>Manufacturer</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.manufacturerName }}</td>
+        </ng-container>
+        <ng-container matColumnDef="productName">
+          <th mat-header-cell *matHeaderCellDef>Product Name</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.productName }}</td>
+        </ng-container>
+        <ng-container matColumnDef="qtyIssued">
+          <th mat-header-cell *matHeaderCellDef>Qty Issued</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.qtyIssued }}</td>
+        </ng-container>
+        <ng-container matColumnDef="mrp">
+          <th mat-header-cell *matHeaderCellDef>MRP</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.mrp | number: '1.2-2' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="batchNo">
+          <th mat-header-cell *matHeaderCellDef>Batch No</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.batchNo }}</td>
+        </ng-container>
+        <ng-container matColumnDef="expiryDate">
+          <th mat-header-cell *matHeaderCellDef>Expiry Date</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.expiryDate | date: 'MM/yyyy' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="pharmacistSign">
+          <th mat-header-cell *matHeaderCellDef>Pharmacist Sign</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.pharmacistSign }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+      </div>
+    }
+  </div>
+
+  <div class="di-report-actions">
+    <button mat-flat-button color="primary" type="button" (click)="print()">Print</button>
+  </div>
+</div>

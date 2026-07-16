@@ -1,0 +1,57 @@
+<div class="vat-statement-body">
+  <div class="vat-statement-filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>From</mat-label>
+      <input matInput [matDatepicker]="fromPicker" [ngModel]="fromDate()" (ngModelChange)="fromDate.set($event)" />
+      <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+      <mat-datepicker #fromPicker />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>To</mat-label>
+      <input matInput [matDatepicker]="toPicker" [ngModel]="toDate()" (ngModelChange)="toDate.set($event)" />
+      <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+      <mat-datepicker #toPicker />
+    </mat-form-field>
+    <button mat-flat-button color="primary" type="button" (click)="getDetails()">Get Details</button>
+  </div>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (loaded()) {
+    <div #reportContent>
+      <div class="vat-statement-header">
+        <div class="vat-statement-hospital">
+          <h2>Pharmacy Vat Statement</h2>
+        </div>
+        <div class="vat-statement-meta">
+          <p>TIN No: {{ clinicSettings()?.tinNo }}</p>
+          <p>DL No: {{ clinicSettings()?.dlNo }}</p>
+          <p>Date: {{ today | date: 'dd/MM/yyyy' }}</p>
+        </div>
+      </div>
+
+      @if (entries().length === 0) {
+        <app-empty-state icon="request_quote" title="No tax entries" message="No sales were recorded in this range." />
+      } @else {
+        <table mat-table [dataSource]="entries()" class="vat-statement-table">
+          <ng-container matColumnDef="period">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let entry">{{ entry.period }}</td>
+          </ng-container>
+          <ng-container matColumnDef="taxAmount">
+            <th mat-header-cell *matHeaderCellDef>Vat Amount</th>
+            <td mat-cell *matCellDef="let entry">{{ entry.taxAmount | number: '1.2-2' }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      }
+    </div>
+
+    <div class="vat-statement-actions">
+      <button mat-flat-button color="primary" type="button" (click)="print()">Print</button>
+    </div>
+  }
+</div>

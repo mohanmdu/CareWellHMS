@@ -1,0 +1,10 @@
+.pay-now-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+  min-width: 320px;
+}
+
+.pay-now-balance {
+  font-weight: 600;
+}

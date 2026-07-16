@@ -29,7 +29,9 @@ export class ClinicSettingsListComponent {
     name: '',
     address: '',
     phone: '',
-    email: ''
+    email: '',
+    tinNo: '',
+    dlNo: ''
   };
 
   constructor() {
@@ -39,7 +41,9 @@ export class ClinicSettingsListComponent {
           name: settings.name,
           address: settings.address ?? '',
           phone: settings.phone ?? '',
-          email: settings.email ?? ''
+          email: settings.email ?? '',
+          tinNo: settings.tinNo ?? '',
+          dlNo: settings.dlNo ?? ''
         };
         this.logoUrl.set(settings.logoUrl);
         this.loading.set(false);
@@ -85,7 +89,9 @@ export class ClinicSettingsListComponent {
         name: this.form.name.trim(),
         address: this.form.address.trim() || null,
         phone: this.form.phone.trim() || null,
-        email: this.form.email.trim() || null
+        email: this.form.email.trim() || null,
+        tinNo: this.form.tinNo.trim() || null,
+        dlNo: this.form.dlNo.trim() || null
       })
       .subscribe({
         next: () => {

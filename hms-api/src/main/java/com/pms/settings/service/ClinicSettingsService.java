@@ -32,6 +32,8 @@ public class ClinicSettingsService {
         settings.setAddress(dto.address());
         settings.setPhone(dto.phone());
         settings.setEmail(dto.email());
+        settings.setTinNo(dto.tinNo());
+        settings.setDlNo(dto.dlNo());
         return toDto(repository.save(settings));
     }
 
@@ -49,6 +51,7 @@ public class ClinicSettingsService {
 
     private ClinicSettingsDto toDto(ClinicSettings settings) {
         return new ClinicSettingsDto(
-                settings.getName(), settings.getAddress(), settings.getPhone(), settings.getEmail(), settings.getLogoPath());
+                settings.getName(), settings.getAddress(), settings.getPhone(), settings.getEmail(), settings.getLogoPath(),
+                settings.getTinNo(), settings.getDlNo());
     }
 }

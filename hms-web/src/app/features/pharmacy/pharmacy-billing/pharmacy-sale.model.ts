@@ -65,6 +65,7 @@ export interface PharmacySale {
 export interface PharmacySaleListEntry {
   id: number;
   billNumber: number;
+  registrationNumber: string | null;
   patientName: string | null;
   source: PharmacySaleSource;
   billingType: PharmacyBillingType;
@@ -80,6 +81,15 @@ export interface PharmacySaleListEntry {
 export interface PharmacySaleItemRequest {
   stockId: number;
   quantity: number;
+}
+
+export const PHARMACY_PAY_MODES = ['Cash', 'Debit Card', 'Credit Card', 'Demand Draft', 'Cheque'] as const;
+
+export interface PharmacySalePaymentRequest {
+  amount: number;
+  discountAmount: number | null;
+  remarks: string | null;
+  payMode: string;
 }
 
 export interface PharmacySaleRequest {

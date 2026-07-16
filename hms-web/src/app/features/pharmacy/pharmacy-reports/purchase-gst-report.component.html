@@ -1,0 +1,80 @@
+<div class="purchase-gst-report-body">
+  <div class="purchase-gst-filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>From</mat-label>
+      <input matInput [matDatepicker]="fromPicker" [ngModel]="fromDate()" (ngModelChange)="fromDate.set($event)" />
+      <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+      <mat-datepicker #fromPicker />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>To</mat-label>
+      <input matInput [matDatepicker]="toPicker" [ngModel]="toDate()" (ngModelChange)="toDate.set($event)" />
+      <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+      <mat-datepicker #toPicker />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>GST %</mat-label>
+      <mat-select [(ngModel)]="gstPercent" name="gstPercent">
+        <mat-option [value]="null">All</mat-option>
+        @for (rate of gstPercentOptions(); track rate) {
+          <mat-option [value]="rate">{{ rate }}%</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <button mat-flat-button color="primary" type="button" (click)="refresh()">Submit</button>
+  </div>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  <div #reportContent>
+    @if (entries().length === 0) {
+      <app-empty-state icon="request_quote" title="No purchases" message="No approved GRNs were recorded in this range." />
+    } @else {
+      <table mat-table [dataSource]="entries()" class="purchase-gst-table">
+        <ng-container matColumnDef="invoiceNo">
+          <th mat-header-cell *matHeaderCellDef>Invoice No</th>
+          <td mat-cell *matCellDef="let entry">
+            <a href="javascript:void(0)" (click)="viewGrn(entry)">{{ entry.invoiceNo }}</a>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="drugDetails">
+          <th mat-header-cell *matHeaderCellDef>Drug Details</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.drugDetails }}</td>
+        </ng-container>
+        <ng-container matColumnDef="purchaseAmount">
+          <th mat-header-cell *matHeaderCellDef>Purchase Amount</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.purchaseAmount | number: '1.2-2' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="sgstPercent">
+          <th mat-header-cell *matHeaderCellDef>SGST %</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.sgstPercent ?? 0 }}</td>
+        </ng-container>
+        <ng-container matColumnDef="sgstAmount">
+          <th mat-header-cell *matHeaderCellDef>SGST Amount</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.sgstAmount | number: '1.2-2' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="cgstPercent">
+          <th mat-header-cell *matHeaderCellDef>CGST %</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.cgstPercent ?? 0 }}</td>
+        </ng-container>
+        <ng-container matColumnDef="cgstAmount">
+          <th mat-header-cell *matHeaderCellDef>CGST Amount</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.cgstAmount | number: '1.2-2' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="netAmount">
+          <th mat-header-cell *matHeaderCellDef>Net Amount</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.netAmount | number: '1.2-2' }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+      <div class="purchase-gst-total">Total Amount: {{ totalAmount() | number: '1.2-2' }}</div>
+    }
+  </div>
+
+  <div class="purchase-gst-actions">
+    <button mat-flat-button color="primary" type="button" (click)="print()">Print</button>
+  </div>
+</div>

@@ -64,6 +64,10 @@ public class Product extends Auditable {
     @Column(name = "hsn_sac")
     private String hsnSac;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "schedule_type", nullable = false, length = 20)
+    private DrugScheduleType scheduleType = DrugScheduleType.NONE;
+
     @Column(nullable = false)
     private boolean active = true;
 }

@@ -4,4 +4,6 @@ export interface ClinicSettings {
   phone: string | null;
   email: string | null;
   logoUrl: string | null;
+  tinNo: string | null;
+  dlNo: string | null;
 }

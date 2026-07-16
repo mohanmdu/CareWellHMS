@@ -39,4 +39,10 @@ public class ClinicSettings {
 
     @Column(name = "logo_path")
     private String logoPath;
+
+    @Column(name = "tin_no", length = 50)
+    private String tinNo;
+
+    @Column(name = "dl_no", length = 50)
+    private String dlNo;
 }

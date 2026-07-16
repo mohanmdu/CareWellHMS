@@ -7,6 +7,17 @@ export const MEDICAL_CATEGORY_LABELS: Record<MedicalCategory, string> = {
   NON_MEDICAL: 'Non-Medical'
 };
 
+export type DrugScheduleType = 'NONE' | 'SCHEDULE' | 'SCHEDULE_H' | 'SCHEDULE_H1';
+
+export const DRUG_SCHEDULE_TYPES: DrugScheduleType[] = ['NONE', 'SCHEDULE', 'SCHEDULE_H', 'SCHEDULE_H1'];
+
+export const DRUG_SCHEDULE_TYPE_LABELS: Record<DrugScheduleType, string> = {
+  NONE: 'None',
+  SCHEDULE: 'Schedule',
+  SCHEDULE_H: 'Schedule H',
+  SCHEDULE_H1: 'Schedule H1'
+};
+
 export interface Product {
   id: number | null;
   name: string;
@@ -23,5 +34,6 @@ export interface Product {
   centralGst: number;
   stateGst: number;
   hsnSac: string | null;
+  scheduleType: DrugScheduleType;
   active: boolean;
 }

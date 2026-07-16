@@ -2,6 +2,19 @@
   padding: var(--hms-space-4) var(--hms-space-2) var(--hms-space-2);
 }
 
+.dues-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--hms-space-3);
+  margin-bottom: var(--hms-space-3);
+}
+
+.dues-total {
+  font-weight: 600;
+  margin-bottom: var(--hms-space-2);
+}
+
 .dues-table {
   width: 100%;
 }

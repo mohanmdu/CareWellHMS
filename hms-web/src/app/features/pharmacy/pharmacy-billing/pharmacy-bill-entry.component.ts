@@ -208,7 +208,7 @@ export class PharmacyBillEntryComponent {
       .subscribe({
         next: (sale) => {
           this.saving.set(false);
-          this.dialog.open(PharmacyBillPrintDialogComponent, { width: '640px', maxWidth: '95vw', data: { sale } });
+          this.dialog.open(PharmacyBillPrintDialogComponent, { width: '900px', maxWidth: '95vw', data: { sale } });
           this.billed.emit();
         },
         error: (err) => {

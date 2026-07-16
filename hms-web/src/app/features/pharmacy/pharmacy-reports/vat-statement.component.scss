@@ -1,0 +1,36 @@
+.vat-statement-body {
+  padding: var(--hms-space-4) var(--hms-space-2) var(--hms-space-2);
+}
+
+.vat-statement-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--hms-space-3);
+  margin-bottom: var(--hms-space-3);
+}
+
+.vat-statement-header {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--hms-space-4);
+  margin-bottom: var(--hms-space-3);
+
+  p {
+    margin: 0;
+  }
+}
+
+.vat-statement-meta {
+  text-align: right;
+}
+
+.vat-statement-table {
+  width: 100%;
+}
+
+.vat-statement-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--hms-space-3);
+}

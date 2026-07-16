@@ -108,7 +108,7 @@ export class DetailedSalesReportComponent {
 
   viewBill(entry: PharmacySaleListEntry): void {
     this.saleService.get(entry.id).subscribe({
-      next: (sale) => this.dialog.open(PharmacyBillPrintDialogComponent, { width: '640px', maxWidth: '95vw', data: { sale } }),
+      next: (sale) => this.dialog.open(PharmacyBillPrintDialogComponent, { width: '900px', maxWidth: '95vw', data: { sale } }),
       error: () => this.notification.error('Failed to load bill.')
     });
   }

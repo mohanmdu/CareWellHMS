@@ -17,6 +17,7 @@ export type ProductInput = Pick<
   | 'centralGst'
   | 'stateGst'
   | 'hsnSac'
+  | 'scheduleType'
 >;
 
 @Injectable({ providedIn: 'root' })

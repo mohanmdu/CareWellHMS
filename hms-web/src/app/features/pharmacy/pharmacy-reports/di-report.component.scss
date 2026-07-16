@@ -1,0 +1,25 @@
+.di-report-body {
+  padding: var(--hms-space-4) var(--hms-space-2) var(--hms-space-2);
+}
+
+.di-report-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--hms-space-3);
+  margin-bottom: var(--hms-space-3);
+}
+
+.di-report-table-wrap {
+  overflow-x: auto;
+}
+
+.di-report-table {
+  width: 100%;
+}
+
+.di-report-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--hms-space-3);
+}

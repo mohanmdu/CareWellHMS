@@ -1,0 +1,36 @@
+.gst-statement-body {
+  padding: var(--hms-space-4) var(--hms-space-2) var(--hms-space-2);
+}
+
+.gst-statement-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--hms-space-3);
+  margin-bottom: var(--hms-space-3);
+}
+
+.gst-statement-header {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--hms-space-4);
+  margin-bottom: var(--hms-space-3);
+
+  p {
+    margin: 0;
+  }
+}
+
+.gst-statement-meta {
+  text-align: right;
+}
+
+.gst-statement-table {
+  width: 100%;
+}
+
+.gst-statement-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--hms-space-3);
+}

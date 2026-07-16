@@ -1,0 +1,34 @@
+<h2 mat-dialog-title>Payment Details ({{ data.entry.patientName }})</h2>
+
+<mat-dialog-content class="pay-now-content">
+  <div class="pay-now-balance">Outstanding balance: {{ data.entry.balanceAmount | number: '1.2-2' }}</div>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Amount</mat-label>
+    <input matInput type="number" min="0" [(ngModel)]="form.amount" name="amount" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Discount/Return Amount</mat-label>
+    <input matInput type="number" min="0" [(ngModel)]="form.discountAmount" name="discountAmount" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Remarks</mat-label>
+    <input matInput [(ngModel)]="form.remarks" name="remarks" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Pay Mode</mat-label>
+    <mat-select [(ngModel)]="form.payMode" name="payMode">
+      @for (mode of payModes; track mode) {
+        <mat-option [value]="mode">{{ mode }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" mat-dialog-close>Cancel</button>
+  <button mat-flat-button color="primary" type="button" [disabled]="!isValid" (click)="payNow()">Pay Now</button>
+</mat-dialog-actions>

@@ -35,6 +35,20 @@ public interface PharmacySaleRepository extends JpaRepository<PharmacySale, Long
             @Param("locationId") Long locationId,
             @Param("billedBy") String billedBy);
 
-    @Query("SELECT s FROM PharmacySale s WHERE s.balanceAmount > 0 AND (:source IS NULL OR s.source = :source) ORDER BY s.billedAt DESC")
-    List<PharmacySale> findDue(@Param("source") PharmacySaleSource source);
+    @Query("""
+            SELECT s FROM PharmacySale s
+            WHERE s.balanceAmount > 0
+              AND (:source IS NULL OR s.source = :source)
+              AND (:locationId IS NULL OR s.location.id = :locationId)
+              AND (:pid IS NULL OR LOWER(s.patient.registrationNumber) = LOWER(:pid))
+              AND (:nameOrMobile IS NULL
+                   OR LOWER(CONCAT(s.patient.firstName, ' ', COALESCE(s.patient.lastName, ''))) LIKE LOWER(CONCAT('%', :nameOrMobile, '%'))
+                   OR s.patient.mobileNumber LIKE CONCAT('%', :nameOrMobile, '%'))
+            ORDER BY s.billedAt DESC
+            """)
+    List<PharmacySale> findDue(
+            @Param("source") PharmacySaleSource source,
+            @Param("locationId") Long locationId,
+            @Param("pid") String pid,
+            @Param("nameOrMobile") String nameOrMobile);
 }

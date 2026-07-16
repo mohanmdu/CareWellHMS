@@ -29,38 +29,40 @@
       </div>
     }
 
-    <table class="bill-items-table">
-      <thead>
-        <tr>
-          <th>S.No</th>
-          <th>P.Name</th>
-          <th>Batch No</th>
-          <th>HSN/SAC</th>
-          <th>Exp.Date</th>
-          <th>Qty</th>
-          <th>MRP</th>
-          <th>SGST</th>
-          <th>CGST</th>
-          <th>Tot Amount</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (item of sale.items; track item.id; let i = $index) {
+    <div class="bill-items-table-wrap">
+      <table class="bill-items-table">
+        <thead>
           <tr>
-            <td>{{ i + 1 }}</td>
-            <td>{{ item.productName }}</td>
-            <td>{{ item.batch }}</td>
-            <td>{{ item.hsnSac }}</td>
-            <td>{{ item.expiryDate }}</td>
-            <td>{{ item.quantity }}</td>
-            <td>{{ item.mrp | number: '1.2-2' }}</td>
-            <td>{{ item.sgstPercent }}% {{ item.sgstAmount | number: '1.2-2' }}</td>
-            <td>{{ item.cgstPercent }}% {{ item.cgstAmount | number: '1.2-2' }}</td>
-            <td>{{ item.netAmount | number: '1.2-2' }}</td>
+            <th>S.No</th>
+            <th>P.Name</th>
+            <th>Batch No</th>
+            <th>HSN/SAC</th>
+            <th>Exp.Date</th>
+            <th>Qty</th>
+            <th>MRP</th>
+            <th>SGST</th>
+            <th>CGST</th>
+            <th>Tot Amount</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (item of sale.items; track item.id; let i = $index) {
+            <tr>
+              <td>{{ i + 1 }}</td>
+              <td>{{ item.productName }}</td>
+              <td>{{ item.batch }}</td>
+              <td>{{ item.hsnSac }}</td>
+              <td>{{ item.expiryDate }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ item.mrp | number: '1.2-2' }}</td>
+              <td>{{ item.sgstPercent }}% {{ item.sgstAmount | number: '1.2-2' }}</td>
+              <td>{{ item.cgstPercent }}% {{ item.cgstAmount | number: '1.2-2' }}</td>
+              <td>{{ item.netAmount | number: '1.2-2' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
 
     <div class="bill-totals">
       <span>Total: Rs. {{ sale.totalAmount | number: '1.2-2' }}</span>

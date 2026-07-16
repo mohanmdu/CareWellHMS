@@ -66,6 +66,14 @@
       <mat-label>HSN/SAC</mat-label>
       <input matInput [(ngModel)]="form.hsnSac" name="hsnSac" />
     </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Schedule Type</mat-label>
+      <mat-select [(ngModel)]="form.scheduleType" name="scheduleType" required>
+        @for (type of scheduleTypes; track type) {
+          <mat-option [value]="type">{{ scheduleTypeLabels[type] }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
   </div>
 </mat-dialog-content>
 

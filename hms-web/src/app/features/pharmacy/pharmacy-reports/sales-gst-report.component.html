@@ -1,0 +1,130 @@
+<div class="sales-gst-report-body">
+  <div class="sales-gst-summary">
+    <span>Total Sale: {{ totalSale() | number: '1.2-2' }}</span>
+    <span>Total Return: {{ totalReturn() | number: '1.2-2' }}</span>
+    <span>Net Amount: {{ netAmount() | number: '1.2-2' }}</span>
+  </div>
+
+  <div class="sales-gst-filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>From</mat-label>
+      <input matInput [matDatepicker]="fromPicker" [ngModel]="fromDate()" (ngModelChange)="fromDate.set($event)" />
+      <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+      <mat-datepicker #fromPicker />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>To</mat-label>
+      <input matInput [matDatepicker]="toPicker" [ngModel]="toDate()" (ngModelChange)="toDate.set($event)" />
+      <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+      <mat-datepicker #toPicker />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>GST %</mat-label>
+      <mat-select [(ngModel)]="gstPercent" name="gstPercent">
+        <mat-option [value]="null">All</mat-option>
+        @for (rate of gstPercentOptions(); track rate) {
+          <mat-option [value]="rate">{{ rate }}%</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <button mat-flat-button color="primary" type="button" (click)="refresh()">Submit</button>
+  </div>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  <div #reportContent>
+    <h3>Sales GST Report</h3>
+    @if (sales().length === 0) {
+      <app-empty-state icon="request_quote" title="No sales" message="No sales were recorded in this range." />
+    } @else {
+      <table mat-table [dataSource]="sales()" class="sales-gst-table">
+        <ng-container matColumnDef="patientName">
+          <th mat-header-cell *matHeaderCellDef>Patient Name</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.patientName }}</td>
+        </ng-container>
+        <ng-container matColumnDef="invoiceNo">
+          <th mat-header-cell *matHeaderCellDef>Invoice No</th>
+          <td mat-cell *matCellDef="let entry">
+            <a href="javascript:void(0)" (click)="viewBill(entry)">{{ entry.invoiceNo }}</a>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="drugDetails">
+          <th mat-header-cell *matHeaderCellDef>Drug Details</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.drugDetails }}</td>
+        </ng-container>
+        <ng-container matColumnDef="sgstPercent">
+          <th mat-header-cell *matHeaderCellDef>SGST %</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.sgstPercent ?? 0 }}</td>
+        </ng-container>
+        <ng-container matColumnDef="sgstAmount">
+          <th mat-header-cell *matHeaderCellDef>SGST Amount</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.sgstAmount | number: '1.2-2' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="cgstPercent">
+          <th mat-header-cell *matHeaderCellDef>CGST %</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.cgstPercent ?? 0 }}</td>
+        </ng-container>
+        <ng-container matColumnDef="cgstAmount">
+          <th mat-header-cell *matHeaderCellDef>CGST Amount</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.cgstAmount | number: '1.2-2' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="mrp">
+          <th mat-header-cell *matHeaderCellDef>MRP</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.mrp | number: '1.2-2' }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="salesColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: salesColumns"></tr>
+      </table>
+    }
+
+    <h3>Sales Return GST Report</h3>
+    @if (returns().length === 0) {
+      <app-empty-state icon="assignment_return" title="No returns" message="No sales returns were recorded in this range." />
+    } @else {
+      <table mat-table [dataSource]="returns()" class="sales-gst-table">
+        <ng-container matColumnDef="patientName">
+          <th mat-header-cell *matHeaderCellDef>Patient Name</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.patientName }}</td>
+        </ng-container>
+        <ng-container matColumnDef="invoiceNo">
+          <th mat-header-cell *matHeaderCellDef>Invoice No</th>
+          <td mat-cell *matCellDef="let entry">
+            <a href="javascript:void(0)" (click)="viewReturn(entry)">{{ entry.invoiceNo }}</a>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="drugDetails">
+          <th mat-header-cell *matHeaderCellDef>Drug Details</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.drugDetails }}</td>
+        </ng-container>
+        <ng-container matColumnDef="sgstPercent">
+          <th mat-header-cell *matHeaderCellDef>SGST %</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.sgstPercent ?? 0 }}</td>
+        </ng-container>
+        <ng-container matColumnDef="sgstAmount">
+          <th mat-header-cell *matHeaderCellDef>SGST Amount</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.sgstAmount | number: '1.2-2' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="cgstPercent">
+          <th mat-header-cell *matHeaderCellDef>CGST %</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.cgstPercent ?? 0 }}</td>
+        </ng-container>
+        <ng-container matColumnDef="cgstAmount">
+          <th mat-header-cell *matHeaderCellDef>CGST Amount</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.cgstAmount | number: '1.2-2' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="mrp">
+          <th mat-header-cell *matHeaderCellDef>MRP</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.mrp | number: '1.2-2' }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="returnColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: returnColumns"></tr>
+      </table>
+    }
+  </div>
+
+  <div class="sales-gst-actions">
+    <button mat-flat-button color="primary" type="button" (click)="print()">Print</button>
+  </div>
+</div>

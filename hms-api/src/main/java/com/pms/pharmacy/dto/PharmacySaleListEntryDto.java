@@ -8,6 +8,7 @@ import java.time.Instant;
 public record PharmacySaleListEntryDto(
         Long id,
         Long billNumber,
+        String registrationNumber,
         String patientName,
         PharmacySaleSource source,
         PharmacyBillingType billingType,

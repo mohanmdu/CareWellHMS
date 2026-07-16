@@ -34,6 +34,16 @@
           <input matInput name="email" type="email" [(ngModel)]="form.email" />
         </mat-form-field>
 
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>TIN No</mat-label>
+          <input matInput name="tinNo" [(ngModel)]="form.tinNo" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>DL No</mat-label>
+          <input matInput name="dlNo" [(ngModel)]="form.dlNo" />
+        </mat-form-field>
+
         <mat-form-field appearance="outline" subscriptSizing="dynamic" class="clinic-address-field">
           <mat-label>Address</mat-label>
           <textarea matInput name="address" rows="2" [(ngModel)]="form.address"></textarea>

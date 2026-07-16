@@ -8,7 +8,13 @@ import { MatSelectModule } from '@angular/material/select';
 import { Manufacturer } from '../manufacturers/manufacturer.model';
 import { ProductType } from '../product-types/product-type.model';
 import { Rack } from '../racks/rack.model';
-import { MEDICAL_CATEGORIES, MEDICAL_CATEGORY_LABELS, Product } from './product.model';
+import {
+  DRUG_SCHEDULE_TYPES,
+  DRUG_SCHEDULE_TYPE_LABELS,
+  MEDICAL_CATEGORIES,
+  MEDICAL_CATEGORY_LABELS,
+  Product
+} from './product.model';
 import { ProductInput } from './product.service';
 
 export interface ProductFormDialogData {
@@ -34,6 +40,8 @@ export class ProductFormDialogComponent {
   readonly manufacturers = this.data.manufacturers;
   readonly medicalCategories = MEDICAL_CATEGORIES;
   readonly medicalCategoryLabels = MEDICAL_CATEGORY_LABELS;
+  readonly scheduleTypes = DRUG_SCHEDULE_TYPES;
+  readonly scheduleTypeLabels = DRUG_SCHEDULE_TYPE_LABELS;
   readonly isEdit = !!this.data.product;
 
   form: ProductInput = {
@@ -47,7 +55,8 @@ export class ProductFormDialogComponent {
     medOrNonMed: this.data.product?.medOrNonMed ?? 'MEDICAL',
     centralGst: this.data.product?.centralGst ?? 0,
     stateGst: this.data.product?.stateGst ?? 0,
-    hsnSac: this.data.product?.hsnSac ?? null
+    hsnSac: this.data.product?.hsnSac ?? null,
+    scheduleType: this.data.product?.scheduleType ?? 'NONE'
   };
 
   get isValid(): boolean {

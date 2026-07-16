@@ -2,6 +2,7 @@ package com.pms.pharmacy.service;
 
 import com.pms.common.EntityNotFoundException;
 import com.pms.pharmacy.dto.ProductDto;
+import com.pms.pharmacy.entity.DrugScheduleType;
 import com.pms.pharmacy.entity.Manufacturer;
 import com.pms.pharmacy.entity.Product;
 import com.pms.pharmacy.entity.ProductType;
@@ -93,6 +94,7 @@ public class ProductService {
         product.setCentralGst(dto.centralGst() != null ? dto.centralGst() : 0);
         product.setStateGst(dto.stateGst() != null ? dto.stateGst() : 0);
         product.setHsnSac(dto.hsnSac());
+        product.setScheduleType(dto.scheduleType() != null ? dto.scheduleType() : DrugScheduleType.NONE);
     }
 
     private Product getOrThrow(Long id) {
@@ -117,6 +119,7 @@ public class ProductService {
                 product.getCentralGst(),
                 product.getStateGst(),
                 product.getHsnSac(),
+                product.getScheduleType(),
                 product.isActive());
     }
 }

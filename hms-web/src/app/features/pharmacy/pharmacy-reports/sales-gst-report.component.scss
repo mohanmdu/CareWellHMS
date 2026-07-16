@@ -1,0 +1,29 @@
+.sales-gst-report-body {
+  padding: var(--hms-space-4) var(--hms-space-2) var(--hms-space-2);
+}
+
+.sales-gst-summary {
+  display: flex;
+  gap: var(--hms-space-4);
+  font-weight: 600;
+  margin-bottom: var(--hms-space-3);
+}
+
+.sales-gst-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--hms-space-3);
+  margin-bottom: var(--hms-space-3);
+}
+
+.sales-gst-table {
+  width: 100%;
+  margin-bottom: var(--hms-space-4);
+}
+
+.sales-gst-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--hms-space-3);
+}

@@ -1,5 +1,6 @@
 package com.pms.pharmacy.dto;
 
+import com.pms.pharmacy.entity.DrugScheduleType;
 import com.pms.pharmacy.entity.MedicalCategory;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -23,5 +24,6 @@ public record ProductDto(
         Double centralGst,
         Double stateGst,
         String hsnSac,
+        DrugScheduleType scheduleType,
         Boolean active) {
 }

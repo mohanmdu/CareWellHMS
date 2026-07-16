@@ -2,6 +2,7 @@ package com.pms.pharmacy.controller;
 
 import com.pms.pharmacy.dto.PharmacySaleDto;
 import com.pms.pharmacy.dto.PharmacySaleListEntryDto;
+import com.pms.pharmacy.dto.PharmacySalePaymentRequest;
 import com.pms.pharmacy.dto.PharmacySaleRequest;
 import com.pms.pharmacy.entity.PharmacyPaymentMode;
 import com.pms.pharmacy.entity.PharmacySaleSource;
@@ -39,8 +40,12 @@ public class PharmacySaleController {
     }
 
     @GetMapping("/due")
-    public List<PharmacySaleListEntryDto> due(@RequestParam(required = false) PharmacySaleSource source) {
-        return service.findDue(source);
+    public List<PharmacySaleListEntryDto> due(
+            @RequestParam(required = false) PharmacySaleSource source,
+            @RequestParam(required = false) Long locationId,
+            @RequestParam(required = false) String pid,
+            @RequestParam(required = false) String nameOrMobile) {
+        return service.findDue(source, locationId, pid, nameOrMobile);
     }
 
     @GetMapping("/{id}")
@@ -52,5 +57,10 @@ public class PharmacySaleController {
     @ResponseStatus(HttpStatus.CREATED)
     public PharmacySaleDto create(@Valid @RequestBody PharmacySaleRequest request) {
         return service.create(request);
+    }
+
+    @PatchMapping("/{id}/payment")
+    public PharmacySaleDto pay(@PathVariable Long id, @Valid @RequestBody PharmacySalePaymentRequest request) {
+        return service.pay(id, request);
     }
 }

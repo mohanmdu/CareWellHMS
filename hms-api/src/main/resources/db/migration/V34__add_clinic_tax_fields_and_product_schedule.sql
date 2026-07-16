@@ -1,0 +1,6 @@
+ALTER TABLE clinic_settings
+    ADD COLUMN tin_no VARCHAR(50) NULL,
+    ADD COLUMN dl_no VARCHAR(50) NULL;
+
+ALTER TABLE product
+    ADD COLUMN schedule_type VARCHAR(20) NOT NULL DEFAULT 'NONE';

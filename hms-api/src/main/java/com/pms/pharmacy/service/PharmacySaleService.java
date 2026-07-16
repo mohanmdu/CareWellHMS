@@ -7,6 +7,7 @@ import com.pms.pharmacy.dto.PharmacySaleDto;
 import com.pms.pharmacy.dto.PharmacySaleItemDto;
 import com.pms.pharmacy.dto.PharmacySaleItemRequest;
 import com.pms.pharmacy.dto.PharmacySaleListEntryDto;
+import com.pms.pharmacy.dto.PharmacySalePaymentRequest;
 import com.pms.pharmacy.dto.PharmacySaleRequest;
 import com.pms.pharmacy.entity.PharmacyLocation;
 import com.pms.pharmacy.entity.PharmacyPaymentMode;
@@ -70,8 +71,25 @@ public class PharmacySaleService {
                 .toList();
     }
 
-    public List<PharmacySaleListEntryDto> findDue(PharmacySaleSource source) {
-        return repository.findDue(source).stream().map(this::toListEntry).toList();
+    public List<PharmacySaleListEntryDto> findDue(PharmacySaleSource source, Long locationId, String pid, String nameOrMobile) {
+        return repository.findDue(source, locationId, pid, nameOrMobile).stream().map(this::toListEntry).toList();
+    }
+
+    @Transactional
+    public PharmacySaleDto pay(Long saleId, PharmacySalePaymentRequest request) {
+        PharmacySale sale = getOrThrow(saleId);
+        double amount = valueOrZero(request.amount());
+        double discountAmount = valueOrZero(request.discountAmount());
+        if (amount + discountAmount > sale.getBalanceAmount()) {
+            throw new IllegalArgumentException("Amount and discount/return cannot exceed the outstanding balance");
+        }
+        sale.setAmountPaid(sale.getAmountPaid() + amount);
+        sale.setDiscountAmount(valueOrZero(sale.getDiscountAmount()) + discountAmount);
+        sale.setBalanceAmount(sale.getTotalAmount() - sale.getDiscountAmount() - sale.getAmountPaid());
+        String note = "Payment: " + amount + " via " + request.payMode()
+                + (request.remarks() != null && !request.remarks().isBlank() ? " (" + request.remarks() + ")" : "");
+        sale.setRemarks(sale.getRemarks() != null && !sale.getRemarks().isBlank() ? sale.getRemarks() + " | " + note : note);
+        return toDto(repository.save(sale));
     }
 
     @Transactional
@@ -170,6 +188,7 @@ public class PharmacySaleService {
         return new PharmacySaleListEntryDto(
                 sale.getId(),
                 sale.getBillNumber(),
+                patient.getRegistrationNumber(),
                 (patient.getFirstName() + " " + (patient.getLastName() != null ? patient.getLastName() : "")).trim(),
                 sale.getSource(),
                 sale.getBillingType(),
