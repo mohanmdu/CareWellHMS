@@ -51,4 +51,21 @@ public interface PharmacySaleRepository extends JpaRepository<PharmacySale, Long
             @Param("locationId") Long locationId,
             @Param("pid") String pid,
             @Param("nameOrMobile") String nameOrMobile);
+
+    /** Patient Wise Report's "Bill Wise" tab - UHID/IPID is treated as an alias of registrationNumber (see plan doc). */
+    @Query("""
+            SELECT s FROM PharmacySale s
+            WHERE (:registrationNumber IS NULL OR LOWER(s.patient.registrationNumber) = LOWER(:registrationNumber))
+              AND (:nameOrMobile IS NULL
+                   OR LOWER(CONCAT(s.patient.firstName, ' ', COALESCE(s.patient.lastName, ''))) LIKE LOWER(CONCAT('%', :nameOrMobile, '%'))
+                   OR s.patient.mobileNumber LIKE CONCAT('%', :nameOrMobile, '%'))
+              AND (:fromInstant IS NULL OR s.billedAt >= :fromInstant)
+              AND (:toInstant IS NULL OR s.billedAt < :toInstant)
+            ORDER BY s.billedAt DESC
+            """)
+    List<PharmacySale> searchByPatient(
+            @Param("registrationNumber") String registrationNumber,
+            @Param("nameOrMobile") String nameOrMobile,
+            @Param("fromInstant") Instant fromInstant,
+            @Param("toInstant") Instant toInstant);
 }

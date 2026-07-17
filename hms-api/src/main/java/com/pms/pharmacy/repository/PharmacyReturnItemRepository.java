@@ -31,4 +31,15 @@ public interface PharmacyReturnItemRepository extends JpaRepository<PharmacyRetu
               AND i.pharmacyReturn.status = com.pms.pharmacy.entity.PharmacyReturnStatus.APPROVED
             """)
     int sumApprovedQuantityByProductId(@Param("productId") Long productId);
+
+    /** Pharmacy MIS "Sales Return Qty" - date-ranged variant of sumApprovedQuantityByProductId. */
+    @Query("""
+            SELECT COALESCE(SUM(i.quantity), 0) FROM PharmacyReturnItem i
+            WHERE i.saleItem.stock.product.id = :productId
+              AND i.pharmacyReturn.status = com.pms.pharmacy.entity.PharmacyReturnStatus.APPROVED
+              AND (:fromInstant IS NULL OR i.pharmacyReturn.approvedAt >= :fromInstant)
+              AND (:toInstant IS NULL OR i.pharmacyReturn.approvedAt < :toInstant)
+            """)
+    int sumApprovedQuantityByProductIdInRange(
+            @Param("productId") Long productId, @Param("fromInstant") Instant fromInstant, @Param("toInstant") Instant toInstant);
 }

@@ -14,6 +14,16 @@ public interface PharmacySaleItemRepository extends JpaRepository<PharmacySaleIt
     @Query("SELECT COALESCE(SUM(i.quantity), 0) FROM PharmacySaleItem i WHERE i.stock.product.id = :productId")
     int sumQuantityByProductId(@Param("productId") Long productId);
 
+    /** Pharmacy MIS "Sales Qty" - date-ranged variant of sumQuantityByProductId. */
+    @Query("""
+            SELECT COALESCE(SUM(i.quantity), 0) FROM PharmacySaleItem i
+            WHERE i.stock.product.id = :productId
+              AND (:fromInstant IS NULL OR i.sale.billedAt >= :fromInstant)
+              AND (:toInstant IS NULL OR i.sale.billedAt < :toInstant)
+            """)
+    int sumQuantityByProductIdInRange(
+            @Param("productId") Long productId, @Param("fromInstant") Instant fromInstant, @Param("toInstant") Instant toInstant);
+
     /** Sales GST Report / VAT / GST Statement source rows. */
     @Query("""
             SELECT i FROM PharmacySaleItem i

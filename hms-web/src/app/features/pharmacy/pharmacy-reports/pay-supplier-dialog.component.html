@@ -1,0 +1,36 @@
+<h2 mat-dialog-title>{{ data.title }}</h2>
+
+<mat-dialog-content class="pay-supplier-content">
+  @if (data.maxAmount !== undefined) {
+    <div class="pay-supplier-balance">Outstanding balance: {{ data.maxAmount | number: '1.2-2' }}</div>
+  }
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Amount</mat-label>
+    <input matInput type="number" min="0" [(ngModel)]="form.amount" name="amount" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Pay Mode</mat-label>
+    <mat-select [(ngModel)]="form.payMode" name="payMode">
+      @for (mode of payModes; track mode) {
+        <mat-option [value]="mode">{{ mode }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Transaction ID</mat-label>
+    <input matInput [(ngModel)]="form.transactionId" name="transactionId" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Any Info</mat-label>
+    <input matInput [(ngModel)]="form.remarks" name="remarks" />
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" mat-dialog-close>Cancel</button>
+  <button mat-flat-button color="primary" type="button" [disabled]="!isValid" (click)="payNow()">Pay Now</button>
+</mat-dialog-actions>

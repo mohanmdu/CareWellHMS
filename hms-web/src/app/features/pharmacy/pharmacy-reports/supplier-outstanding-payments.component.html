@@ -1,0 +1,142 @@
+<div class="sop-body">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (vendors().length === 0) {
+    <app-empty-state icon="payments" title="Nothing outstanding" message="No approved GRNs currently have a balance owed." />
+  } @else {
+    <div class="sop-table-wrap">
+      <table class="sop-vendor-table">
+        <thead>
+          <tr>
+            <th>S.No</th>
+            <th>Vendor Name</th>
+            <th>Total Amount</th>
+            <th>Paid Amount</th>
+            <th>Balance Amount</th>
+            <th>Details</th>
+            <th>Pay</th>
+            <th>Pay Selected</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (vendor of vendors(); track vendor.supplierId; let i = $index) {
+            <tr>
+              <td>{{ i + 1 }}</td>
+              <td>{{ vendor.supplierName }}</td>
+              <td>{{ vendor.totalAmount | number: '1.2-2' }}</td>
+              <td>{{ vendor.paidAmount | number: '1.2-2' }}</td>
+              <td>{{ vendor.balanceAmount | number: '1.2-2' }}</td>
+              <td>
+                <button mat-flat-button [color]="isVendorExpanded(vendor) ? 'warn' : 'primary'" type="button" (click)="toggleVendor(vendor)">
+                  {{ isVendorExpanded(vendor) ? 'Hide' : 'Details' }}
+                </button>
+              </td>
+              <td>
+                <button mat-flat-button color="primary" type="button" (click)="payAll(vendor)">Pay All</button>
+              </td>
+              <td>
+                <button mat-flat-button color="primary" type="button" (click)="paySelected(vendor)">Pay Selected</button>
+              </td>
+            </tr>
+            @if (isVendorExpanded(vendor)) {
+              <tr>
+                <td colspan="8" class="sop-nested-cell">
+                  <table class="sop-invoice-table">
+                    <thead>
+                      <tr>
+                        <th></th>
+                        <th>S.No</th>
+                        <th>Invoice No</th>
+                        <th>Invoice Date</th>
+                        <th>GRN Date</th>
+                        <th>Total Amount</th>
+                        <th>Paid Amount</th>
+                        <th>Amount to pay</th>
+                        <th>View</th>
+                        <th>Pay</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (invoice of invoicesFor(vendor); track invoice.grnId; let j = $index) {
+                        <tr>
+                          <td><mat-checkbox [checked]="isSelected(invoice)" (change)="toggleSelect(invoice)" /></td>
+                          <td>{{ j + 1 }}</td>
+                          <td>{{ invoice.invoiceNo }}</td>
+                          <td>{{ invoice.invoiceDate | date: 'dd/MM/yyyy' }}</td>
+                          <td>{{ invoice.grnDate | date: 'dd/MM/yyyy' }}</td>
+                          <td>{{ invoice.totalAmount | number: '1.2-2' }}</td>
+                          <td>{{ invoice.paidAmount | number: '1.2-2' }}</td>
+                          <td>{{ invoice.amountToPay | number: '1.2-2' }}</td>
+                          <td>
+                            <button mat-stroked-button type="button" (click)="toggleHistory(invoice)">
+                              {{ isInvoiceExpanded(invoice) ? 'Hide' : 'Details' }}
+                            </button>
+                          </td>
+                          <td>
+                            <button
+                              mat-flat-button
+                              color="accent"
+                              type="button"
+                              [disabled]="invoice.amountToPay <= 0"
+                              (click)="makePay(vendor, invoice)"
+                            >
+                              Make pay
+                            </button>
+                          </td>
+                        </tr>
+                        @if (isInvoiceExpanded(invoice)) {
+                          <tr>
+                            <td colspan="10" class="sop-nested-cell">
+                              @if (historyFor(invoice).length === 0) {
+                                <div class="sop-no-history">No Payments has Done</div>
+                              } @else {
+                                <table class="sop-history-table">
+                                  <thead>
+                                    <tr>
+                                      <th>S.No</th>
+                                      <th>Payment ID</th>
+                                      <th>Paid By</th>
+                                      <th>Paid Date</th>
+                                      <th>Payment Mode</th>
+                                      <th>Payment Details</th>
+                                      <th>Paid Amount</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    @for (entry of historyFor(invoice); track entry.id; let k = $index) {
+                                      <tr>
+                                        <td>{{ k + 1 }}</td>
+                                        <td>{{ entry.id }}</td>
+                                        <td>{{ entry.paidBy }}</td>
+                                        <td>{{ entry.paidAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                                        <td>{{ entry.payMode }}</td>
+                                        <td>{{ entry.remarks || entry.transactionId }}</td>
+                                        <td>{{ entry.amount | number: '1.2-2' }}</td>
+                                      </tr>
+                                    }
+                                  </tbody>
+                                </table>
+                              }
+                            </td>
+                          </tr>
+                        }
+                      }
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4">Total Balance Amount</td>
+            <td colspan="4">{{ totalBalance | number: '1.2-2' }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  }
+</div>

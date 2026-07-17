@@ -43,4 +43,17 @@ public interface PharmacyStockRepository extends JpaRepository<PharmacyStock, Lo
             @Param("drugName") String drugName,
             @Param("fromDate") LocalDate fromDate,
             @Param("toDate") LocalDate toDate);
+
+    /** Expired Report - in-stock batches whose expiry falls in [fromDate, toDate], joined for Supplier/Manufacturer. */
+    @Query("""
+            SELECT s FROM PharmacyStock s
+            JOIN s.grnItem gi
+            JOIN gi.grn g
+            WHERE s.quantityOnHand > 0
+              AND s.expiryDate IS NOT NULL
+              AND (:fromDate IS NULL OR s.expiryDate >= :fromDate)
+              AND s.expiryDate <= :toDate
+            ORDER BY s.expiryDate ASC
+            """)
+    List<PharmacyStock> searchExpiring(@Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate);
 }

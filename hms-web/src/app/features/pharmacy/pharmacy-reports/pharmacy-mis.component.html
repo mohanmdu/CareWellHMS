@@ -1,0 +1,144 @@
+<div class="mis-body">
+  <div class="mis-filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>From</mat-label>
+      <input matInput [matDatepicker]="fromPicker" [ngModel]="fromDate()" (ngModelChange)="fromDate.set($event)" />
+      <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+      <mat-datepicker #fromPicker />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>To</mat-label>
+      <input matInput [matDatepicker]="toPicker" [ngModel]="toDate()" (ngModelChange)="toDate.set($event)" />
+      <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+      <mat-datepicker #toPicker />
+    </mat-form-field>
+    <button mat-flat-button color="primary" type="button" (click)="submit()">Submit</button>
+  </div>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  <mat-tab-group>
+    <mat-tab label="Fast Moving Report">
+      <div class="mis-tab-body">
+        <div #fastContent>
+          <div class="mis-banner mis-banner-fast">PHARMACY FAST MOVING REPORT ON {{ today | date: 'dd-MMM-yyyy' }}</div>
+          @if (fastMoving().length === 0) {
+            <app-empty-state icon="trending_up" title="No data" message="No product movement in this range." />
+          } @else {
+            <div class="mis-table-wrap">
+              <table class="mis-table mis-table-fast">
+                <thead>
+                  <tr>
+                    <th>S.No</th>
+                    <th>Product Name</th>
+                    <th>Product Code</th>
+                    <th>Purchase Qty</th>
+                    <th>Sales Qty</th>
+                    <th>Sales Return Qty</th>
+                    <th>Net Qty</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (entry of fastMoving(); track entry.productId; let i = $index) {
+                    <tr>
+                      <td>{{ i + 1 }}</td>
+                      <td>{{ entry.productName }}</td>
+                      <td>{{ entry.productId }}</td>
+                      <td>{{ entry.purchaseQty }}</td>
+                      <td>{{ entry.salesQty }}</td>
+                      <td>{{ entry.returnQty }}</td>
+                      <td>{{ entry.netQty }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+        <div class="mis-actions">
+          <button mat-flat-button color="primary" type="button" (click)="printFast()">Print</button>
+        </div>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Slow Moving Report">
+      <div class="mis-tab-body">
+        <div #slowContent>
+          <div class="mis-banner mis-banner-slow">SLOW MOVING REPORT ON {{ today | date: 'dd-MMM-yyyy' }}</div>
+          @if (slowMoving().length === 0) {
+            <app-empty-state icon="trending_down" title="No data" message="No slow-moving products in this range." />
+          } @else {
+            <div class="mis-table-wrap">
+              <table class="mis-table mis-table-slow">
+                <thead>
+                  <tr>
+                    <th>S.No</th>
+                    <th>Product Name</th>
+                    <th>Product Code</th>
+                    <th>Sales Qty</th>
+                    <th>Sales Return Qty</th>
+                    <th>Net Qty</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (entry of slowMoving(); track entry.productId; let i = $index) {
+                    <tr>
+                      <td>{{ i + 1 }}</td>
+                      <td>{{ entry.productName }}</td>
+                      <td>{{ entry.productId }}</td>
+                      <td>{{ entry.salesQty }}</td>
+                      <td>{{ entry.returnQty }}</td>
+                      <td>{{ entry.netQty }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+        <div class="mis-actions">
+          <button mat-flat-button color="primary" type="button" (click)="printSlow()">Print</button>
+        </div>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Non Moving Report">
+      <div class="mis-tab-body">
+        <div #nonMovingContent>
+          <div class="mis-banner mis-banner-non-moving">Non Moving Report On {{ today | date: 'dd-MMM-yyyy' }}</div>
+          @if (nonMoving().length === 0) {
+            <app-empty-state icon="inventory_2" title="No data" message="No purchased-but-unsold products in this range." />
+          } @else {
+            <div class="mis-table-wrap">
+              <table class="mis-table mis-table-non-moving">
+                <thead>
+                  <tr>
+                    <th>S.No</th>
+                    <th>Product Name</th>
+                    <th>Product Code</th>
+                    <th>Purchase Qty</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (entry of nonMoving(); track entry.productId; let i = $index) {
+                    <tr>
+                      <td>{{ i + 1 }}</td>
+                      <td>{{ entry.productName }}</td>
+                      <td>{{ entry.productId }}</td>
+                      <td>{{ entry.purchaseQty }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+        <div class="mis-actions">
+          <button mat-flat-button color="primary" type="button" (click)="printNonMoving()">Print</button>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

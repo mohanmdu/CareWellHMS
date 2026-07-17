@@ -1,0 +1,10 @@
+.pay-supplier-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+  min-width: 340px;
+}
+
+.pay-supplier-balance {
+  font-weight: 600;
+}

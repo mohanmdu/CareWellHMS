@@ -1,0 +1,205 @@
+<div class="pwr-body">
+  <div class="pwr-filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>UHID</mat-label>
+      <input matInput [(ngModel)]="uhid" name="uhid" (keyup.enter)="getDetails()" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>IPID</mat-label>
+      <input matInput [(ngModel)]="ipid" name="ipid" placeholder="Inpatient ID" (keyup.enter)="getDetails()" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>From</mat-label>
+      <input matInput [matDatepicker]="fromPicker" [ngModel]="fromDate()" (ngModelChange)="fromDate.set($event)" />
+      <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+      <mat-datepicker #fromPicker />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>To</mat-label>
+      <input matInput [matDatepicker]="toPicker" [ngModel]="toDate()" (ngModelChange)="toDate.set($event)" />
+      <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+      <mat-datepicker #toPicker />
+    </mat-form-field>
+    <button mat-flat-button color="primary" type="button" (click)="getDetails()">Get Details</button>
+  </div>
+
+  <div class="pwr-filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Name/Mobile</mat-label>
+      <input matInput [(ngModel)]="nameOrMobile" name="nameOrMobile" (keyup.enter)="search()" />
+    </mat-form-field>
+    <button mat-flat-button color="primary" type="button" (click)="search()">Search</button>
+  </div>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  <mat-tab-group [selectedIndex]="activeTabIndex()" (selectedIndexChange)="activeTabIndex.set($event)">
+    <mat-tab label="Bill Wise">
+      <div class="pwr-tab-body">
+        @if (bills().length === 0) {
+          <app-empty-state icon="receipt_long" title="No bills" message="Search for a patient by UHID/IPID or Name/Mobile to see their bills." />
+        } @else {
+          <table class="pwr-bill-table">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Bill No</th>
+                <th>UHID</th>
+                <th>Patient Name</th>
+                <th>Type</th>
+                <th>Invoice Date</th>
+                <th>Invoiced Amount</th>
+                <th>Paid Date</th>
+                <th>Due Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (bill of bills(); track bill.saleId; let i = $index) {
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td>
+                    <a href="javascript:void(0)" (click)="viewBill(bill)">{{ bill.billNumber }}</a>
+                  </td>
+                  <td>{{ bill.registrationNumber }}</td>
+                  <td>{{ bill.patientName }}</td>
+                  <td>{{ bill.type }}</td>
+                  <td>{{ bill.invoiceDate | date: 'dd/MM/yyyy HH:mm' }}</td>
+                  <td>{{ bill.invoicedAmount | number: '1.2-2' }}</td>
+                  <td>{{ bill.paidDate ? (bill.paidDate | date: 'dd/MM/yyyy HH:mm') : '-' }}</td>
+                  <td>{{ bill.dueAmount | number: '1.2-2' }}</td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="6">Total</td>
+                <td>{{ totalInvoiced() | number: '1.2-2' }}</td>
+                <td></td>
+                <td>{{ totalDue() | number: '1.2-2' }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        }
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Details Report">
+      <div class="pwr-tab-body">
+        @if (!statement()) {
+          <app-empty-state icon="description" title="No statement selected" message="Click a Bill No in Bill Wise to load its statement here." />
+        } @else {
+          <div #statementContent class="pwr-statement">
+            <div class="pwr-statement-header">
+              <h2>Patient Statement</h2>
+              <div class="pwr-statement-meta">
+                <p>TIN No: {{ clinicSettings()?.tinNo }}</p>
+                <p>DL No: {{ clinicSettings()?.dlNo }}</p>
+                <p>Date: {{ today | date: 'dd/MM/yyyy' }}</p>
+              </div>
+            </div>
+
+            <table class="pwr-profile-table">
+              <tbody>
+                <tr>
+                  <td>UHID</td>
+                  <td>{{ statement()!.registrationNumber }}</td>
+                  <td>Name</td>
+                  <td>{{ statement()!.patientName }}</td>
+                </tr>
+                <tr>
+                  <td>Gender</td>
+                  <td colspan="3">{{ statement()!.gender }}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h3>Medical Items</h3>
+            <table class="pwr-item-table">
+              <thead>
+                <tr>
+                  <th>S.No</th>
+                  <th>Type</th>
+                  <th>Drug Name</th>
+                  <th>Batch</th>
+                  <th>Exp.Date</th>
+                  <th>Qty</th>
+                  <th>Mrp</th>
+                  <th>Net Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of statement()!.medicalItems; track $index; let i = $index) {
+                  <tr>
+                    <td>{{ i + 1 }}</td>
+                    <td>{{ item.type }}</td>
+                    <td>{{ item.drugName }}</td>
+                    <td>{{ item.batch }}</td>
+                    <td>{{ item.expiryDate }}</td>
+                    <td>{{ item.qty }}</td>
+                    <td>{{ item.mrp | number: '1.2-2' }}</td>
+                    <td>{{ item.netAmount | number: '1.2-2' }}</td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="7">Sum Amount</td>
+                  <td>{{ medicalSum() | number: '1.2-2' }}</td>
+                </tr>
+              </tfoot>
+            </table>
+
+            <h3>Non Medical Items</h3>
+            <table class="pwr-item-table">
+              <thead>
+                <tr>
+                  <th>S.No</th>
+                  <th>Type</th>
+                  <th>Drug Name</th>
+                  <th>Batch</th>
+                  <th>Exp.Date</th>
+                  <th>Qty</th>
+                  <th>Mrp</th>
+                  <th>Net Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of statement()!.nonMedicalItems; track $index; let i = $index) {
+                  <tr>
+                    <td>{{ i + 1 }}</td>
+                    <td>{{ item.type }}</td>
+                    <td>{{ item.drugName }}</td>
+                    <td>{{ item.batch }}</td>
+                    <td>{{ item.expiryDate }}</td>
+                    <td>{{ item.qty }}</td>
+                    <td>{{ item.mrp | number: '1.2-2' }}</td>
+                    <td>{{ item.netAmount | number: '1.2-2' }}</td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="7">Sum Amount</td>
+                  <td>{{ nonMedicalSum() | number: '1.2-2' }}</td>
+                </tr>
+              </tfoot>
+            </table>
+
+            <div class="pwr-totals">
+              <span>Paid Amount: {{ statement()!.paidAmount | number: '1.2-2' }}</span>
+              <span>Discount/Return Amount: {{ statement()!.discountAmount | number: '1.2-2' }}</span>
+              <span>Due: {{ statement()!.dueAmount | number: '1.2-2' }}</span>
+              <span>Sum Total: {{ (medicalSum() + nonMedicalSum()) | number: '1.2-2' }}</span>
+            </div>
+          </div>
+
+          <div class="pwr-actions">
+            <button mat-flat-button color="primary" type="button" (click)="print()">Print</button>
+          </div>
+        }
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

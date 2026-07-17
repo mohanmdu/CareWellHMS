@@ -1,0 +1,119 @@
+<div class="iwd-body">
+  <div class="iwd-filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Report Type</mat-label>
+      <mat-select [(ngModel)]="reportType" name="reportType">
+        <mat-option value="SUPPLIER">Supplier Wise</mat-option>
+        <mat-option value="COMPANY">Company Wise</mat-option>
+        <mat-option value="PRODUCT">Product Wise</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    @if (reportType === 'SUPPLIER') {
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Supplier Name</mat-label>
+        <mat-select [(ngModel)]="supplierId" name="supplierId">
+          <mat-option [value]="null">All</mat-option>
+          @for (supplier of suppliers(); track supplier.id) {
+            <mat-option [value]="supplier.id">{{ supplier.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+    @if (reportType === 'COMPANY') {
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Company Name</mat-label>
+        <mat-select [(ngModel)]="manufacturerId" name="manufacturerId">
+          <mat-option [value]="null">--ALL--</mat-option>
+          @for (manufacturer of manufacturers(); track manufacturer.id) {
+            <mat-option [value]="manufacturer.id">{{ manufacturer.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+    @if (reportType === 'PRODUCT') {
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Drug Name</mat-label>
+        <input matInput [(ngModel)]="drugName" name="drugName" />
+      </mat-form-field>
+    }
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>From</mat-label>
+      <input matInput [matDatepicker]="fromPicker" [ngModel]="fromDate()" (ngModelChange)="fromDate.set($event)" />
+      <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+      <mat-datepicker #fromPicker />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>To</mat-label>
+      <input matInput [matDatepicker]="toPicker" [ngModel]="toDate()" (ngModelChange)="toDate.set($event)" />
+      <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+      <mat-datepicker #toPicker />
+    </mat-form-field>
+    <button mat-flat-button color="primary" type="button" (click)="getStock()">Get Stock</button>
+  </div>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (loaded()) {
+    <div #reportContent>
+      @if (entries().length === 0) {
+        <app-empty-state icon="inventory" title="No results" message="No purchase records matched these filters." />
+      } @else {
+        <div class="iwd-table-wrap">
+          <table class="iwd-table">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Inv No</th>
+                <th>Drug Name</th>
+                <th>Drug Type</th>
+                <th>Batch No</th>
+                <th>Qty</th>
+                <th>Product Price</th>
+                <th>MRP</th>
+                <th>Net Amount (Including GST)</th>
+                <th>Supplier Name</th>
+                <th>Manufacturer Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (entry of entries(); track entry.grnId + '-' + entry.batch; let i = $index) {
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td>
+                    <a href="javascript:void(0)" (click)="viewGrn(entry)">{{ entry.invoiceNo }}</a>
+                  </td>
+                  <td>{{ entry.drugName }}</td>
+                  <td>{{ entry.drugType }}</td>
+                  <td>{{ entry.batch }}</td>
+                  <td>{{ entry.qty }}</td>
+                  <td>{{ entry.productPrice | number: '1.2-2' }}</td>
+                  <td>{{ entry.mrp | number: '1.2-2' }}</td>
+                  <td>{{ entry.netAmountInclGst | number: '1.2-2' }}</td>
+                  <td>{{ entry.supplierName }}</td>
+                  <td>{{ entry.manufacturerName }}</td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="5">Total</td>
+                <td>{{ totalQty() }}</td>
+                <td colspan="2"></td>
+                <td>{{ totalNetAmount() | number: '1.2-2' }}</td>
+                <td colspan="2"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      }
+    </div>
+
+    <div class="iwd-actions">
+      <button mat-flat-button color="primary" type="button" (click)="print()">Print</button>
+    </div>
+  }
+</div>

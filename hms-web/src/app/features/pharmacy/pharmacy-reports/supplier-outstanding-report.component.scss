@@ -1,0 +1,27 @@
+.sor-body {
+  padding: var(--hms-space-4) var(--hms-space-2) var(--hms-space-2);
+}
+
+.sor-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--hms-space-3);
+  margin-bottom: var(--hms-space-3);
+}
+
+.sor-table {
+  width: 100%;
+}
+
+.sor-total {
+  font-weight: 600;
+  text-align: right;
+  margin-bottom: var(--hms-space-3);
+}
+
+.sor-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--hms-space-3);
+}

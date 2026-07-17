@@ -1,0 +1,63 @@
+<div class="sor-body">
+  <div class="sor-filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>From</mat-label>
+      <input matInput [matDatepicker]="fromPicker" [ngModel]="fromDate()" (ngModelChange)="fromDate.set($event)" />
+      <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+      <mat-datepicker #fromPicker />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>To</mat-label>
+      <input matInput [matDatepicker]="toPicker" [ngModel]="toDate()" (ngModelChange)="toDate.set($event)" />
+      <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+      <mat-datepicker #toPicker />
+    </mat-form-field>
+    <button mat-flat-button color="primary" type="button" (click)="refresh()">Search</button>
+  </div>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  <div #reportContent>
+    @if (entries().length === 0) {
+      <app-empty-state icon="receipt_long" title="No outstanding invoices" message="No approved GRNs were recorded in this range." />
+    } @else {
+      <table mat-table [dataSource]="entries()" class="sor-table">
+        <ng-container matColumnDef="vendorName">
+          <th mat-header-cell *matHeaderCellDef>Vendor Name</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.vendorName }}</td>
+        </ng-container>
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef>Date</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.date | date: 'dd/MM/yyyy' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="invoiceNo">
+          <th mat-header-cell *matHeaderCellDef>Invoice No</th>
+          <td mat-cell *matCellDef="let entry">
+            <a href="javascript:void(0)" (click)="viewGrn(entry)">{{ entry.invoiceNo }}</a>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="totalAmount">
+          <th mat-header-cell *matHeaderCellDef>Total Amount</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.totalAmount | number: '1.2-2' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="paidAmount">
+          <th mat-header-cell *matHeaderCellDef>Paid Amount</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.paidAmount | number: '1.2-2' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="balanceAmount">
+          <th mat-header-cell *matHeaderCellDef>Balance Amount</th>
+          <td mat-cell *matCellDef="let entry">{{ entry.balanceAmount | number: '1.2-2' }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+      <div class="sor-total">Total Balance Amount: {{ totalBalance() | number: '1.2-2' }}</div>
+    }
+  </div>
+
+  <div class="sor-actions">
+    <button mat-flat-button color="primary" type="button" (click)="print()">Print</button>
+  </div>
+</div>

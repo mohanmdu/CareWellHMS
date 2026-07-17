@@ -76,3 +76,108 @@ export interface DiReportEntry {
   expiryDate: string | null;
   pharmacistSign: string | null;
 }
+
+export interface InventoryReportEntry {
+  productId: number;
+  productName: string;
+  batch: string | null;
+  packing: number;
+  noPack: number;
+  quantity: number;
+  sellingPrice: number;
+  netAmountSp: number;
+  purchasePrice: number;
+  netAmountPp: number;
+  expiryDate: string | null;
+}
+
+export interface ExpiredReportEntry {
+  productName: string;
+  manufacturerName: string | null;
+  supplierName: string;
+  batch: string | null;
+  quantity: number;
+  purchasePrice: number;
+  mrp: number;
+  totalAmountSp: number;
+  totalAmountPp: number;
+  expiryDate: string;
+}
+
+export interface ItemWiseSalesDetail {
+  saleId: number;
+  invoiceNo: number;
+  batch: string | null;
+  vatPercent: number;
+  registrationNumber: string | null;
+  patientName: string;
+  saleQty: number;
+  sellingDate: string;
+}
+
+export interface ItemWiseSalesSummary {
+  productName: string;
+  batch: string | null;
+  mrp: number | null;
+  saleQty: number;
+  netAmount: number;
+  details: ItemWiseSalesDetail[];
+}
+
+export type ItemWiseReportType = 'SUPPLIER' | 'COMPANY' | 'PRODUCT';
+
+export interface ItemWiseDetailEntry {
+  grnId: number;
+  invoiceNo: string;
+  drugName: string;
+  drugType: string | null;
+  batch: string | null;
+  qty: number;
+  productPrice: number | null;
+  mrp: number | null;
+  netAmountInclGst: number;
+  supplierName: string;
+  manufacturerName: string | null;
+}
+
+export interface PatientBillEntry {
+  saleId: number;
+  billNumber: number;
+  registrationNumber: string | null;
+  patientName: string;
+  type: string;
+  invoiceDate: string;
+  invoicedAmount: number;
+  paidDate: string | null;
+  dueAmount: number;
+}
+
+export interface PatientStatementItem {
+  type: string | null;
+  drugName: string;
+  batch: string | null;
+  expiryDate: string | null;
+  qty: number;
+  mrp: number | null;
+  netAmount: number;
+}
+
+export interface PatientStatement {
+  registrationNumber: string | null;
+  patientName: string;
+  gender: string | null;
+  medicalItems: PatientStatementItem[];
+  nonMedicalItems: PatientStatementItem[];
+  paidAmount: number;
+  discountAmount: number;
+  dueAmount: number;
+}
+
+export interface ProductMovementEntry {
+  productId: number;
+  productName: string;
+  purchaseQty: number;
+  salesQty: number;
+  returnQty: number;
+  netQty: number;
+}

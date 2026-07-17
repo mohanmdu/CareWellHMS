@@ -1,0 +1,68 @@
+.pwr-body {
+  padding: var(--hms-space-4) var(--hms-space-2) var(--hms-space-2);
+}
+
+.pwr-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--hms-space-3);
+  margin-bottom: var(--hms-space-3);
+}
+
+.pwr-tab-body {
+  padding: var(--hms-space-4) var(--hms-space-2) var(--hms-space-2);
+}
+
+.pwr-bill-table,
+.pwr-item-table,
+.pwr-profile-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin-bottom: var(--hms-space-4);
+
+  th,
+  td {
+    border: 1px solid var(--hms-color-border, #ddd);
+    padding: var(--hms-space-2);
+    text-align: left;
+  }
+
+  th {
+    background: var(--hms-color-surface-alt, #f2f2f2);
+  }
+
+  tfoot td {
+    font-weight: 600;
+    background: var(--hms-color-surface-alt, #fdf0e6);
+  }
+}
+
+.pwr-statement-header {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--hms-space-4);
+  margin-bottom: var(--hms-space-3);
+}
+
+.pwr-statement-meta {
+  text-align: right;
+
+  p {
+    margin: 0;
+  }
+}
+
+.pwr-totals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hms-space-4);
+  font-weight: 600;
+}
+
+.pwr-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--hms-space-3);
+}

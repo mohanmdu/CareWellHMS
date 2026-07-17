@@ -1,0 +1,112 @@
+<div class="iwsd-body">
+  <div class="iwsd-filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>From</mat-label>
+      <input matInput [matDatepicker]="fromPicker" [ngModel]="fromDate()" (ngModelChange)="fromDate.set($event)" />
+      <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+      <mat-datepicker #fromPicker />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>To</mat-label>
+      <input matInput [matDatepicker]="toPicker" [ngModel]="toDate()" (ngModelChange)="toDate.set($event)" />
+      <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+      <mat-datepicker #toPicker />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Drug Name</mat-label>
+      <input matInput [(ngModel)]="drugName" name="drugName" (keyup.enter)="getDetails()" />
+    </mat-form-field>
+    <button mat-flat-button color="primary" type="button" (click)="getDetails()">Get Details</button>
+  </div>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  <div #reportContent>
+    @if (summaries().length === 0) {
+      <app-empty-state icon="sell" title="No sales" message="No sales were recorded in this range." />
+    } @else {
+      <div class="iwsd-table-wrap">
+        <table class="iwsd-table">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Product Name</th>
+              <th>Batch No</th>
+              <th>MRP</th>
+              <th>Sale Qty</th>
+              <th>Net Amount</th>
+              <th>View</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (summary of summaries(); track keyFor(summary); let i = $index) {
+              <tr>
+                <td>{{ i + 1 }}</td>
+                <td>{{ summary.productName }}</td>
+                <td>{{ summary.batch }}</td>
+                <td>{{ summary.mrp | number: '1.2-2' }}</td>
+                <td>{{ summary.saleQty }}</td>
+                <td>{{ summary.netAmount | number: '1.2-2' }}</td>
+                <td>
+                  <button mat-stroked-button type="button" (click)="toggle(summary)">
+                    {{ isExpanded(summary) ? 'Hide' : 'View' }}
+                  </button>
+                </td>
+              </tr>
+              @if (isExpanded(summary)) {
+                <tr>
+                  <td colspan="7" class="iwsd-nested-cell">
+                    <table class="iwsd-detail-table">
+                      <thead>
+                        <tr>
+                          <th>S.No</th>
+                          <th>Invoice No</th>
+                          <th>Batch No</th>
+                          <th>Vat %</th>
+                          <th>PID/CID</th>
+                          <th>Patient Name</th>
+                          <th>Sale Qty</th>
+                          <th>Selling Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (detail of summary.details; track detail.saleId; let j = $index) {
+                          <tr>
+                            <td>{{ j + 1 }}</td>
+                            <td>
+                              <a href="javascript:void(0)" (click)="viewBill(detail)">{{ detail.invoiceNo }}</a>
+                            </td>
+                            <td>{{ detail.batch }}</td>
+                            <td>{{ detail.vatPercent }}%</td>
+                            <td>{{ detail.registrationNumber }}</td>
+                            <td>{{ detail.patientName }}</td>
+                            <td>{{ detail.saleQty }}</td>
+                            <td>{{ detail.sellingDate | date: 'dd/MM/yyyy' }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4">Total</td>
+              <td>{{ totalSaleQty }}</td>
+              <td>{{ totalNetAmount | number: '1.2-2' }}</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    }
+  </div>
+
+  <div class="iwsd-actions">
+    <button mat-flat-button color="primary" type="button" (click)="print()">Print</button>
+  </div>
+</div>

@@ -25,4 +25,15 @@ public interface GrnItemRepository extends JpaRepository<GrnItem, Long> {
             ORDER BY i.grn.invoiceDate DESC
             """)
     List<GrnItem> searchApprovedLines(@Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate);
+
+    /** Pharmacy MIS "Purchase Qty" - date-ranged variant of sumReceivedQtyByProductId. */
+    @Query("""
+            SELECT COALESCE(SUM(i.totalQty + i.freeQty), 0) FROM GrnItem i
+            WHERE i.product.id = :productId
+              AND i.grn.status = com.pms.pharmacy.entity.GrnStatus.APPROVED
+              AND (:fromDate IS NULL OR i.grn.grnDate >= :fromDate)
+              AND (:toDate IS NULL OR i.grn.grnDate <= :toDate)
+            """)
+    int sumReceivedQtyByProductIdInRange(
+            @Param("productId") Long productId, @Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate);
 }
