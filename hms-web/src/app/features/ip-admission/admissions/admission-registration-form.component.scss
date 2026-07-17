@@ -1,0 +1,87 @@
+.admission-form-section {
+  padding: var(--hms-space-5);
+}
+
+.admission-patient-block {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--hms-space-5);
+  padding-bottom: var(--hms-space-4);
+  margin-bottom: var(--hms-space-4);
+  border-bottom: 1px solid var(--hms-color-border, #e0e0e0);
+
+  .hms-form-grid {
+    flex: 1;
+  }
+}
+
+.admission-readonly-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-1);
+}
+
+.admission-readonly-field-wide {
+  grid-column: span 2;
+}
+
+.admission-readonly-label {
+  font-size: var(--hms-font-size-sm);
+  color: var(--hms-color-text-muted);
+}
+
+.admission-readonly-value {
+  font-weight: 500;
+}
+
+.admission-photo-field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--hms-space-2);
+  flex-shrink: 0;
+}
+
+.admission-photo-preview {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid var(--hms-color-border, #e0e0e0);
+}
+
+.admission-photo-placeholder {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 1px dashed var(--hms-color-border, #e0e0e0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--hms-font-size-sm);
+  color: var(--hms-color-text-muted);
+  text-align: center;
+}
+
+.admission-remarks-field {
+  grid-column: span 2;
+}
+
+.admission-icu-field {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-4);
+}
+
+.admission-icu-label {
+  font-size: var(--hms-font-size-sm);
+  color: var(--hms-color-text-muted);
+}
+
+.admission-submit-row {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  margin-top: var(--hms-space-2);
+}

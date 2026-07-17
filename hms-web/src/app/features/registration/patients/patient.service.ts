@@ -16,6 +16,10 @@ export class PatientService {
     return this.http.get<Patient[]>(this.baseUrl, { params: query ? { query } : {} });
   }
 
+  get(id: number): Observable<Patient> {
+    return this.http.get<Patient>(`${this.baseUrl}/${id}`);
+  }
+
   listInactive(): Observable<Patient[]> {
     return this.http.get<Patient[]>(`${this.baseUrl}/inactive`);
   }

@@ -280,6 +280,27 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'ip/admissions/new',
+        loadComponent: () =>
+          import('./features/ip-admission/admissions/admission-patient-search.component').then(
+            (m) => m.AdmissionPatientSearchComponent
+          )
+      },
+      {
+        path: 'ip/admissions/new/success/:admissionId',
+        loadComponent: () =>
+          import('./features/ip-admission/admissions/admission-registration-success.component').then(
+            (m) => m.AdmissionRegistrationSuccessComponent
+          )
+      },
+      {
+        path: 'ip/admissions/new/:patientId/register',
+        loadComponent: () =>
+          import('./features/ip-admission/admissions/admission-registration-form.component').then(
+            (m) => m.AdmissionRegistrationFormComponent
+          )
+      },
+      {
         path: 'insurance/claims',
         loadComponent: () =>
           import('./features/insurance/claims/insurance-claim-worklist.component').then(

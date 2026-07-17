@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * REST equivalent of the legacy IPAction admission/advance/discharge family
@@ -27,10 +28,26 @@ public class AdmissionController {
         return service.findAll();
     }
 
+    @GetMapping("/{id}")
+    public AdmissionDto get(@PathVariable Long id) {
+        return service.findById(id);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public AdmissionDto admit(@Valid @RequestBody AdmissionDto dto) {
         return service.admit(dto);
+    }
+
+    @PostMapping("/register")
+    @ResponseStatus(HttpStatus.CREATED)
+    public AdmissionDto register(@Valid @RequestBody AdmissionDto dto) {
+        return service.register(dto);
+    }
+
+    @PostMapping("/{id}/photo")
+    public AdmissionDto uploadPhoto(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+        return service.uploadPhoto(id, file);
     }
 
     @PatchMapping("/{id}/advance-payment")

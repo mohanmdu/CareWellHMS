@@ -49,9 +49,18 @@ public class Admission extends Auditable {
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
+    // Nullable: set only once Ward Allocation (a later batch) finalizes the
+    // bed assignment. Until then the admission sits at status = REGISTERED
+    // with only a roomType preference, matching the legacy's two-step
+    // register-then-admit flow.
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id", nullable = false)
+    @JoinColumn(name = "room_id")
     private Room room;
+
+    /** Room type preference captured at registration, before a specific room/bed is picked. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_type_id")
+    private RoomType roomType;
 
     @Column(name = "admission_date", nullable = false)
     private LocalDateTime admissionDate;
@@ -77,4 +86,72 @@ public class Admission extends Auditable {
 
     @Column(name = "discharge_summary", length = 2000)
     private String dischargeSummary;
+
+    // --- Registration/intake fields captured at IP Admission Advice (Step 1) ---
+
+    @Column(name = "attender_name")
+    private String attenderName;
+
+    @Column(name = "relation_type")
+    private String relationType;
+
+    @Column(name = "father_spouse_name")
+    private String fatherSpouseName;
+
+    @Column(name = "relation_mobile_no")
+    private String relationMobileNo;
+
+    private String occupation;
+
+    @Column(name = "marital_status")
+    private String maritalStatus;
+
+    @Column(name = "period_of_stay_days")
+    private Integer periodOfStayDays;
+
+    @Column(name = "description_of_case")
+    private String descriptionOfCase;
+
+    @Column(name = "referral_doctor")
+    private String referralDoctor;
+
+    @Column(name = "primary_consultant")
+    private String primaryConsultant;
+
+    @Column(name = "secondary_consultant")
+    private String secondaryConsultant;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_type", length = 32)
+    private AdmissionPaymentType paymentType;
+
+    @Column(name = "height_cm")
+    private Double heightCm;
+
+    @Column(name = "weight_kg")
+    private Double weightKg;
+
+    @Column(nullable = false)
+    private boolean mlc = false;
+
+    @Column(name = "insurance_type")
+    private String insuranceType;
+
+    @Column(name = "patient_type")
+    private String patientType;
+
+    @Column(length = 1000)
+    private String remarks;
+
+    @Column(name = "aadhaar_number")
+    private String aadhaarNumber;
+
+    @Column(name = "ventilator_required", nullable = false)
+    private boolean ventilatorRequired = false;
+
+    @Column(name = "monitor_required", nullable = false)
+    private boolean monitorRequired = false;
+
+    @Column(name = "photo_path")
+    private String photoPath;
 }

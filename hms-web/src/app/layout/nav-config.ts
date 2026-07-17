@@ -78,7 +78,10 @@ export const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: 'IP Admission',
-    items: [{ label: 'IP Admissions', route: '/ip/admissions', icon: 'local_hospital' }]
+    items: [
+      { label: 'New Admission', route: '/ip/admissions/new', icon: 'person_add' },
+      { label: 'IP Admissions', route: '/ip/admissions', icon: 'local_hospital' }
+    ]
   },
   {
     label: 'IP Billing Master',
