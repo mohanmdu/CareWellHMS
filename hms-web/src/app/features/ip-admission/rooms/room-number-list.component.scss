@@ -1,0 +1,37 @@
+.room-number-form {
+  padding: var(--hms-space-4) var(--hms-space-5);
+  margin-bottom: var(--hms-space-4);
+}
+
+.room-number-section {
+  margin-bottom: var(--hms-space-4);
+}
+
+.room-number-section-title {
+  font-size: var(--hms-font-size-lg);
+  margin: 0 0 var(--hms-space-3);
+}
+
+.room-number-table-wrap {
+  overflow-x: auto;
+}
+
+.room-number-table {
+  width: 100%;
+}
+
+.room-number-actions-cell {
+  text-align: right;
+}
+
+.room-number-actions-row {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+  justify-content: flex-end;
+}
+
+.room-number-actions-header {
+  width: 0;
+  white-space: nowrap;
+}

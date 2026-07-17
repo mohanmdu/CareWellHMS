@@ -1,0 +1,95 @@
+<div class="hms-page">
+  <app-page-header title="Room Availability" subtitle="Live room status across the hospital." />
+
+  <section class="hms-card-surface room-availability-stats">
+    <div class="room-availability-stat">
+      <span class="room-availability-stat-value">{{ stats().total }}</span>
+      <span class="room-availability-stat-label">Total Rooms</span>
+    </div>
+    <div class="room-availability-stat room-availability-stat-available">
+      <span class="room-availability-stat-value">{{ stats().available }}</span>
+      <span class="room-availability-stat-label">Available</span>
+    </div>
+    <div class="room-availability-stat room-availability-stat-allocated">
+      <span class="room-availability-stat-value">{{ stats().allocated }}</span>
+      <span class="room-availability-stat-label">Allocated</span>
+    </div>
+    <div class="room-availability-stat room-availability-stat-maintenance">
+      <span class="room-availability-stat-value">{{ stats().maintenance }}</span>
+      <span class="room-availability-stat-label">Maintenance</span>
+    </div>
+  </section>
+
+  <section class="hms-card-surface room-availability-section">
+    <div class="room-availability-toolbar">
+      <mat-button-toggle-group [value]="statusFilter()" (change)="setFilter($event.value)">
+        <mat-button-toggle value="ALL">All</mat-button-toggle>
+        <mat-button-toggle value="AVAILABLE">Available</mat-button-toggle>
+        <mat-button-toggle value="ALLOCATED">Allocated</mat-button-toggle>
+        <mat-button-toggle value="MAINTENANCE">Maintenance</mat-button-toggle>
+      </mat-button-toggle-group>
+      <app-table-search placeholder="Search room number or type..." [value]="searchTerm()" (valueChange)="onSearch($event)" />
+    </div>
+
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    @if (!loading() && rooms().length === 0) {
+      <app-empty-state icon="bed" title="No rooms yet" message="Add rooms from the Room Numbers screen first." />
+    } @else if (filteredRooms().length === 0) {
+      <app-empty-state icon="search_off" title="No matches" message="No rooms match your filter/search." />
+    } @else {
+      <div class="room-availability-table-wrap">
+        <table mat-table [dataSource]="pagination.page()" class="room-availability-table">
+          <ng-container matColumnDef="serialNo">
+            <th mat-header-cell *matHeaderCellDef>S.No</th>
+            <td mat-cell *matCellDef="let room; let i = index">
+              {{ pagination.pageIndex() * pagination.pageSize() + i + 1 }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="roomType">
+            <th mat-header-cell *matHeaderCellDef>Room Type</th>
+            <td mat-cell *matCellDef="let room">{{ room.roomTypeName }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="roomNumber">
+            <th mat-header-cell *matHeaderCellDef>Room Number</th>
+            <td mat-cell *matCellDef="let room">{{ room.roomNumber }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="currentStatus">
+            <th mat-header-cell *matHeaderCellDef>Current Status</th>
+            <td mat-cell *matCellDef="let room">
+              <app-status-badge [label]="statusLabel[room.status]" [tone]="statusTone[room.status]" />
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="availability">
+            <th mat-header-cell *matHeaderCellDef>Availability</th>
+            <td mat-cell *matCellDef="let room">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="room-availability-select">
+                <mat-select [value]="room.status" (selectionChange)="changeStatus(room, $event.value)">
+                  @for (status of statusOptions; track status) {
+                    <mat-option [value]="status">{{ statusLabel[status] }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+      <mat-paginator
+        [length]="pagination.length()"
+        [pageIndex]="pagination.pageIndex()"
+        [pageSize]="pagination.pageSize()"
+        [pageSizeOptions]="[5, 10, 25, 50]"
+        (page)="pagination.onPage($event)"
+      />
+    }
+  </section>
+</div>

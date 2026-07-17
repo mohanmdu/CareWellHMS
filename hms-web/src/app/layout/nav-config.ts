@@ -69,11 +69,16 @@ export const NAV_GROUPS: NavGroup[] = [
     ]
   },
   {
-    label: 'IP Admission',
+    label: 'Room / Ward Management',
     items: [
-      { label: 'Rooms', route: '/ip/rooms', icon: 'bed' },
-      { label: 'IP Admissions', route: '/ip/admissions', icon: 'local_hospital' }
+      { label: 'Room Types', route: '/ip/room-types', icon: 'apartment' },
+      { label: 'Room Numbers', route: '/ip/rooms', icon: 'bed' },
+      { label: 'Room Availability', route: '/ip/room-availability', icon: 'meeting_room' }
     ]
+  },
+  {
+    label: 'IP Admission',
+    items: [{ label: 'IP Admissions', route: '/ip/admissions', icon: 'local_hospital' }]
   },
   {
     label: 'IP Billing Master',

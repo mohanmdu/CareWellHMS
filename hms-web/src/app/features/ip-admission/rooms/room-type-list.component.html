@@ -1,0 +1,120 @@
+<div class="hms-page">
+  <app-page-header title="Room Types" subtitle="Room type master with Cash and Claim (insurance) rent, used by Room Numbers." />
+
+  <section class="hms-card-surface room-type-form">
+    <form class="hms-inline-actions" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Room Type</mat-label>
+        <input matInput name="name" [(ngModel)]="form.name" required />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="room-type-rate-field" subscriptSizing="dynamic">
+        <mat-label>Rent (Cash)</mat-label>
+        <input matInput name="rentCash" type="number" min="0" [(ngModel)]="form.rentCash" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="room-type-rate-field" subscriptSizing="dynamic">
+        <mat-label>Rent (Claim)</mat-label>
+        <input matInput name="rentClaim" type="number" min="0" [(ngModel)]="form.rentClaim" />
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="submit" [disabled]="saving() || !form.name.trim()">
+        <mat-icon aria-hidden="true">{{ editingId() !== null ? 'save' : 'add' }}</mat-icon>
+        {{ editingId() !== null ? 'Update' : 'Add' }}
+      </button>
+      @if (editingId() !== null) {
+        <button mat-stroked-button type="button" (click)="clear()">Clear</button>
+      }
+    </form>
+  </section>
+
+  <section class="hms-card-surface room-type-section">
+    <h2 class="room-type-section-title">Room Types Master Data</h2>
+    @if (loadingActive()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+    @if (!loadingActive() && activeTypes().length === 0) {
+      <app-empty-state icon="apartment" title="No room types yet" message="Add the first room type above." />
+    } @else if (activeTypes().length > 0) {
+      <div class="room-type-table-wrap">
+        <table mat-table [dataSource]="activeTypes()" class="room-type-table">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Room Type</th>
+            <td mat-cell *matCellDef="let type">{{ type.name }}</td>
+          </ng-container>
+          <ng-container matColumnDef="roomCount">
+            <th mat-header-cell *matHeaderCellDef>Room Count</th>
+            <td mat-cell *matCellDef="let type">{{ type.roomCount }}</td>
+          </ng-container>
+          <ng-container matColumnDef="rentCash">
+            <th mat-header-cell *matHeaderCellDef>Rent (Cash)</th>
+            <td mat-cell *matCellDef="let type">{{ type.rentCash | number: '1.0-2' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="rentClaim">
+            <th mat-header-cell *matHeaderCellDef>Rent (Claim)</th>
+            <td mat-cell *matCellDef="let type">{{ type.rentClaim | number: '1.0-2' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="createdBy">
+            <th mat-header-cell *matHeaderCellDef>Created By</th>
+            <td mat-cell *matCellDef="let type">{{ type.createdBy ?? '-' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="room-type-actions-header"></th>
+            <td mat-cell *matCellDef="let type" class="room-type-actions-cell">
+              <div class="room-type-actions-row">
+                <button mat-icon-button type="button" [attr.aria-label]="'Edit ' + type.name" (click)="edit(type)">
+                  <mat-icon aria-hidden="true">edit</mat-icon>
+                </button>
+                <button mat-icon-button type="button" color="warn" [attr.aria-label]="'Deactivate ' + type.name" (click)="deactivate(type)">
+                  <mat-icon aria-hidden="true">delete</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="activeColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: activeColumns"></tr>
+        </table>
+      </div>
+    }
+  </section>
+
+  <section class="hms-card-surface room-type-section">
+    <h2 class="room-type-section-title">Deactivated Room Types</h2>
+    @if (loadingInactive()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+    @if (!loadingInactive() && inactiveTypes().length === 0) {
+      <app-empty-state icon="inbox" title="No deactivated room types" message="Deactivated room types will appear here." />
+    } @else if (inactiveTypes().length > 0) {
+      <div class="room-type-table-wrap">
+        <table mat-table [dataSource]="inactiveTypes()" class="room-type-table">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Room Type</th>
+            <td mat-cell *matCellDef="let type">{{ type.name }}</td>
+          </ng-container>
+          <ng-container matColumnDef="roomCount">
+            <th mat-header-cell *matHeaderCellDef>Room Count</th>
+            <td mat-cell *matCellDef="let type">{{ type.roomCount }}</td>
+          </ng-container>
+          <ng-container matColumnDef="rentCash">
+            <th mat-header-cell *matHeaderCellDef>Rent (Cash)</th>
+            <td mat-cell *matCellDef="let type">{{ type.rentCash | number: '1.0-2' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="rentClaim">
+            <th mat-header-cell *matHeaderCellDef>Rent (Claim)</th>
+            <td mat-cell *matCellDef="let type">{{ type.rentClaim | number: '1.0-2' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="deactivatedBy">
+            <th mat-header-cell *matHeaderCellDef>Deactivated By</th>
+            <td mat-cell *matCellDef="let type">{{ type.deactivatedBy ?? '-' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="room-type-actions-header"></th>
+            <td mat-cell *matCellDef="let type" class="room-type-actions-cell">
+              <button mat-stroked-button color="primary" type="button" (click)="restore(type)">Activate</button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="inactiveColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: inactiveColumns"></tr>
+        </table>
+      </div>
+    }
+  </section>
+</div>

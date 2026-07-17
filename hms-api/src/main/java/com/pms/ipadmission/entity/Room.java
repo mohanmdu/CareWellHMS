@@ -3,6 +3,8 @@ package com.pms.ipadmission.entity;
 import com.pms.common.Auditable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -33,6 +35,10 @@ public class Room extends Auditable {
     @JoinColumn(name = "room_type_id", nullable = false)
     private RoomType roomType;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 32)
+    private RoomStatus status = RoomStatus.AVAILABLE;
+
     @Column(nullable = false)
-    private boolean occupied = false;
+    private boolean active = true;
 }

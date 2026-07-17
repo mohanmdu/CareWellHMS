@@ -26,8 +26,11 @@ public class RoomType extends Auditable {
     @Column(nullable = false, unique = true)
     private String name;
 
-    @Column(name = "daily_rate", nullable = false)
-    private double dailyRate;
+    @Column(name = "rent_cash", nullable = false)
+    private double rentCash;
+
+    @Column(name = "rent_claim", nullable = false)
+    private double rentClaim;
 
     @Column(nullable = false)
     private boolean active = true;

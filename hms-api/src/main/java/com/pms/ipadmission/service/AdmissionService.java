@@ -5,6 +5,7 @@ import com.pms.ipadmission.dto.AdmissionDto;
 import com.pms.ipadmission.entity.Admission;
 import com.pms.ipadmission.entity.AdmissionStatus;
 import com.pms.ipadmission.entity.Room;
+import com.pms.ipadmission.entity.RoomStatus;
 import com.pms.ipadmission.repository.AdmissionRepository;
 import com.pms.ipadmission.repository.RoomRepository;
 import com.pms.registration.entity.Patient;
@@ -51,8 +52,8 @@ public class AdmissionService {
                 .orElseThrow(() -> new EntityNotFoundException("Patient not found: " + dto.patientId()));
         Room room = roomRepository.findById(dto.roomId())
                 .orElseThrow(() -> new EntityNotFoundException("Room not found: " + dto.roomId()));
-        if (room.isOccupied()) {
-            throw new IllegalArgumentException("Room " + room.getRoomNumber() + " is already occupied");
+        if (room.getStatus() != RoomStatus.AVAILABLE) {
+            throw new IllegalArgumentException("Room " + room.getRoomNumber() + " is not available");
         }
 
         Admission admission = new Admission();
@@ -63,7 +64,7 @@ public class AdmissionService {
         admission.setStatus(AdmissionStatus.ADMITTED);
         admission.setAdvanceAmount(0);
 
-        room.setOccupied(true);
+        room.setStatus(RoomStatus.ALLOCATED);
         roomRepository.save(room);
 
         return toDto(repository.save(admission));
@@ -90,7 +91,7 @@ public class AdmissionService {
         admission.setSettlementAmount(admission.getAdvanceAmount() - totalBilled);
 
         Room room = admission.getRoom();
-        room.setOccupied(false);
+        room.setStatus(RoomStatus.AVAILABLE);
         roomRepository.save(room);
 
         return toDto(repository.save(admission));

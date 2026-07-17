@@ -258,9 +258,19 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'ip/room-types',
+        loadComponent: () =>
+          import('./features/ip-admission/rooms/room-type-list.component').then((m) => m.RoomTypeListComponent)
+      },
+      {
         path: 'ip/rooms',
         loadComponent: () =>
-          import('./features/ip-admission/rooms/room-catalog.component').then((m) => m.RoomCatalogComponent)
+          import('./features/ip-admission/rooms/room-number-list.component').then((m) => m.RoomNumberListComponent)
+      },
+      {
+        path: 'ip/room-availability',
+        loadComponent: () =>
+          import('./features/ip-admission/rooms/room-availability.component').then((m) => m.RoomAvailabilityComponent)
       },
       {
         path: 'ip/admissions',

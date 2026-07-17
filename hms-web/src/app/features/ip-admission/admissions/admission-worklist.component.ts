@@ -96,7 +96,7 @@ export class AdmissionWorklistComponent {
   }
 
   refreshAvailableRooms(): void {
-    this.roomService.list().subscribe({ next: (rooms) => this.availableRooms.set(rooms.filter((r) => !r.occupied)) });
+    this.roomService.list().subscribe({ next: (rooms) => this.availableRooms.set(rooms.filter((r) => r.status === 'AVAILABLE')) });
   }
 
   selectPatient(patient: Patient): void {

@@ -1,0 +1,60 @@
+.room-availability-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--hms-space-4);
+  padding: var(--hms-space-4) var(--hms-space-5);
+  margin-bottom: var(--hms-space-4);
+}
+
+.room-availability-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--hms-space-1);
+}
+
+.room-availability-stat-value {
+  font-size: var(--hms-font-size-xl, 1.75rem);
+  font-weight: 600;
+}
+
+.room-availability-stat-label {
+  color: var(--hms-color-text-muted);
+  font-size: var(--hms-font-size-sm);
+}
+
+.room-availability-stat-available .room-availability-stat-value {
+  color: var(--hms-color-success, #2e7d32);
+}
+
+.room-availability-stat-allocated .room-availability-stat-value {
+  color: var(--hms-color-warning, #ed6c02);
+}
+
+.room-availability-stat-maintenance .room-availability-stat-value {
+  color: var(--hms-color-text-muted);
+}
+
+.room-availability-section {
+  overflow-x: auto;
+}
+
+.room-availability-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--hms-space-3);
+  margin-bottom: var(--hms-space-3);
+}
+
+.room-availability-table-wrap {
+  overflow-x: auto;
+}
+
+.room-availability-table {
+  width: 100%;
+}
+
+.room-availability-select {
+  width: 160px;
+}

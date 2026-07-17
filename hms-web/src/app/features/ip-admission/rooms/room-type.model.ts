@@ -1,6 +1,16 @@
 export interface RoomType {
   id: number | null;
   name: string;
-  dailyRate: number;
+  rentCash: number;
+  rentClaim: number;
   active: boolean;
+  roomCount: number;
+  createdAt: string | null;
+  createdBy: string | null;
+  updatedAt: string | null;
+  updatedBy: string | null;
+  deactivatedAt: string | null;
+  deactivatedBy: string | null;
 }
+
+export type RoomTypeInput = Pick<RoomType, 'name' | 'rentCash' | 'rentClaim'>;
