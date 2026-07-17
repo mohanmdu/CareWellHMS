@@ -1,0 +1,24 @@
+.ip-billing-activity-log-section {
+  overflow-x: auto;
+}
+
+.ip-billing-activity-log-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--hms-space-3);
+  margin-bottom: var(--hms-space-3);
+}
+
+.ip-billing-activity-log-search {
+  display: block;
+  margin-bottom: var(--hms-space-3);
+}
+
+.ip-billing-activity-log-table-wrap {
+  overflow-x: auto;
+}
+
+.ip-billing-activity-log-table {
+  width: 100%;
+}

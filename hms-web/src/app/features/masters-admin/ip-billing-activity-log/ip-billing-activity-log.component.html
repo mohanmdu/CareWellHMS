@@ -1,0 +1,86 @@
+<div class="hms-page">
+  <app-page-header title="IP Billing Activity Log" subtitle="Audit trail of every IP Billing Component create, update, deactivate and activate." />
+
+  <section class="hms-card-surface ip-billing-activity-log-section">
+    <div class="ip-billing-activity-log-filters">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>From</mat-label>
+        <input matInput [matDatepicker]="fromPicker" [ngModel]="fromDate()" (ngModelChange)="fromDate.set($event)" />
+        <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+        <mat-datepicker #fromPicker />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>To</mat-label>
+        <input matInput [matDatepicker]="toPicker" [ngModel]="toDate()" (ngModelChange)="toDate.set($event)" />
+        <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+        <mat-datepicker #toPicker />
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="button" (click)="refresh()">Submit</button>
+    </div>
+
+    @if (logs().length > 0) {
+      <app-table-search placeholder="Search logs..." [value]="searchTerm()" (valueChange)="onSearch($event)" class="ip-billing-activity-log-search" />
+    }
+
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    @if (!loading() && logs().length === 0) {
+      <app-empty-state icon="history" title="No activity yet" message="IP Billing Component operations will appear here." />
+    } @else if (filteredLogs().length === 0) {
+      <app-empty-state icon="search_off" title="No matches" message="No logs match your search." />
+    } @else if (filteredLogs().length > 0) {
+      <div class="ip-billing-activity-log-table-wrap">
+        <table mat-table [dataSource]="pagination.page()" class="ip-billing-activity-log-table">
+          <ng-container matColumnDef="serialNo">
+            <th mat-header-cell *matHeaderCellDef>S.No</th>
+            <td mat-cell *matCellDef="let log; let i = index">
+              {{ pagination.pageIndex() * pagination.pageSize() + i + 1 }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="operation">
+            <th mat-header-cell *matHeaderCellDef>Operation</th>
+            <td mat-cell *matCellDef="let log">
+              <app-status-badge
+                [label]="operationLabel[log.operation] ?? log.operation"
+                [tone]="operationTone[log.operation] ?? 'neutral'"
+              />
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="content">
+            <th mat-header-cell *matHeaderCellDef>Content</th>
+            <td mat-cell *matCellDef="let log">{{ log.content }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="previousContent">
+            <th mat-header-cell *matHeaderCellDef>Previous Content</th>
+            <td mat-cell *matCellDef="let log">{{ log.previousContent ?? '-' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="performedBy">
+            <th mat-header-cell *matHeaderCellDef>Created By</th>
+            <td mat-cell *matCellDef="let log">{{ log.performedBy }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="performedAt">
+            <th mat-header-cell *matHeaderCellDef>Action Time</th>
+            <td mat-cell *matCellDef="let log">{{ log.performedAt | date: 'medium' }}</td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+      <mat-paginator
+        [length]="pagination.length()"
+        [pageIndex]="pagination.pageIndex()"
+        [pageSize]="pagination.pageSize()"
+        [pageSizeOptions]="[5, 10, 25, 50]"
+        (page)="pagination.onPage($event)"
+      />
+    }
+  </section>
+</div>

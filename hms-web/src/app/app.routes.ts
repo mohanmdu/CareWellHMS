@@ -106,6 +106,27 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'masters/ip-billing-categories',
+        loadComponent: () =>
+          import('./features/masters-admin/ip-billing-categories/ip-billing-category-list.component').then(
+            (m) => m.IpBillingCategoryListComponent
+          )
+      },
+      {
+        path: 'masters/ip-billing-components',
+        loadComponent: () =>
+          import('./features/masters-admin/ip-billing-components/ip-billing-component-list.component').then(
+            (m) => m.IpBillingComponentListComponent
+          )
+      },
+      {
+        path: 'masters/ip-billing-activity-log',
+        loadComponent: () =>
+          import('./features/masters-admin/ip-billing-activity-log/ip-billing-activity-log.component').then(
+            (m) => m.IpBillingActivityLogComponent
+          )
+      },
+      {
         path: 'appointments/book',
         loadComponent: () =>
           import('./features/appointments/booking/booking-wizard.component').then((m) => m.BookingWizardComponent)
