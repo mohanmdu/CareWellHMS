@@ -13,6 +13,22 @@ export interface DischargeSummaryListRow {
   dischargeSummaryId: number | null;
 }
 
+export interface DischargeInitiatedRow {
+  admissionId: number;
+  admissionNumber: string;
+  patientUhid: string | null;
+  patientName: string;
+  gender: string | null;
+  age: number | null;
+  mobileNumber: string | null;
+  address: string | null;
+  admissionDate: string;
+  paymentType: string | null;
+  wardLocation: string | null;
+  diagnosis: string | null;
+  primaryConsultant: string | null;
+}
+
 export interface DischargeSurgeryProcedure {
   id: number | null;
   procedureName: string | null;

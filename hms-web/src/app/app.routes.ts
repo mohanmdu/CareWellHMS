@@ -204,6 +204,13 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'ip/discharge-summary/initiated',
+        loadComponent: () =>
+          import('./features/ip-admission/discharge-summary/discharge-initiated-list.component').then(
+            (m) => m.DischargeInitiatedListComponent
+          )
+      },
+      {
         path: 'ip/discharge-summary/:admissionId/edit',
         loadComponent: () =>
           import('./features/ip-admission/discharge-summary/discharge-summary-form.component').then(

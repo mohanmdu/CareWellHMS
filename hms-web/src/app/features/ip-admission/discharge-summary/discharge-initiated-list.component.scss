@@ -1,0 +1,137 @@
+.dil-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-4);
+}
+
+.dil-title {
+  margin: 0;
+  text-align: center;
+  font-size: var(--hms-font-size-lg);
+  font-weight: 700;
+  color: var(--hms-color-primary, #1565c0);
+}
+
+.dil-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-3) var(--hms-space-4);
+}
+
+.dil-filter-label {
+  font-weight: 600;
+}
+
+.dil-filter-field {
+  width: 160px;
+}
+
+.dil-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-3) var(--hms-space-4);
+}
+
+.dil-entries {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+}
+
+.dil-entries-field {
+  width: 80px;
+}
+
+.dil-search-field {
+  width: 240px;
+}
+
+.dil-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(520px, 1fr));
+  gap: var(--hms-space-3);
+}
+
+.dil-card {
+  padding: var(--hms-space-3) var(--hms-space-4);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--hms-space-3);
+  border-left: 4px solid var(--hms-color-primary, #1565c0);
+}
+
+.dil-card-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--hms-space-3);
+}
+
+.dil-card-column {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--hms-font-size-sm);
+
+  p {
+    margin: 0;
+  }
+}
+
+.dil-column-title {
+  margin: 0 0 4px;
+  font-size: var(--hms-font-size-sm);
+  font-weight: 700;
+  text-decoration: underline;
+  color: var(--hms-color-text-muted);
+}
+
+.dil-patient-name {
+  font-weight: 700;
+  color: var(--hms-color-primary, #1565c0);
+}
+
+.dil-discharged-tag {
+  margin-top: var(--hms-space-2);
+  font-weight: 700;
+  color: #c62828;
+}
+
+.dil-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-2);
+  min-width: 150px;
+}
+
+.dil-summary-btn {
+  background: #2e7d32;
+  color: #fff;
+}
+
+@media (max-width: 900px) {
+  .dil-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dil-card {
+    flex-direction: column;
+  }
+
+  .dil-card-body {
+    grid-template-columns: 1fr;
+  }
+
+  .dil-card-actions {
+    flex-direction: row;
+    width: 100%;
+  }
+}

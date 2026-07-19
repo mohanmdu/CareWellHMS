@@ -91,7 +91,10 @@ export const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: 'Discharge Summary Module',
-    items: [{ label: 'Discharge List', route: '/ip/discharge-summary', icon: 'assignment' }]
+    items: [
+      { label: 'Discharge Initiated List', route: '/ip/discharge-summary/initiated', icon: 'pending_actions' },
+      { label: 'Discharge List', route: '/ip/discharge-summary', icon: 'assignment' }
+    ]
   },
   {
     label: 'ICD Codes Module',

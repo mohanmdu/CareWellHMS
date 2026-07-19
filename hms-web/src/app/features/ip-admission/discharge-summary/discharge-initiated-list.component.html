@@ -1,0 +1,83 @@
+<div class="hms-page dil-page">
+  <h1 class="dil-title">In Patient Discharge Initiated List</h1>
+
+  <section class="hms-card-surface dil-filter-bar">
+    <span class="dil-filter-label">From</span>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="dil-filter-field">
+      <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" />
+      <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+      <mat-datepicker #fromPicker />
+    </mat-form-field>
+    <span class="dil-filter-label">To</span>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="dil-filter-field">
+      <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" />
+      <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+      <mat-datepicker #toPicker />
+    </mat-form-field>
+    <button mat-flat-button color="primary" type="button" (click)="search()">Submit</button>
+  </section>
+
+  <section class="hms-card-surface dil-toolbar">
+    <div class="dil-entries">
+      <span>Show</span>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="dil-entries-field">
+        <mat-select [ngModel]="pagination.pageSize()" (ngModelChange)="onPageSizeChange($event)">
+          <mat-option [value]="10">10</mat-option>
+          <mat-option [value]="20">20</mat-option>
+          <mat-option [value]="50">50</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <span>entries</span>
+    </div>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="dil-search-field">
+      <mat-label>Search</mat-label>
+      <input matInput [ngModel]="searchTerm()" (ngModelChange)="onSearch($event)" />
+    </mat-form-field>
+  </section>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading() && searched() && rows().length === 0) {
+    <app-empty-state icon="assignment_turned_in" title="No discharge-initiated patients" message="No admissions currently have discharge initiated." />
+  } @else if (filteredRows().length === 0 && searched()) {
+    <app-empty-state icon="search_off" title="No matches" message="No patients match your search." />
+  } @else {
+    <div class="dil-card-grid">
+      @for (row of pagination.page(); track row.admissionId) {
+        <article class="hms-card-surface dil-card">
+          <div class="dil-card-body">
+            <div class="dil-card-column">
+              <h3 class="dil-column-title">Patient Details</h3>
+              <p class="dil-patient-name">{{ row.patientName }} ({{ row.patientUhid ?? '—' }})</p>
+              <p>{{ row.age ?? '—' }} Years, {{ row.gender ?? '—' }}</p>
+              <p>IP No: {{ row.admissionNumber }}</p>
+              <p>Mobile: {{ row.mobileNumber ?? '—' }}</p>
+              <p>{{ row.address ?? '—' }}</p>
+            </div>
+
+            <div class="dil-card-column">
+              <h3 class="dil-column-title">Other Details</h3>
+              <p>DOA: {{ row.admissionDate | date: 'dd/MM/yyyy hh:mm a' }}</p>
+              <p>Payment Type: {{ row.paymentType ?? '—' }}</p>
+              <p>Location: {{ row.wardLocation ?? '—' }}</p>
+              <p>Diagnosis: {{ row.diagnosis ?? '—' }}</p>
+            </div>
+
+            <div class="dil-card-column dil-consultant-column">
+              <h3 class="dil-column-title">Consultant</h3>
+              <p>{{ row.primaryConsultant ?? '—' }}</p>
+              <p class="dil-discharged-tag">Discharged</p>
+            </div>
+          </div>
+
+          <div class="dil-card-actions">
+            <button mat-flat-button color="primary" type="button" (click)="gotoBilling(row)">Goto Billing</button>
+            <button mat-flat-button class="dil-summary-btn" type="button" (click)="gotoDischargeSummary(row)">Discharge Summary</button>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</div>

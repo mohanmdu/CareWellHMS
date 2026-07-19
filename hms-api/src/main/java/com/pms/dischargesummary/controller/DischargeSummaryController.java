@@ -1,5 +1,6 @@
 package com.pms.dischargesummary.controller;
 
+import com.pms.dischargesummary.dto.DischargeInitiatedRowDto;
 import com.pms.dischargesummary.dto.DischargeSummaryDto;
 import com.pms.dischargesummary.dto.DischargeSummaryListRowDto;
 import com.pms.dischargesummary.service.DischargeSummaryService;
@@ -31,6 +32,13 @@ public class DischargeSummaryController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
             @RequestParam(required = false) String billingType) {
         return service.getList(fromDate, toDate, billingType);
+    }
+
+    @GetMapping("/initiated-list")
+    public List<DischargeInitiatedRowDto> initiatedList(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
+        return service.getInitiatedList(fromDate, toDate);
     }
 
     @GetMapping("/admission/{admissionId}")

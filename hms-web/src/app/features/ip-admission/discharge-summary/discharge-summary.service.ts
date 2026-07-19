@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { DischargeSummary, DischargeSummaryListRow } from './discharge-summary.model';
+import { DischargeInitiatedRow, DischargeSummary, DischargeSummaryListRow } from './discharge-summary.model';
 
 @Injectable({ providedIn: 'root' })
 export class DischargeSummaryService {
@@ -21,6 +21,17 @@ export class DischargeSummaryService {
       params = params.set('billingType', billingType);
     }
     return this.http.get<DischargeSummaryListRow[]>(`${this.baseUrl}/list`, { params });
+  }
+
+  initiatedList(fromDate?: string, toDate?: string): Observable<DischargeInitiatedRow[]> {
+    let params = new HttpParams();
+    if (fromDate) {
+      params = params.set('fromDate', fromDate);
+    }
+    if (toDate) {
+      params = params.set('toDate', toDate);
+    }
+    return this.http.get<DischargeInitiatedRow[]>(`${this.baseUrl}/initiated-list`, { params });
   }
 
   getByAdmission(admissionId: number): Observable<DischargeSummary> {

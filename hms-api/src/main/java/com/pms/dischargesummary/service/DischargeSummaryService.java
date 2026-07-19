@@ -4,6 +4,7 @@ import com.pms.activitylog.service.ActivityLogEntry;
 import com.pms.activitylog.service.ActivityLogService;
 import com.pms.common.EntityNotFoundException;
 import com.pms.dischargesummary.dto.DischargeAdviseDrugDto;
+import com.pms.dischargesummary.dto.DischargeInitiatedRowDto;
 import com.pms.dischargesummary.dto.DischargeSummaryDto;
 import com.pms.dischargesummary.dto.DischargeSummaryListRowDto;
 import com.pms.dischargesummary.dto.DischargeSurgeryProcedureDto;
@@ -50,6 +51,40 @@ public class DischargeSummaryService {
                 .filter(admission -> matchesPaymentTypeFilter(admission, billingTypeFilter))
                 .map(this::toListRow)
                 .toList();
+    }
+
+    /** Discharge Initiated List: admissions in DISCHARGE_INITIATED status (stage 1 of discharge, not yet finalized). */
+    public List<DischargeInitiatedRowDto> getInitiatedList(LocalDate fromDate, LocalDate toDate) {
+        var fromDateTime = fromDate != null ? fromDate.atStartOfDay() : null;
+        var toDateTime = toDate != null ? toDate.plusDays(1).atStartOfDay() : null;
+        return admissionRepository.findDischargeInitiatedForList(fromDateTime, toDateTime).stream()
+                .map(this::toInitiatedRow)
+                .toList();
+    }
+
+    private DischargeInitiatedRowDto toInitiatedRow(Admission admission) {
+        Patient patient = admission.getPatient();
+        Room room = admission.getRoom();
+        String wardLocation = room != null ? room.getRoomNumber() + " - " + room.getRoomType().getName() : null;
+        String diagnosis = repository.findByAdmissionId(admission.getId())
+                .map(DischargeSummary::getDiagnosisText)
+                .filter(text -> text != null && !text.isBlank())
+                .map(text -> String.join(", ", splitLines(text)))
+                .orElse(admission.getDescriptionOfCase());
+        return new DischargeInitiatedRowDto(
+                admission.getId(),
+                admission.getAdmissionNumber(),
+                patient.getRegistrationNumber(),
+                patientDisplayName(patient),
+                patient.getGender(),
+                patient.getAge(),
+                patient.getMobileNumber(),
+                patient.getAddress(),
+                admission.getAdmissionDate(),
+                admission.getPaymentType() != null ? admission.getPaymentType().name() : null,
+                wardLocation,
+                diagnosis,
+                admission.getPrimaryConsultant());
     }
 
     private DischargeSummaryListRowDto toListRow(Admission admission) {
