@@ -134,6 +134,16 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'ip/reports/admission',
+        loadComponent: () =>
+          import('./features/ip-admission/reports/admission-report.component').then((m) => m.AdmissionReportComponent)
+      },
+      {
+        path: 'ip/reports/admission/:id/bill',
+        loadComponent: () =>
+          import('./features/ip-admission/reports/provisional-bill.component').then((m) => m.ProvisionalBillComponent)
+      },
+      {
         path: 'masters/cms/site-content',
         loadComponent: () =>
           import('./features/masters-admin/website-cms/site-content/cms-site-content.component').then(

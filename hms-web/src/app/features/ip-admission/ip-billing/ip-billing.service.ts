@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
+  AdmissionReportRow,
   IpBillingLedger,
   IpBillingLineItem,
   IpBillingLineItemEditInput,
@@ -52,5 +53,19 @@ export class IpBillingService {
       params = params.set('consultantId', consultantId);
     }
     return this.http.get<IpConsultantWiseReportRow[]>(`${this.baseUrl}/reports/consultant-wise`, { params });
+  }
+
+  getAdmissionReport(fromDate?: string, toDate?: string, paymentType?: string): Observable<AdmissionReportRow[]> {
+    let params = new HttpParams();
+    if (fromDate) {
+      params = params.set('fromDate', fromDate);
+    }
+    if (toDate) {
+      params = params.set('toDate', toDate);
+    }
+    if (paymentType) {
+      params = params.set('paymentType', paymentType);
+    }
+    return this.http.get<AdmissionReportRow[]>(`${this.baseUrl}/reports/admission`, { params });
   }
 }

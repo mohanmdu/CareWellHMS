@@ -1,5 +1,6 @@
 package com.pms.ipbilling.controller;
 
+import com.pms.ipbilling.dto.AdmissionReportRowDto;
 import com.pms.ipbilling.dto.IpBillingLedgerDto;
 import com.pms.ipbilling.dto.IpBillingLineItemDto;
 import com.pms.ipbilling.dto.IpConsultantWiseReportRowDto;
@@ -61,5 +62,13 @@ public class IpBillingController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
             @RequestParam(required = false) Long consultantId) {
         return service.getConsultantWiseReport(fromDate, toDate, consultantId);
+    }
+
+    @GetMapping("/reports/admission")
+    public List<AdmissionReportRowDto> admissionReport(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+            @RequestParam(required = false) String paymentType) {
+        return service.getAdmissionReport(fromDate, toDate, paymentType);
     }
 }

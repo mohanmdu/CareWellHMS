@@ -64,3 +64,18 @@ export interface IpConsultantWiseReportRow {
   specializationName: string | null;
   amount: number;
 }
+
+export interface AdmissionReportRow {
+  admissionId: number;
+  admissionNumber: string | null;
+  patientUhid: string | null;
+  patientName: string | null;
+  patientGender: string | null;
+  paymentType: string | null;
+  admissionDate: string | null;
+  dischargeDate: string | null;
+  roomNumber: string | null;
+  roomTypeName: string | null;
+  invoiceAmount: number;
+  amountPaid: number;
+}

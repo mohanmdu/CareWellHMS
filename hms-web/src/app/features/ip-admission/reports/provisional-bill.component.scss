@@ -1,0 +1,136 @@
+.pb-page {
+  max-width: 800px;
+}
+
+.pb-section {
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.pb-bills-header {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-4);
+  background: var(--hms-color-warning, #d98e04);
+  color: #fff;
+  padding: var(--hms-space-3) var(--hms-space-4);
+
+  ::ng-deep .mat-mdc-form-field {
+    --mdc-outlined-text-field-outline-color: rgba(0, 0, 0, 0.3);
+    --mdc-outlined-text-field-input-text-color: #1a1a1a;
+  }
+}
+
+.pb-bills-select {
+  width: 240px;
+  background: #fff;
+  border-radius: var(--hms-radius-sm, 2px);
+}
+
+.pb-bills-title {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.pb-patient-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--hms-space-4);
+  padding: var(--hms-space-4);
+  border-bottom: 1px solid var(--hms-color-border, #e0e0e0);
+}
+
+.pb-patient-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-1) 0;
+  font-size: var(--hms-font-size-sm);
+
+  span {
+    color: var(--hms-color-text-muted);
+  }
+}
+
+.pb-table-wrap {
+  padding: 0 var(--hms-space-4);
+  overflow-x: auto;
+}
+
+.pb-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--hms-font-size-sm);
+  margin: var(--hms-space-3) 0;
+
+  th,
+  td {
+    padding: var(--hms-space-2) var(--hms-space-3);
+    text-align: left;
+    border-bottom: 1px solid var(--hms-color-border, #e0e0e0);
+  }
+
+  td:last-child,
+  th:last-child {
+    text-align: right;
+  }
+
+  thead th {
+    background: var(--hms-color-surface-alt, #f0f0f0);
+    font-weight: 600;
+  }
+}
+
+.pb-summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--hms-space-4);
+  padding: var(--hms-space-4);
+  font-size: var(--hms-font-size-sm);
+}
+
+.pb-summary-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-1);
+}
+
+.pb-summary-right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-1);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.pb-print-row {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--hms-space-4);
+}
+
+@media (max-width: 640px) {
+  .pb-patient-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pb-summary-row {
+    flex-direction: column;
+  }
+
+  .pb-summary-right {
+    text-align: left;
+  }
+
+  .pb-bills-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pb-bills-select {
+    width: 100%;
+  }
+}

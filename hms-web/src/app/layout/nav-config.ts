@@ -95,7 +95,8 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: 'IP Billing Categories', route: '/masters/ip-billing-categories', icon: 'category' },
       { label: 'IP Billing Components', route: '/masters/ip-billing-components', icon: 'sell' },
       { label: 'Billing Activity Log', route: '/masters/ip-billing-activity-log', icon: 'history' },
-      { label: 'Consultant Wise Report', route: '/ip/reports/consultant-wise', icon: 'summarize' }
+      { label: 'Consultant Wise Report', route: '/ip/reports/consultant-wise', icon: 'summarize' },
+      { label: 'Admission Report', route: '/ip/reports/admission', icon: 'receipt_long' }
     ]
   },
   {

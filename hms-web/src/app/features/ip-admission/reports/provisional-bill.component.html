@@ -1,0 +1,80 @@
+<div class="hms-page pb-page">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading() && admission(); as admission) {
+    <div #billContent>
+      <section class="hms-card-surface pb-section">
+        <div class="pb-bills-header">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="pb-bills-select">
+            <mat-select [value]="billView()" (selectionChange)="billView.set($event.value)">
+              @for (view of billViews; track view) {
+                <mat-option [value]="view">{{ view }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <span class="pb-bills-title">Provisional Customized Bill</span>
+        </div>
+
+        <div class="pb-patient-grid">
+          <div class="pb-patient-col">
+            <div class="pb-patient-row"><span>Patient Name</span><strong>{{ admission.patientName }}</strong></div>
+            <div class="pb-patient-row">
+              <span>Age / Gender</span><strong>{{ admission.patientAge ?? '—' }} Years / {{ admission.patientGender ?? '—' }}</strong>
+            </div>
+            <div class="pb-patient-row"><span>Address</span><strong>{{ admission.patientAddress ?? '—' }}</strong></div>
+            <div class="pb-patient-row"><span>Bill No</span><strong>0</strong></div>
+          </div>
+          <div class="pb-patient-col">
+            <div class="pb-patient-row"><span>UHID</span><strong>{{ admission.patientUhid ?? '—' }}</strong></div>
+            <div class="pb-patient-row"><span>IP No</span><strong>{{ admission.admissionNumber }}</strong></div>
+            <div class="pb-patient-row"><span>Bed No</span><strong>{{ admission.roomNumber ?? '—' }}</strong></div>
+            <div class="pb-patient-row">
+              <span>D.O.A</span><strong>{{ admission.admissionDate | date: 'dd/MM/yyyy HH:mm' }}</strong>
+            </div>
+            <div class="pb-patient-row">
+              <span>D.O.D</span><strong>{{ admission.dischargeDate ? (admission.dischargeDate | date: 'dd/MM/yyyy HH:mm') : '—' }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="pb-table-wrap">
+          <table class="pb-table">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Particulars</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of particulars(); track row.label; let i = $index) {
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ row.label }}</td>
+                  <td>{{ row.amount | number: '1.0-2' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pb-summary-row">
+          <div class="pb-summary-left">
+            <div>Final Amount Received : Rupees {{ amountInWords(admission.advanceAmount ?? 0) }} Only.</div>
+            <div>Created By : —</div>
+          </div>
+          <div class="pb-summary-right">
+            <div>Total Amount : <strong>{{ ledger()?.netTotal | number: '1.0-2' }}</strong></div>
+            <div>Due Amount : <strong>{{ dueAmount() | number: '1.0-2' }}</strong></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="pb-print-row">
+      <button mat-flat-button color="primary" type="button" (click)="print()">Print</button>
+    </div>
+  }
+</div>

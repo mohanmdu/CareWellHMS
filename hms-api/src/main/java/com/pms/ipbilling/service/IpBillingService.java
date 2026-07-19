@@ -3,8 +3,10 @@ package com.pms.ipbilling.service;
 import com.pms.common.EntityNotFoundException;
 import com.pms.ipadmission.entity.Admission;
 import com.pms.ipadmission.entity.AdmissionPaymentType;
+import com.pms.ipadmission.entity.Room;
 import com.pms.ipadmission.entity.RoomType;
 import com.pms.ipadmission.repository.AdmissionRepository;
+import com.pms.ipbilling.dto.AdmissionReportRowDto;
 import com.pms.ipbilling.dto.IpBillingLedgerDto;
 import com.pms.ipbilling.dto.IpBillingLedgerRowDto;
 import com.pms.ipbilling.dto.IpBillingLineItemDto;
@@ -20,8 +22,10 @@ import com.pms.masters.entity.IpBillingComponent;
 import com.pms.masters.repository.ConsultantRepository;
 import com.pms.masters.repository.IpBillingCategoryRepository;
 import com.pms.masters.repository.IpBillingComponentRepository;
+import com.pms.registration.entity.Patient;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -191,6 +195,58 @@ public class IpBillingService {
                 })
                 .sorted(Comparator.comparing(IpConsultantWiseReportRowDto::consultantName))
                 .toList();
+    }
+
+    /** Admission Report (PDF: "Admission Details"): one row per admission with its net invoice total and amount paid so far. */
+    public List<AdmissionReportRowDto> getAdmissionReport(LocalDate fromDate, LocalDate toDate, String paymentTypeFilter) {
+        LocalDateTime fromDateTime = fromDate != null ? fromDate.atStartOfDay() : null;
+        LocalDateTime toDateTime = toDate != null ? toDate.plusDays(1).atStartOfDay() : null;
+
+        return admissionRepository.findForAdmissionReport(fromDateTime, toDateTime).stream()
+                .filter(admission -> matchesPaymentTypeFilter(admission, paymentTypeFilter))
+                .map(this::toAdmissionReportRow)
+                .toList();
+    }
+
+    private boolean matchesPaymentTypeFilter(Admission admission, String filter) {
+        if (filter == null || filter.equalsIgnoreCase("ALL")) {
+            return true;
+        }
+        if (filter.equalsIgnoreCase("CASH")) {
+            return admission.getPaymentType() == AdmissionPaymentType.CASH;
+        }
+        if (filter.equalsIgnoreCase("CLAIM")) {
+            return admission.getPaymentType() != null && admission.getPaymentType() != AdmissionPaymentType.CASH;
+        }
+        return true;
+    }
+
+    private AdmissionReportRowDto toAdmissionReportRow(Admission admission) {
+        Patient patient = admission.getPatient();
+        Room room = admission.getRoom();
+        return new AdmissionReportRowDto(
+                admission.getId(),
+                admission.getAdmissionNumber(),
+                patient.getRegistrationNumber(),
+                (patient.getFirstName() + " " + (patient.getLastName() != null ? patient.getLastName() : "")).trim(),
+                patient.getGender(),
+                admission.getPaymentType() != null ? admission.getPaymentType().name() : null,
+                admission.getAdmissionDate(),
+                admission.getDischargeDate(),
+                room != null ? room.getRoomNumber() : null,
+                room != null ? room.getRoomType().getName() : (admission.getRoomType() != null ? admission.getRoomType().getName() : null),
+                computeNetTotal(admission),
+                admission.getAdvanceAmount());
+    }
+
+    /** Same net-total math as getLedger(), flattened to a single number for the Admission Report's Invoice Amount column. */
+    private double computeNetTotal(Admission admission) {
+        double wardBed = wardBedChargesRow(admission).invoiced();
+        List<IpBillingLineItem> items = lineItemRepository.findByAdmissionIdOrderByRequestedOnAsc(admission.getId());
+        double invoiced = items.stream().mapToDouble(IpBillingLineItem::getLineTotal).sum();
+        double discount = items.stream().mapToDouble(IpBillingLineItem::getDiscountAmount).sum();
+        double refund = items.stream().mapToDouble(IpBillingLineItem::getRefundAmount).sum();
+        return wardBed + invoiced - discount - refund;
     }
 
     private IpBillingLedgerRowDto wardBedChargesRow(Admission admission) {

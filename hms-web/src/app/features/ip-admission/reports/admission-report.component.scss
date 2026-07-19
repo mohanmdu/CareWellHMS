@@ -1,0 +1,115 @@
+.ar-section {
+  padding: var(--hms-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-4);
+}
+
+.ar-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--hms-space-3);
+  background: var(--hms-color-warning, #d98e04);
+  color: #fff;
+  padding: var(--hms-space-3) var(--hms-space-4);
+  border-radius: var(--hms-radius-md, 4px);
+
+  ::ng-deep .mat-mdc-form-field {
+    --mdc-outlined-text-field-outline-color: rgba(255, 255, 255, 0.6);
+    --mdc-outlined-text-field-hover-outline-color: #fff;
+    --mdc-outlined-text-field-input-text-color: #fff;
+    --mdc-outlined-text-field-label-text-color: rgba(255, 255, 255, 0.9);
+    --mat-datepicker-toggle-icon-color: #fff;
+  }
+}
+
+.ar-header-title {
+  margin: 0;
+  font-size: var(--hms-font-size-lg);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: inherit;
+}
+
+.ar-header-count {
+  font-weight: 600;
+}
+
+.ar-header-label {
+  font-weight: 600;
+}
+
+.ar-header-field {
+  width: 150px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: var(--hms-radius-sm, 2px);
+}
+
+.ar-header-select {
+  width: 100px;
+}
+
+.ar-table-wrap {
+  overflow-x: auto;
+}
+
+.ar-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--hms-font-size-sm);
+
+  th,
+  td {
+    padding: var(--hms-space-2) var(--hms-space-3);
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  td:nth-last-child(2),
+  td:nth-last-child(3),
+  th:nth-last-child(2),
+  th:nth-last-child(3) {
+    text-align: right;
+  }
+
+  thead th {
+    background: var(--hms-color-primary, #1565c0);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  tbody td {
+    border-bottom: 1px solid var(--hms-color-border, #e0e0e0);
+  }
+}
+
+.ar-total-row {
+  font-weight: 700;
+  background: var(--hms-color-surface-alt, #e0e0e0);
+
+  td {
+    text-align: right;
+  }
+
+  td:first-child {
+    text-align: left;
+  }
+}
+
+.ar-print-row {
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 900px) {
+  .ar-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ar-header-field,
+  .ar-header-select {
+    width: 100%;
+  }
+}

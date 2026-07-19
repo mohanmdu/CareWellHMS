@@ -1,0 +1,97 @@
+<div class="hms-page">
+  <section class="hms-card-surface ar-section">
+    <div class="ar-header">
+      <h1 class="ar-header-title">Admission Details</h1>
+      <span class="ar-header-count">Patient Count : {{ rows().length }}</span>
+
+      <span class="ar-header-label">From:</span>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="ar-header-field">
+        <input matInput [matDatepicker]="fromPicker" placeholder="Select time" [(ngModel)]="fromDate" />
+        <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+        <mat-datepicker #fromPicker />
+      </mat-form-field>
+
+      <span class="ar-header-label">To:</span>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="ar-header-field">
+        <input matInput [matDatepicker]="toPicker" placeholder="Select time" [(ngModel)]="toDate" />
+        <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+        <mat-datepicker #toPicker />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="ar-header-field ar-header-select">
+        <mat-select [(ngModel)]="paymentType">
+          <mat-option value="ALL">All</mat-option>
+          <mat-option value="CASH">Cash</mat-option>
+          <mat-option value="CLAIM">Claim</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-flat-button color="primary" type="button" (click)="search()">Submit</button>
+    </div>
+
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    @if (!loading() && searched() && rows().length === 0) {
+      <app-empty-state icon="local_hospital" title="No admissions found" message="No admissions match these filters." />
+    } @else if (rows().length > 0) {
+      <div #reportContent>
+        <div class="ar-table-wrap">
+          <table class="ar-table">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>UHID</th>
+                <th>IPID</th>
+                <th>Name</th>
+                <th>Gender</th>
+                <th>Payment Type</th>
+                <th>Date Of Admission</th>
+                <th>Date Of Discharge</th>
+                <th>Ward &amp; Room No</th>
+                <th>Invoice Amount</th>
+                <th>Amount Paid</th>
+                <th>Bill No</th>
+                <th>View Bill</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of rows(); track row.admissionId; let i = $index) {
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ row.patientUhid ?? '—' }}</td>
+                  <td>{{ row.admissionNumber }}</td>
+                  <td>{{ row.patientName }}</td>
+                  <td>{{ row.patientGender ?? '—' }}</td>
+                  <td>{{ row.paymentType ?? '—' }}</td>
+                  <td>{{ row.admissionDate | date: 'dd/MM/yy' }}</td>
+                  <td>{{ row.dischargeDate ? (row.dischargeDate | date: 'dd/MM/yy') : '—' }}</td>
+                  <td>{{ wardAndRoom(row) }}</td>
+                  <td>{{ row.invoiceAmount | number: '1.0-2' }}</td>
+                  <td>{{ row.amountPaid | number: '1.0-2' }}</td>
+                  <td>0</td>
+                  <td>
+                    <button mat-flat-button color="primary" type="button" (click)="viewBill(row)">View Bill</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr class="ar-total-row">
+                <td colspan="9">Total Collection</td>
+                <td>₹ {{ totals().invoiceAmount | number: '1.0-2' }}</td>
+                <td>₹ {{ totals().amountPaid | number: '1.0-2' }}</td>
+                <td colspan="2"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div class="ar-print-row">
+        <button mat-flat-button color="primary" type="button" (click)="print()">Print</button>
+      </div>
+    }
+  </section>
+</div>
