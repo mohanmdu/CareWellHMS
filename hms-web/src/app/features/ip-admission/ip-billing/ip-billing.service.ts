@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
@@ -7,6 +7,7 @@ import {
   IpBillingLineItem,
   IpBillingLineItemEditInput,
   IpBillingLineItemInput,
+  IpConsultantWiseReportRow,
   IpPayment
 } from './ip-billing.model';
 
@@ -37,5 +38,19 @@ export class IpBillingService {
 
   listPayments(admissionId: number): Observable<IpPayment[]> {
     return this.http.get<IpPayment[]>(`${this.baseUrl}/admissions/${admissionId}/payments`);
+  }
+
+  getConsultantWiseReport(fromDate?: string, toDate?: string, consultantId?: number): Observable<IpConsultantWiseReportRow[]> {
+    let params = new HttpParams();
+    if (fromDate) {
+      params = params.set('fromDate', fromDate);
+    }
+    if (toDate) {
+      params = params.set('toDate', toDate);
+    }
+    if (consultantId) {
+      params = params.set('consultantId', consultantId);
+    }
+    return this.http.get<IpConsultantWiseReportRow[]>(`${this.baseUrl}/reports/consultant-wise`, { params });
   }
 }

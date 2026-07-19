@@ -127,6 +127,13 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'ip/reports/consultant-wise',
+        loadComponent: () =>
+          import('./features/ip-admission/reports/consultant-wise-report.component').then(
+            (m) => m.ConsultantWiseReportComponent
+          )
+      },
+      {
         path: 'masters/cms/site-content',
         loadComponent: () =>
           import('./features/masters-admin/website-cms/site-content/cms-site-content.component').then(

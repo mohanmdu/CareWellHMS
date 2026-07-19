@@ -57,3 +57,10 @@ export interface IpPayment {
   netAmount: number;
   createdBy: string | null;
 }
+
+export interface IpConsultantWiseReportRow {
+  consultantId: number | null;
+  consultantName: string;
+  specializationName: string | null;
+  amount: number;
+}

@@ -8,6 +8,7 @@ import com.pms.ipadmission.repository.AdmissionRepository;
 import com.pms.ipbilling.dto.IpBillingLedgerDto;
 import com.pms.ipbilling.dto.IpBillingLedgerRowDto;
 import com.pms.ipbilling.dto.IpBillingLineItemDto;
+import com.pms.ipbilling.dto.IpConsultantWiseReportRowDto;
 import com.pms.ipbilling.dto.IpPaymentDto;
 import com.pms.ipbilling.entity.IpBillingLineItem;
 import com.pms.ipbilling.entity.IpPayment;
@@ -20,8 +21,11 @@ import com.pms.masters.repository.ConsultantRepository;
 import com.pms.masters.repository.IpBillingCategoryRepository;
 import com.pms.masters.repository.IpBillingComponentRepository;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -158,6 +162,35 @@ public class IpBillingService {
         double netTotal = rows.stream().mapToDouble(IpBillingLedgerRowDto::net).sum();
 
         return new IpBillingLedgerDto(rows, netInvoiced, netDiscount, netRefund, netTotal);
+    }
+
+    /** IP Consultant Wise Report: net billed amount (invoiced - discount - refund) per consultant, over a date range. */
+    public List<IpConsultantWiseReportRowDto> getConsultantWiseReport(LocalDate fromDate, LocalDate toDate, Long consultantId) {
+        Instant fromInstant = fromDate != null ? fromDate.atStartOfDay(ZoneId.systemDefault()).toInstant() : null;
+        Instant toInstant = toDate != null ? toDate.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant() : null;
+        List<IpBillingLineItem> items = lineItemRepository.findForConsultantWiseReport(fromInstant, toInstant, consultantId);
+
+        Map<Long, List<IpBillingLineItem>> byConsultant = new LinkedHashMap<>();
+        for (IpBillingLineItem item : items) {
+            Long key = item.getConsultant() != null ? item.getConsultant().getId() : 0L;
+            byConsultant.computeIfAbsent(key, k -> new ArrayList<>()).add(item);
+        }
+
+        return byConsultant.entrySet().stream()
+                .map(entry -> {
+                    List<IpBillingLineItem> rows = entry.getValue();
+                    Consultant consultant = rows.get(0).getConsultant();
+                    double invoiced = rows.stream().mapToDouble(IpBillingLineItem::getLineTotal).sum();
+                    double discount = rows.stream().mapToDouble(IpBillingLineItem::getDiscountAmount).sum();
+                    double refund = rows.stream().mapToDouble(IpBillingLineItem::getRefundAmount).sum();
+                    return new IpConsultantWiseReportRowDto(
+                            consultant != null ? consultant.getId() : null,
+                            consultant != null ? consultant.getName() : "Unassigned",
+                            consultant != null && consultant.getSpecialization() != null ? consultant.getSpecialization().getName() : null,
+                            invoiced - discount - refund);
+                })
+                .sorted(Comparator.comparing(IpConsultantWiseReportRowDto::consultantName))
+                .toList();
     }
 
     private IpBillingLedgerRowDto wardBedChargesRow(Admission admission) {

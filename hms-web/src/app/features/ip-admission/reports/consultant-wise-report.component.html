@@ -1,0 +1,70 @@
+<div class="hms-page">
+  <app-page-header title="Consultant Wise Report For IP" subtitle="IP billing amounts grouped by consultant over a date range." />
+
+  <section class="hms-card-surface cwr-section">
+    <div class="cwr-filters">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>From</mat-label>
+        <input matInput [matDatepicker]="fromPicker" placeholder="Select time" [(ngModel)]="fromDate" />
+        <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+        <mat-datepicker #fromPicker />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>To</mat-label>
+        <input matInput [matDatepicker]="toPicker" placeholder="Select time" [(ngModel)]="toDate" />
+        <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+        <mat-datepicker #toPicker />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Consultant</mat-label>
+        <mat-select [(ngModel)]="consultantId">
+          <mat-option [value]="null">All</mat-option>
+          @for (consultant of consultants(); track consultant.id) {
+            <mat-option [value]="consultant.id">{{ consultant.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="button" (click)="search()">Submit</button>
+    </div>
+
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    @if (!loading() && searched() && rows().length === 0) {
+      <app-empty-state icon="summarize" title="No billing found" message="No IP billing entries match these filters." />
+    } @else if (rows().length > 0) {
+      <div #reportContent>
+        <div class="cwr-table-wrap">
+          <table class="cwr-table">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Consultant Name</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of rows(); track row.consultantId; let i = $index) {
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ displayName(row) }}</td>
+                  <td>{{ row.amount | number: '1.0-2' }}</td>
+                </tr>
+              }
+              <tr class="cwr-total-row">
+                <td></td>
+                <td>Total Amount</td>
+                <td>{{ totalAmount() | number: '1.0-2' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="cwr-print-row">
+        <button mat-flat-button color="primary" type="button" (click)="print()">Print</button>
+      </div>
+    }
+  </section>
+</div>

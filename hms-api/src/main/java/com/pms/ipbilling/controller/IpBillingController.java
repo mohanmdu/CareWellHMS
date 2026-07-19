@@ -2,10 +2,13 @@ package com.pms.ipbilling.controller;
 
 import com.pms.ipbilling.dto.IpBillingLedgerDto;
 import com.pms.ipbilling.dto.IpBillingLineItemDto;
+import com.pms.ipbilling.dto.IpConsultantWiseReportRowDto;
 import com.pms.ipbilling.dto.IpPaymentDto;
 import com.pms.ipbilling.service.IpBillingService;
 import jakarta.validation.Valid;
+import java.time.LocalDate;
 import java.util.List;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,5 +53,13 @@ public class IpBillingController {
     @GetMapping("/admissions/{admissionId}/payments")
     public List<IpPaymentDto> listPayments(@PathVariable Long admissionId) {
         return service.listPayments(admissionId);
+    }
+
+    @GetMapping("/reports/consultant-wise")
+    public List<IpConsultantWiseReportRowDto> consultantWiseReport(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+            @RequestParam(required = false) Long consultantId) {
+        return service.getConsultantWiseReport(fromDate, toDate, consultantId);
     }
 }
