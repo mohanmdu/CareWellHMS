@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
   AdmissionReportRow,
+  DischargeListRow,
   IpBillingLedger,
   IpBillingLineItem,
   IpBillingLineItemEditInput,
@@ -67,5 +68,19 @@ export class IpBillingService {
       params = params.set('paymentType', paymentType);
     }
     return this.http.get<AdmissionReportRow[]>(`${this.baseUrl}/reports/admission`, { params });
+  }
+
+  getDischargeList(fromDate?: string, toDate?: string, billingType?: string): Observable<DischargeListRow[]> {
+    let params = new HttpParams();
+    if (fromDate) {
+      params = params.set('fromDate', fromDate);
+    }
+    if (toDate) {
+      params = params.set('toDate', toDate);
+    }
+    if (billingType) {
+      params = params.set('billingType', billingType);
+    }
+    return this.http.get<DischargeListRow[]>(`${this.baseUrl}/reports/discharge-list`, { params });
   }
 }

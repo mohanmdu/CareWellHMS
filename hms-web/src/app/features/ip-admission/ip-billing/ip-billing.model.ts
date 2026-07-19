@@ -87,3 +87,20 @@ export interface AdmissionReportRow {
   invoiceAmount: number;
   amountPaid: number;
 }
+
+export interface DischargeListRow {
+  admissionId: number;
+  admissionNumber: string | null;
+  patientUhid: string | null;
+  patientName: string | null;
+  patientGender: string | null;
+  billingType: string | null;
+  insuranceType: string | null;
+  admissionDate: string | null;
+  dischargeDate: string | null;
+  invoicedAmount: number;
+  paidAmount: number;
+  refundAmount: number;
+  discountAmount: number;
+  balanceAmount: number;
+}

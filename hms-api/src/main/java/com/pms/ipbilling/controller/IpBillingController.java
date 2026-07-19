@@ -1,6 +1,7 @@
 package com.pms.ipbilling.controller;
 
 import com.pms.ipbilling.dto.AdmissionReportRowDto;
+import com.pms.ipbilling.dto.DischargeListRowDto;
 import com.pms.ipbilling.dto.IpBillingLedgerDto;
 import com.pms.ipbilling.dto.IpBillingLineItemDto;
 import com.pms.ipbilling.dto.IpConsultantWiseReportRowDto;
@@ -70,5 +71,13 @@ public class IpBillingController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
             @RequestParam(required = false) String paymentType) {
         return service.getAdmissionReport(fromDate, toDate, paymentType);
+    }
+
+    @GetMapping("/reports/discharge-list")
+    public List<DischargeListRowDto> dischargeList(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+            @RequestParam(required = false) String billingType) {
+        return service.getDischargeList(fromDate, toDate, billingType);
     }
 }

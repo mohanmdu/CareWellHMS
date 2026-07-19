@@ -36,7 +36,8 @@ export const REPORT_PRINT_STYLES = `
     font-weight: 700;
     background: #f0f0f0;
   }
-  .ar2-letterhead {
+  .ar2-letterhead,
+  .dl-letterhead {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -45,19 +46,22 @@ export const REPORT_PRINT_STYLES = `
     margin-bottom: 12px;
     border-bottom: 2px solid #ccc;
   }
-  .ar2-logo {
+  .ar2-logo,
+  .dl-logo {
     width: 56px;
     height: 56px;
     border-radius: 50%;
     object-fit: cover;
   }
-  .ar2-title {
+  .ar2-title,
+  .dl-title {
     flex: 1;
     text-align: center;
     font-size: 1.3rem;
     font-weight: 700;
   }
-  .ar2-contact {
+  .ar2-contact,
+  .dl-contact {
     display: flex;
     flex-direction: column;
     text-align: right;

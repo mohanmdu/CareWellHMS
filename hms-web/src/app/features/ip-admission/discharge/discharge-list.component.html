@@ -1,65 +1,126 @@
 <div class="hms-page">
-  <app-page-header title="Discharge List" subtitle="Archive of patients who have completed the discharge process." />
+  <section class="hms-card-surface dl-section">
+    <div class="dl-toolbar">
+      <button mat-icon-button type="button" aria-label="Print report" [disabled]="rows().length === 0" (click)="print()">
+        <mat-icon aria-hidden="true">print</mat-icon>
+      </button>
+    </div>
 
-  @if (loading()) {
-    <mat-progress-bar mode="indeterminate" />
-  }
+    <div #reportContent>
+      <header class="dl-letterhead">
+        @if (clinicSettings()?.logoUrl; as logo) {
+          <img [src]="logo" alt="" class="dl-logo" />
+        } @else {
+          <div class="dl-logo dl-logo-placeholder" aria-hidden="true">{{ (clinicSettings()?.name ?? 'H').charAt(0) }}</div>
+        }
+        <h1 class="dl-title">Discharge List</h1>
+        <div class="dl-contact">
+          <strong>{{ clinicSettings()?.name ?? 'Hospital' }}</strong>
+          @if (clinicSettings()?.address) {
+            <span>{{ clinicSettings()?.address }}</span>
+          }
+          @if (clinicSettings()?.phone) {
+            <span>Ph: {{ clinicSettings()?.phone }}</span>
+          }
+          @if (clinicSettings()?.domain) {
+            <span>Web: {{ clinicSettings()?.domain }}</span>
+          }
+          @if (clinicSettings()?.email) {
+            <span>{{ clinicSettings()?.email }}</span>
+          }
+        </div>
+      </header>
 
-  @if (!loading() && discharged().length === 0) {
-    <app-empty-state icon="assignment_turned_in" title="No discharged patients yet" message="Fully discharged admissions will appear here." />
-  } @else if (!loading()) {
-    <section class="hms-card-surface dl-table-section">
-      <table mat-table [dataSource]="discharged()" class="dl-table">
-        <ng-container matColumnDef="dischargeNumber">
-          <th mat-header-cell *matHeaderCellDef>Discharge #</th>
-          <td mat-cell *matCellDef="let admission">{{ admission.dischargeNumber ?? '—' }}</td>
-        </ng-container>
+      <div class="dl-filter-bar">
+        <span class="dl-filter-title">Discharge List</span>
+        <span class="dl-filter-label">From :</span>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="dl-filter-field">
+          <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" />
+          <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+          <mat-datepicker #fromPicker />
+        </mat-form-field>
+        <span class="dl-filter-label">To :</span>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="dl-filter-field">
+          <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" />
+          <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+          <mat-datepicker #toPicker />
+        </mat-form-field>
+        <span class="dl-filter-label">Billing Type :</span>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="dl-filter-field dl-filter-select">
+          <mat-select [(ngModel)]="billingType">
+            <mat-option value="ALL">All</mat-option>
+            <mat-option value="CASH">Cash</mat-option>
+            <mat-option value="CLAIM">Claim</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <button mat-flat-button color="primary" type="button" (click)="search()">Submit</button>
+      </div>
 
-        <ng-container matColumnDef="admissionNumber">
-          <th mat-header-cell *matHeaderCellDef>Admission #</th>
-          <td mat-cell *matCellDef="let admission">{{ admission.admissionNumber }}</td>
-        </ng-container>
+      @if (loading()) {
+        <mat-progress-bar mode="indeterminate" />
+      }
 
-        <ng-container matColumnDef="patient">
-          <th mat-header-cell *matHeaderCellDef>Patient</th>
-          <td mat-cell *matCellDef="let admission">{{ admission.patientName }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="room">
-          <th mat-header-cell *matHeaderCellDef>Room</th>
-          <td mat-cell *matCellDef="let admission">{{ admission.roomNumber ?? '—' }} ({{ admission.roomTypeName ?? '—' }})</td>
-        </ng-container>
-
-        <ng-container matColumnDef="dischargeDate">
-          <th mat-header-cell *matHeaderCellDef>Discharge Date</th>
-          <td mat-cell *matCellDef="let admission">{{ admission.dischargeDate | date: 'dd/MM/yyyy HH:mm' }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="dischargeType">
-          <th mat-header-cell *matHeaderCellDef>Discharge Type</th>
-          <td mat-cell *matCellDef="let admission">{{ admission.dischargeType ?? '—' }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="settlement">
-          <th mat-header-cell *matHeaderCellDef>Settlement</th>
-          <td mat-cell *matCellDef="let admission">
-            @if (admission.settlementAmount !== null) {
-              {{ admission.settlementAmount! >= 0 ? 'Refund: ' : 'Due: ' }}
-              {{ (admission.settlementAmount! >= 0 ? admission.settlementAmount! : -admission.settlementAmount!) | number: '1.0-2' }}
-            }
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell *matCellDef="let admission">
-            <button mat-stroked-button color="primary" type="button" (click)="viewBilling(admission)">View Billing</button>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-      </table>
-    </section>
-  }
+      @if (!loading() && searched() && rows().length === 0) {
+        <app-empty-state icon="assignment_turned_in" title="No discharged patients" message="No discharged admissions match these filters." />
+      } @else if (rows().length > 0) {
+        <div class="dl-table-wrap">
+          <table class="dl-table">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Patient UHID</th>
+                <th>PatientName</th>
+                <th>Gender</th>
+                <th>IPID</th>
+                <th>Billing Type</th>
+                <th>Insurance</th>
+                <th>Admission Date</th>
+                <th>Discharge Date</th>
+                <th>Invoiced Amount</th>
+                <th>Paid Amount</th>
+                <th>Refund Amount</th>
+                <th>Discount Amount</th>
+                <th>Balance Amount</th>
+                <th>Discharge</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of rows(); track row.admissionId; let i = $index) {
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ row.patientUhid ?? '—' }}</td>
+                  <td>{{ row.patientName }}</td>
+                  <td>{{ row.patientGender ?? '—' }}</td>
+                  <td>{{ row.admissionNumber }}</td>
+                  <td>{{ row.billingType ?? '—' }}</td>
+                  <td>{{ row.insuranceType ?? '—' }}</td>
+                  <td>{{ row.admissionDate | date: 'dd/MM/yyyy HH:mm' }}</td>
+                  <td>{{ row.dischargeDate | date: 'dd/MM/yyyy HH:mm' }}</td>
+                  <td>{{ row.invoicedAmount | number: '1.0-2' }}</td>
+                  <td>{{ row.paidAmount | number: '1.0-2' }}</td>
+                  <td>{{ row.refundAmount | number: '1.0-2' }}</td>
+                  <td>{{ row.discountAmount | number: '1.0-2' }}</td>
+                  <td>{{ row.balanceAmount | number: '1.0-2' }}</td>
+                  <td>
+                    <button mat-flat-button color="primary" type="button" (click)="viewBilling(row)">View</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr class="dl-total-row">
+                <td colspan="9">Total</td>
+                <td>Rs. {{ totals().invoicedAmount | number: '1.0-2' }}</td>
+                <td>Rs. {{ totals().paidAmount | number: '1.0-2' }}</td>
+                <td>Rs. {{ totals().refundAmount | number: '1.0-2' }}</td>
+                <td>Rs. {{ totals().discountAmount | number: '1.0-2' }}</td>
+                <td>Rs. {{ totals().balanceAmount | number: '1.0-2' }}</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      }
+    </div>
+  </section>
 </div>

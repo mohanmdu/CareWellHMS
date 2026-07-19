@@ -9,6 +9,7 @@ import com.pms.ipadmission.entity.RoomType;
 import com.pms.ipadmission.repository.AdmissionRepository;
 import com.pms.ipadmission.repository.AdmissionRoomHistoryRepository;
 import com.pms.ipbilling.dto.AdmissionReportRowDto;
+import com.pms.ipbilling.dto.DischargeListRowDto;
 import com.pms.ipbilling.dto.IpBillingLedgerDto;
 import com.pms.ipbilling.dto.IpBillingLedgerRowDto;
 import com.pms.ipbilling.dto.IpBillingLineItemDto;
@@ -217,6 +218,38 @@ public class IpBillingService {
                 .toList();
     }
 
+    /** Discharge List (PDF): one row per DISCHARGED admission with its full invoiced/paid/refund/discount/balance breakdown. */
+    public List<DischargeListRowDto> getDischargeList(LocalDate fromDate, LocalDate toDate, String billingTypeFilter) {
+        LocalDateTime fromDateTime = fromDate != null ? fromDate.atStartOfDay() : null;
+        LocalDateTime toDateTime = toDate != null ? toDate.plusDays(1).atStartOfDay() : null;
+
+        return admissionRepository.findDischargedForList(fromDateTime, toDateTime).stream()
+                .filter(admission -> matchesPaymentTypeFilter(admission, billingTypeFilter))
+                .map(this::toDischargeListRow)
+                .toList();
+    }
+
+    private DischargeListRowDto toDischargeListRow(Admission admission) {
+        Patient patient = admission.getPatient();
+        BillingBreakdown breakdown = computeBillingBreakdown(admission);
+        double paidAmount = admission.getAdvanceAmount();
+        return new DischargeListRowDto(
+                admission.getId(),
+                admission.getAdmissionNumber(),
+                patient.getRegistrationNumber(),
+                (patient.getFirstName() + " " + (patient.getLastName() != null ? patient.getLastName() : "")).trim(),
+                patient.getGender(),
+                admission.getPaymentType() != null ? admission.getPaymentType().name() : null,
+                admission.getInsuranceType(),
+                admission.getAdmissionDate(),
+                admission.getDischargeDate(),
+                breakdown.invoiced(),
+                paidAmount,
+                breakdown.refund(),
+                breakdown.discount(),
+                breakdown.net() - paidAmount);
+    }
+
     private boolean matchesPaymentTypeFilter(Admission admission, String filter) {
         if (filter == null || filter.equalsIgnoreCase("ALL")) {
             return true;
@@ -250,12 +283,21 @@ public class IpBillingService {
 
     /** Same net-total math as getLedger(), flattened to a single number for the Admission Report's Invoice Amount column. */
     private double computeNetTotal(Admission admission) {
+        return computeBillingBreakdown(admission).net();
+    }
+
+    /** Shared invoiced/discount/refund/net computation behind computeNetTotal() and the Discharge List's fuller column breakdown. */
+    private BillingBreakdown computeBillingBreakdown(Admission admission) {
         double wardBed = computeWardStays(admission).stream().mapToDouble(WardStayDto::invoicedAmount).sum();
         List<IpBillingLineItem> items = lineItemRepository.findByAdmissionIdOrderByRequestedOnAsc(admission.getId());
-        double invoiced = items.stream().mapToDouble(IpBillingLineItem::getLineTotal).sum();
+        double lineInvoiced = items.stream().mapToDouble(IpBillingLineItem::getLineTotal).sum();
         double discount = items.stream().mapToDouble(IpBillingLineItem::getDiscountAmount).sum();
         double refund = items.stream().mapToDouble(IpBillingLineItem::getRefundAmount).sum();
-        return wardBed + invoiced - discount - refund;
+        double invoiced = wardBed + lineInvoiced;
+        return new BillingBreakdown(invoiced, discount, refund, invoiced - discount - refund);
+    }
+
+    private record BillingBreakdown(double invoiced, double discount, double refund, double net) {
     }
 
     /**
