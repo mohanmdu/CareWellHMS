@@ -77,7 +77,10 @@ public class AdmissionController {
     }
 
     @PatchMapping("/{id}/change-room")
-    public AdmissionDto changeRoom(@PathVariable Long id, @RequestBody Map<String, Long> body) {
-        return service.changeRoom(id, body.get("roomId"));
+    public AdmissionDto changeRoom(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        Long roomId = ((Number) body.get("roomId")).longValue();
+        Object rawDate = body.get("changedAt");
+        LocalDateTime changedAt = rawDate != null ? LocalDateTime.parse(rawDate.toString()) : null;
+        return service.changeRoom(id, roomId, changedAt);
     }
 }

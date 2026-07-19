@@ -393,6 +393,18 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'ip/admissions/:id/ward-change',
+        loadComponent: () =>
+          import('./features/ip-admission/admissions/ward-change.component').then((m) => m.WardChangeComponent)
+      },
+      {
+        path: 'ip/admissions/:id/ward-change/confirmation',
+        loadComponent: () =>
+          import('./features/ip-admission/admissions/ward-change-confirmation.component').then(
+            (m) => m.WardChangeConfirmationComponent
+          )
+      },
+      {
         path: 'ip/inpatient-list',
         loadComponent: () =>
           import('./features/ip-admission/inpatient-list/inpatient-list.component').then(

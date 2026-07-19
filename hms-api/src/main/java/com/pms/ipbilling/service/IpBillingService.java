@@ -3,15 +3,18 @@ package com.pms.ipbilling.service;
 import com.pms.common.EntityNotFoundException;
 import com.pms.ipadmission.entity.Admission;
 import com.pms.ipadmission.entity.AdmissionPaymentType;
+import com.pms.ipadmission.entity.AdmissionRoomHistory;
 import com.pms.ipadmission.entity.Room;
 import com.pms.ipadmission.entity.RoomType;
 import com.pms.ipadmission.repository.AdmissionRepository;
+import com.pms.ipadmission.repository.AdmissionRoomHistoryRepository;
 import com.pms.ipbilling.dto.AdmissionReportRowDto;
 import com.pms.ipbilling.dto.IpBillingLedgerDto;
 import com.pms.ipbilling.dto.IpBillingLedgerRowDto;
 import com.pms.ipbilling.dto.IpBillingLineItemDto;
 import com.pms.ipbilling.dto.IpConsultantWiseReportRowDto;
 import com.pms.ipbilling.dto.IpPaymentDto;
+import com.pms.ipbilling.dto.WardStayDto;
 import com.pms.ipbilling.entity.IpBillingLineItem;
 import com.pms.ipbilling.entity.IpPayment;
 import com.pms.ipbilling.repository.IpBillingLineItemRepository;
@@ -23,11 +26,11 @@ import com.pms.masters.repository.ConsultantRepository;
 import com.pms.masters.repository.IpBillingCategoryRepository;
 import com.pms.masters.repository.IpBillingComponentRepository;
 import com.pms.registration.entity.Patient;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -53,6 +56,7 @@ public class IpBillingService {
     private final IpBillingLineItemRepository lineItemRepository;
     private final IpPaymentRepository paymentRepository;
     private final AdmissionRepository admissionRepository;
+    private final AdmissionRoomHistoryRepository roomHistoryRepository;
     private final IpBillingCategoryRepository categoryRepository;
     private final IpBillingComponentRepository componentRepository;
     private final ConsultantRepository consultantRepository;
@@ -61,12 +65,14 @@ public class IpBillingService {
             IpBillingLineItemRepository lineItemRepository,
             IpPaymentRepository paymentRepository,
             AdmissionRepository admissionRepository,
+            AdmissionRoomHistoryRepository roomHistoryRepository,
             IpBillingCategoryRepository categoryRepository,
             IpBillingComponentRepository componentRepository,
             ConsultantRepository consultantRepository) {
         this.lineItemRepository = lineItemRepository;
         this.paymentRepository = paymentRepository;
         this.admissionRepository = admissionRepository;
+        this.roomHistoryRepository = roomHistoryRepository;
         this.categoryRepository = categoryRepository;
         this.componentRepository = componentRepository;
         this.consultantRepository = consultantRepository;
@@ -149,8 +155,11 @@ public class IpBillingService {
                 .orElseThrow(() -> new EntityNotFoundException("Admission not found: " + admissionId));
         List<IpBillingLineItem> items = lineItemRepository.findByAdmissionIdOrderByRequestedOnAsc(admissionId);
 
+        List<WardStayDto> wardStays = computeWardStays(admission);
+        double wardBedTotal = wardStays.stream().mapToDouble(WardStayDto::invoicedAmount).sum();
+
         List<IpBillingLedgerRowDto> rows = new ArrayList<>();
-        rows.add(wardBedChargesRow(admission));
+        rows.add(new IpBillingLedgerRowDto(WARD_BED_CHARGES, wardBedTotal, 0, 0, wardBedTotal, List.of()));
 
         Map<String, List<IpBillingLineItem>> byCategory = new LinkedHashMap<>();
         for (IpBillingLineItem item : items) {
@@ -165,7 +174,7 @@ public class IpBillingService {
         double netRefund = rows.stream().mapToDouble(IpBillingLedgerRowDto::refund).sum();
         double netTotal = rows.stream().mapToDouble(IpBillingLedgerRowDto::net).sum();
 
-        return new IpBillingLedgerDto(rows, netInvoiced, netDiscount, netRefund, netTotal);
+        return new IpBillingLedgerDto(rows, netInvoiced, netDiscount, netRefund, netTotal, wardStays);
     }
 
     /** IP Consultant Wise Report: net billed amount (invoiced - discount - refund) per consultant, over a date range. */
@@ -241,7 +250,7 @@ public class IpBillingService {
 
     /** Same net-total math as getLedger(), flattened to a single number for the Admission Report's Invoice Amount column. */
     private double computeNetTotal(Admission admission) {
-        double wardBed = wardBedChargesRow(admission).invoiced();
+        double wardBed = computeWardStays(admission).stream().mapToDouble(WardStayDto::invoicedAmount).sum();
         List<IpBillingLineItem> items = lineItemRepository.findByAdmissionIdOrderByRequestedOnAsc(admission.getId());
         double invoiced = items.stream().mapToDouble(IpBillingLineItem::getLineTotal).sum();
         double discount = items.stream().mapToDouble(IpBillingLineItem::getDiscountAmount).sum();
@@ -249,25 +258,43 @@ public class IpBillingService {
         return wardBed + invoiced - discount - refund;
     }
 
-    private IpBillingLedgerRowDto wardBedChargesRow(Admission admission) {
-        double invoiced = 0;
-        if (admission.getRoom() != null) {
-            RoomType roomType = admission.getRoom().getRoomType();
-            double dailyRate = admission.getPaymentType() == AdmissionPaymentType.INSURANCE
-                    ? roomType.getRentClaim()
-                    : roomType.getRentCash();
-            invoiced = dailyRate * stayDays(admission);
+    /**
+     * Ward/Bed Charges, split one row per room the patient actually occupied
+     * (AdmissionRoomHistory), so a mid-stay Ward Change prices each room
+     * separately instead of billing the whole stay at whatever room the
+     * patient currently happens to be in.
+     */
+    private List<WardStayDto> computeWardStays(Admission admission) {
+        List<AdmissionRoomHistory> periods = roomHistoryRepository.findByAdmissionIdOrderByFromDateAsc(admission.getId());
+        if (periods.isEmpty()) {
+            if (admission.getRoom() == null) {
+                return List.of();
+            }
+            // Defensive fallback only - admit()/admitRegistered() always open a period, and V47 backfilled every pre-existing admission.
+            Instant from = toInstant(admission.getAdmissionDate());
+            Instant to = admission.getDischargeDate() != null ? toInstant(admission.getDischargeDate()) : Instant.now();
+            return List.of(wardStayFor(admission.getRoom(), admission, from, to));
         }
-        return new IpBillingLedgerRowDto(WARD_BED_CHARGES, invoiced, 0, 0, invoiced, List.of());
+        return periods.stream()
+                .map(period -> wardStayFor(
+                        period.getRoom(),
+                        admission,
+                        toInstant(period.getFromDate()),
+                        period.getToDate() != null
+                                ? toInstant(period.getToDate())
+                                : (admission.getDischargeDate() != null ? toInstant(admission.getDischargeDate()) : Instant.now())))
+                .toList();
     }
 
-    private long stayDays(Admission admission) {
-        Instant from = admission.getAdmissionDate().atZone(java.time.ZoneId.systemDefault()).toInstant();
-        Instant to = admission.getDischargeDate() != null
-                ? admission.getDischargeDate().atZone(java.time.ZoneId.systemDefault()).toInstant()
-                : Instant.now();
-        long days = ChronoUnit.DAYS.between(from, to);
-        return Math.max(days, 1);
+    private WardStayDto wardStayFor(Room room, Admission admission, Instant from, Instant to) {
+        RoomType roomType = room.getRoomType();
+        double dailyRate = admission.getPaymentType() == AdmissionPaymentType.INSURANCE ? roomType.getRentClaim() : roomType.getRentCash();
+        double exactDays = Math.max(Duration.between(from, to).toMinutes() / (24.0 * 60.0), 0);
+        return new WardStayDto(room.getRoomNumber(), roomType.getName(), Math.round(exactDays * 10.0) / 10.0, dailyRate * exactDays);
+    }
+
+    private Instant toInstant(LocalDateTime dateTime) {
+        return dateTime.atZone(ZoneId.systemDefault()).toInstant();
     }
 
     private IpBillingLedgerRowDto categoryRow(String categoryName, List<IpBillingLineItem> items) {

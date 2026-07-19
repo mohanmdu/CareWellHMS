@@ -37,12 +37,20 @@ export interface IpBillingLedgerRow {
   lineItems: IpBillingLineItem[];
 }
 
+export interface WardStay {
+  roomNumber: string;
+  roomTypeName: string;
+  dayCount: number;
+  invoicedAmount: number;
+}
+
 export interface IpBillingLedger {
   rows: IpBillingLedgerRow[];
   netInvoiced: number;
   netDiscount: number;
   netRefund: number;
   netTotal: number;
+  wardStays: WardStay[];
 }
 
 export interface IpPayment {

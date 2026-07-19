@@ -25,8 +25,8 @@ export class AdmissionService {
     return this.http.patch<Admission>(`${this.baseUrl}/${id}/admit`, input);
   }
 
-  changeRoom(id: number, roomId: number): Observable<Admission> {
-    return this.http.patch<Admission>(`${this.baseUrl}/${id}/change-room`, { roomId });
+  changeRoom(id: number, roomId: number, changedAt: string): Observable<Admission> {
+    return this.http.patch<Admission>(`${this.baseUrl}/${id}/change-room`, { roomId, changedAt });
   }
 
   register(input: AdmissionRegistrationInput): Observable<Admission> {

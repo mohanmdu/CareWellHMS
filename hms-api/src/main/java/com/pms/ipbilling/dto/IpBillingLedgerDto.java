@@ -7,5 +7,6 @@ public record IpBillingLedgerDto(
         double netInvoiced,
         double netDiscount,
         double netRefund,
-        double netTotal) {
+        double netTotal,
+        List<WardStayDto> wardStays) {
 }

@@ -1,0 +1,66 @@
+<div class="hms-page">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading() && admission(); as admission) {
+    <section class="hms-card-surface wc-section">
+      <h1 class="wc-title">Inpatient Ward Change List</h1>
+
+      <div class="wc-table-wrap">
+        <table class="wc-table">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Patient UHID</th>
+              <th>PatientName</th>
+              <th>Gender</th>
+              <th>Patient IPID</th>
+              <th>Room Type</th>
+              <th>Admission Date</th>
+              <th>Ward Change From</th>
+              <th>Ward Type</th>
+              <th>Room No</th>
+              <th>Submit</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>{{ admission.patientUhid ?? '—' }}</td>
+              <td>{{ admission.patientName }}</td>
+              <td>{{ admission.patientGender ?? '—' }}</td>
+              <td>{{ admission.admissionNumber }}</td>
+              <td>{{ admission.roomTypeName ?? '—' }}</td>
+              <td>{{ admission.admissionDate | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td>
+                <input type="datetime-local" class="wc-inline-input" [(ngModel)]="changedAt" />
+              </td>
+              <td>
+                <select class="wc-inline-input" [(ngModel)]="roomTypeId" (ngModelChange)="onRoomTypeChange()">
+                  <option [ngValue]="null">Select</option>
+                  @for (type of roomTypes(); track type.id) {
+                    <option [ngValue]="type.id">{{ type.name }}</option>
+                  }
+                </select>
+              </td>
+              <td>
+                <select class="wc-inline-input" [(ngModel)]="roomId">
+                  <option [ngValue]="null">Select</option>
+                  @for (room of availableRooms(); track room.id) {
+                    <option [ngValue]="room.id">{{ room.roomNumber }}</option>
+                  }
+                </select>
+              </td>
+              <td>
+                <button mat-flat-button color="primary" type="button" [disabled]="!roomId || saving()" (click)="save()">
+                  Save
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</div>

@@ -128,12 +128,12 @@
                   @for (row of ledger.rows; track row.category) {
                     <tr
                       class="ip-billing-ledger-row"
-                      [class.ip-billing-ledger-row-expandable]="row.lineItems.length > 0"
-                      (click)="row.lineItems.length > 0 && toggleCategory(row.category)"
+                      [class.ip-billing-ledger-row-expandable]="isExpandable(row)"
+                      (click)="isExpandable(row) && toggleCategory(row.category)"
                     >
                       <td>
                         {{ row.category }}
-                        @if (row.lineItems.length > 0) {
+                        @if (isExpandable(row)) {
                           <mat-icon aria-hidden="true" class="ip-billing-expand-icon">{{
                             expandedCategories().has(row.category) ? 'expand_less' : 'expand_more'
                           }}</mat-icon>
@@ -144,59 +144,80 @@
                       <td>{{ row.refund | number: '1.0-2' }}</td>
                       <td>{{ row.net | number: '1.0-2' }}</td>
                     </tr>
-                    @if (expandedCategories().has(row.category) && row.lineItems.length > 0) {
+                    @if (expandedCategories().has(row.category) && isExpandable(row)) {
                       <tr class="ip-billing-breakdown-row">
                         <td colspan="5">
-                          <table class="ip-billing-table ip-billing-breakdown-table">
-                            <thead>
-                              <tr>
-                                <th>Component</th>
-                                <th>Requested On</th>
-                                <th>Quantity</th>
-                                <th>Rate</th>
-                                <th>Units</th>
-                                <th>Invoiced Amount</th>
-                                <th>Discount</th>
-                                <th>Net</th>
-                                <th>Discount Reason</th>
-                                <th>Created By</th>
-                                <th></th>
-                                <th></th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              @for (item of row.lineItems; track item.id) {
+                          @if (row.category === 'Ward/Bed Charges') {
+                            <table class="ip-billing-table ip-billing-breakdown-table">
+                              <thead>
                                 <tr>
-                                  <td>{{ item.componentName }}</td>
-                                  <td>{{ item.requestedOn | date: 'dd/MM/yyyy HH:mm' }}</td>
-                                  <td>{{ item.quantity }}</td>
-                                  <td>{{ item.unitAmount | number: '1.0-2' }}</td>
-                                  <td>{{ item.units ?? '—' }}</td>
-                                  <td>{{ item.lineTotal | number: '1.0-2' }}</td>
-                                  <td>{{ item.discountAmount | number: '1.0-2' }}</td>
-                                  <td>{{ (item.lineTotal - item.discountAmount - item.refundAmount) | number: '1.0-2' }}</td>
-                                  <td>{{ item.discountReason ?? '—' }}</td>
-                                  <td>{{ item.createdBy ?? '—' }}</td>
-                                  <td>
-                                    <button mat-icon-button type="button" [attr.aria-label]="'Edit ' + item.componentName" (click)="editLineItem(item)">
-                                      <mat-icon aria-hidden="true">edit</mat-icon>
-                                    </button>
-                                  </td>
-                                  <td>
-                                    <button
-                                      mat-icon-button
-                                      type="button"
-                                      color="warn"
-                                      [attr.aria-label]="'Delete ' + item.componentName"
-                                      (click)="deleteLineItem(item)"
-                                    >
-                                      <mat-icon aria-hidden="true">delete</mat-icon>
-                                    </button>
-                                  </td>
+                                  <th>Ward &amp; Room No</th>
+                                  <th>Day Count</th>
+                                  <th>Invoiced Amount</th>
                                 </tr>
-                              }
-                            </tbody>
-                          </table>
+                              </thead>
+                              <tbody>
+                                @for (stay of ledger.wardStays; track $index) {
+                                  <tr>
+                                    <td>{{ stay.roomTypeName }} - {{ stay.roomNumber }}</td>
+                                    <td>{{ stay.dayCount }}</td>
+                                    <td>{{ stay.invoicedAmount | number: '1.0-2' }}</td>
+                                  </tr>
+                                }
+                              </tbody>
+                            </table>
+                          } @else {
+                            <table class="ip-billing-table ip-billing-breakdown-table">
+                              <thead>
+                                <tr>
+                                  <th>Component</th>
+                                  <th>Requested On</th>
+                                  <th>Quantity</th>
+                                  <th>Rate</th>
+                                  <th>Units</th>
+                                  <th>Invoiced Amount</th>
+                                  <th>Discount</th>
+                                  <th>Net</th>
+                                  <th>Discount Reason</th>
+                                  <th>Created By</th>
+                                  <th></th>
+                                  <th></th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                @for (item of row.lineItems; track item.id) {
+                                  <tr>
+                                    <td>{{ item.componentName }}</td>
+                                    <td>{{ item.requestedOn | date: 'dd/MM/yyyy HH:mm' }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>{{ item.unitAmount | number: '1.0-2' }}</td>
+                                    <td>{{ item.units ?? '—' }}</td>
+                                    <td>{{ item.lineTotal | number: '1.0-2' }}</td>
+                                    <td>{{ item.discountAmount | number: '1.0-2' }}</td>
+                                    <td>{{ (item.lineTotal - item.discountAmount - item.refundAmount) | number: '1.0-2' }}</td>
+                                    <td>{{ item.discountReason ?? '—' }}</td>
+                                    <td>{{ item.createdBy ?? '—' }}</td>
+                                    <td>
+                                      <button mat-icon-button type="button" [attr.aria-label]="'Edit ' + item.componentName" (click)="editLineItem(item)">
+                                        <mat-icon aria-hidden="true">edit</mat-icon>
+                                      </button>
+                                    </td>
+                                    <td>
+                                      <button
+                                        mat-icon-button
+                                        type="button"
+                                        color="warn"
+                                        [attr.aria-label]="'Delete ' + item.componentName"
+                                        (click)="deleteLineItem(item)"
+                                      >
+                                        <mat-icon aria-hidden="true">delete</mat-icon>
+                                      </button>
+                                    </td>
+                                  </tr>
+                                }
+                              </tbody>
+                            </table>
+                          }
                         </td>
                       </tr>
                     }

@@ -20,7 +20,7 @@ import { IpBillingComponent as IpBillingComponentMaster } from '../../masters-ad
 import { IpBillingComponentService } from '../../masters-admin/ip-billing-components/ip-billing-component.service';
 import { Admission, DISCHARGE_TYPE_OPTIONS } from '../admissions/admission.model';
 import { AdmissionService } from '../admissions/admission.service';
-import { IpBillingLedger, IpBillingLineItem, IpPayment } from './ip-billing.model';
+import { IpBillingLedger, IpBillingLedgerRow, IpBillingLineItem, IpPayment } from './ip-billing.model';
 import { IpBillingService } from './ip-billing.service';
 
 interface BufferRow {
@@ -225,6 +225,13 @@ export class IpBillingWorkspaceComponent {
         this.notification.error(err.error?.message ?? 'Failed to confirm billing entries.');
       }
     });
+  }
+
+  isExpandable(row: IpBillingLedgerRow): boolean {
+    if (row.category === 'Ward/Bed Charges') {
+      return (this.ledger()?.wardStays.length ?? 0) > 0;
+    }
+    return row.lineItems.length > 0;
   }
 
   toggleCategory(category: string): void {

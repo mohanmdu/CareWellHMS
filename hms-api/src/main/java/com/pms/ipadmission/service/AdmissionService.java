@@ -4,11 +4,13 @@ import com.pms.common.EntityNotFoundException;
 import com.pms.common.FileStorageService;
 import com.pms.ipadmission.dto.AdmissionDto;
 import com.pms.ipadmission.entity.Admission;
+import com.pms.ipadmission.entity.AdmissionRoomHistory;
 import com.pms.ipadmission.entity.AdmissionStatus;
 import com.pms.ipadmission.entity.Room;
 import com.pms.ipadmission.entity.RoomStatus;
 import com.pms.ipadmission.entity.RoomType;
 import com.pms.ipadmission.repository.AdmissionRepository;
+import com.pms.ipadmission.repository.AdmissionRoomHistoryRepository;
 import com.pms.ipadmission.repository.RoomRepository;
 import com.pms.ipadmission.repository.RoomTypeRepository;
 import com.pms.ipbilling.entity.IpPayment;
@@ -18,6 +20,7 @@ import com.pms.registration.repository.PatientRepository;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -50,6 +53,7 @@ public class AdmissionService {
     private final RoomTypeRepository roomTypeRepository;
     private final FileStorageService fileStorageService;
     private final IpPaymentRepository paymentRepository;
+    private final AdmissionRoomHistoryRepository roomHistoryRepository;
     private final AtomicInteger sequence = new AtomicInteger(0);
     private final AtomicInteger receiptSequence = new AtomicInteger(0);
     private final AtomicInteger dischargeSequence = new AtomicInteger(0);
@@ -60,13 +64,15 @@ public class AdmissionService {
             RoomRepository roomRepository,
             RoomTypeRepository roomTypeRepository,
             FileStorageService fileStorageService,
-            IpPaymentRepository paymentRepository) {
+            IpPaymentRepository paymentRepository,
+            AdmissionRoomHistoryRepository roomHistoryRepository) {
         this.repository = repository;
         this.patientRepository = patientRepository;
         this.roomRepository = roomRepository;
         this.roomTypeRepository = roomTypeRepository;
         this.fileStorageService = fileStorageService;
         this.paymentRepository = paymentRepository;
+        this.roomHistoryRepository = roomHistoryRepository;
         this.sequence.set((int) repository.count());
         this.receiptSequence.set((int) paymentRepository.count());
         this.dischargeSequence.set((int) repository.findAll().stream().filter(a -> a.getDischargeNumber() != null).count());
@@ -104,7 +110,9 @@ public class AdmissionService {
         room.setStatus(RoomStatus.ALLOCATED);
         roomRepository.save(room);
 
-        return toDto(repository.save(admission));
+        Admission saved = repository.save(admission);
+        openRoomHistoryPeriod(saved, room, saved.getAdmissionDate());
+        return toDto(saved);
     }
 
     /**
@@ -143,7 +151,9 @@ public class AdmissionService {
         room.setStatus(RoomStatus.ALLOCATED);
         roomRepository.save(room);
 
-        return toDto(repository.save(admission));
+        Admission saved = repository.save(admission);
+        openRoomHistoryPeriod(saved, room, saved.getAdmissionDate());
+        return toDto(saved);
     }
 
     /** Step 1 of the Casualty/Emergency Admission flow: intake + room-type preference, no bed assigned yet. */
@@ -275,9 +285,14 @@ public class AdmissionService {
         return "DIS" + String.format("%06d", dischargeSequence.incrementAndGet());
     }
 
-    /** Ward Change (Inpatient List "Ward Change" action): moves an ADMITTED patient to a different available room. */
+    /**
+     * Ward Change (Inpatient List "Ward Change" action): moves an ADMITTED
+     * patient to a different available room, closing out the current
+     * AdmissionRoomHistory period and opening a new one at changedAt so
+     * IpBillingService can price each room the patient actually occupied.
+     */
     @Transactional
-    public AdmissionDto changeRoom(Long id, Long newRoomId) {
+    public AdmissionDto changeRoom(Long id, Long newRoomId, LocalDateTime changedAt) {
         Admission admission = getOrThrow(id);
         requireAdmitted(admission);
         if (newRoomId == null) {
@@ -291,7 +306,22 @@ public class AdmissionService {
         }
 
         Room oldRoom = admission.getRoom();
-        if (oldRoom != null && !oldRoom.getId().equals(newRoom.getId())) {
+        if (oldRoom != null && oldRoom.getId().equals(newRoom.getId())) {
+            throw new IllegalArgumentException("Patient is already in room " + newRoom.getRoomNumber());
+        }
+
+        LocalDateTime effectiveChangeTime = changedAt != null ? changedAt : LocalDateTime.now();
+
+        Optional<AdmissionRoomHistory> openPeriod = roomHistoryRepository.findByAdmissionIdAndToDateIsNull(id);
+        if (openPeriod.isPresent()) {
+            if (effectiveChangeTime.isBefore(openPeriod.get().getFromDate())) {
+                throw new IllegalArgumentException("Ward change date cannot be before the current room's start date");
+            }
+            openPeriod.get().setToDate(effectiveChangeTime);
+            roomHistoryRepository.save(openPeriod.get());
+        }
+
+        if (oldRoom != null) {
             oldRoom.setStatus(RoomStatus.AVAILABLE);
             roomRepository.save(oldRoom);
         }
@@ -300,7 +330,17 @@ public class AdmissionService {
         newRoom.setStatus(RoomStatus.ALLOCATED);
         roomRepository.save(newRoom);
 
-        return toDto(repository.save(admission));
+        Admission saved = repository.save(admission);
+        openRoomHistoryPeriod(saved, newRoom, effectiveChangeTime);
+        return toDto(saved);
+    }
+
+    private void openRoomHistoryPeriod(Admission admission, Room room, LocalDateTime fromDate) {
+        AdmissionRoomHistory period = new AdmissionRoomHistory();
+        period.setAdmission(admission);
+        period.setRoom(room);
+        period.setFromDate(fromDate);
+        roomHistoryRepository.save(period);
     }
 
     private void applyIntakeFields(Admission admission, AdmissionDto dto) {

@@ -7,16 +7,14 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { NotificationService } from '../../../shared/services/notification.service';
-import { PromptDialogService } from '../../../shared/services/prompt-dialog.service';
-import { PromptDialogSelectOption } from '../../../shared/ui/prompt-dialog/prompt-dialog.component';
 import { EmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
 import { TablePagination } from '../../../shared/table/table-pagination';
 import { TableSearchComponent } from '../../../shared/table/table-search.component';
 import { Admission } from '../admissions/admission.model';
 import { AdmissionService } from '../admissions/admission.service';
-import { RoomService } from '../rooms/room.service';
 import { InpatientCardComponent } from './inpatient-card.component';
 
 type ViewBy = 'LIST' | 'WARD' | 'CONSULTANT';
@@ -57,9 +55,8 @@ interface PatientGroup {
 })
 export class InpatientListComponent {
   private readonly admissionService = inject(AdmissionService);
-  private readonly roomService = inject(RoomService);
   private readonly notification = inject(NotificationService);
-  private readonly promptDialog = inject(PromptDialogService);
+  private readonly router = inject(Router);
 
   loading = signal(true);
   allAdmissions = signal<Admission[]>([]);
@@ -147,38 +144,7 @@ export class InpatientListComponent {
     if (admission.id === null) {
       return;
     }
-    this.roomService.list().subscribe({
-      next: (rooms) => {
-        const options: PromptDialogSelectOption[] = rooms
-          .filter((r) => r.status === 'AVAILABLE')
-          .sort((a, b) => a.roomNumber.localeCompare(b.roomNumber))
-          .map((room) => ({ value: room.id!, label: `${room.roomNumber} - ${room.roomTypeName}` }));
-        if (options.length === 0) {
-          this.notification.error('No available rooms to change to.');
-          return;
-        }
-        this.promptDialog
-          .prompt({
-            title: `Ward Change - ${admission.admissionNumber}`,
-            message: `Currently in ${admission.roomTypeName} - ${admission.roomNumber}`,
-            fields: [{ key: 'roomId', label: 'New Room', type: 'select', required: true, options }],
-            confirmLabel: 'Change Ward'
-          })
-          .subscribe((values) => {
-            if (!values || admission.id === null) {
-              return;
-            }
-            this.admissionService.changeRoom(admission.id, values['roomId'] as number).subscribe({
-              next: () => {
-                this.notification.success('Ward changed.');
-                this.refresh();
-              },
-              error: (err) => this.notification.error(err.error?.message ?? 'Failed to change ward.')
-            });
-          });
-      },
-      error: () => this.notification.error('Failed to load available rooms.')
-    });
+    this.router.navigate(['/ip/admissions', admission.id, 'ward-change']);
   }
 
   exportCsv(): void {
