@@ -72,4 +72,13 @@ public class IpPaymentRequest extends Auditable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ip_payment_id")
     private IpPayment ipPayment;
+
+    @Column(name = "cancel_reason", length = 500)
+    private String cancelReason;
+
+    @Column(name = "cancelled_at")
+    private Instant cancelledAt;
+
+    @Column(name = "cancelled_by")
+    private String cancelledBy;
 }

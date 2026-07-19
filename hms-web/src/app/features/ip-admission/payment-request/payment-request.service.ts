@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { AdvanceReportRow, PaymentRequest, PaymentRequestType } from './payment-request.model';
+import { AdvanceReportRow, CancellationRequestRow, PaymentRequest, PaymentRequestType } from './payment-request.model';
 
 @Injectable({ providedIn: 'root' })
 export class PaymentRequestService {
@@ -38,5 +38,13 @@ export class PaymentRequestService {
       params = params.set('toDate', toDate);
     }
     return this.http.get<AdvanceReportRow[]>(`${this.baseUrl}/advance-report`, { params });
+  }
+
+  searchCancellable(uhid: string): Observable<CancellationRequestRow[]> {
+    return this.http.get<CancellationRequestRow[]>(`${this.baseUrl}/cancellable`, { params: { uhid } });
+  }
+
+  cancel(id: number, reason: string): Observable<PaymentRequest> {
+    return this.http.patch<PaymentRequest>(`${this.baseUrl}/${id}/cancel`, { reason });
   }
 }

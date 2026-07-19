@@ -1,5 +1,5 @@
 export type PaymentRequestType = 'ADVANCE' | 'FINAL_SETTLEMENT' | 'DUE_AMOUNT';
-export type PaymentRequestStatus = 'PENDING' | 'APPROVED';
+export type PaymentRequestStatus = 'PENDING' | 'APPROVED' | 'CANCELLED';
 
 export const PAYMENT_REQUEST_TYPE_OPTIONS: { value: PaymentRequestType; label: string }[] = [
   { value: 'ADVANCE', label: 'Advance' },
@@ -58,4 +58,17 @@ export interface AdvanceReportRow {
   finalSettlementAmount: number;
   dueAmountPaid: number;
   total: number;
+}
+
+export interface CancellationRequestRow {
+  id: number;
+  patientUhid: string | null;
+  patientName: string | null;
+  admissionNumber: string | null;
+  amount: number;
+  paymentMode: string | null;
+  invoiceDate: string | null;
+  type: string;
+  paymentStatus: string;
+  invoiceId: string | null;
 }

@@ -1,6 +1,7 @@
 package com.pms.cashier.service;
 
 import com.pms.cashier.dto.AdvanceReportRowDto;
+import com.pms.cashier.dto.CancellationRequestRowDto;
 import com.pms.cashier.dto.IpPaymentRequestDto;
 import com.pms.cashier.entity.IpPaymentRequest;
 import com.pms.cashier.entity.PaymentRequestStatus;
@@ -11,6 +12,7 @@ import com.pms.ipadmission.entity.Admission;
 import com.pms.ipadmission.repository.AdmissionRepository;
 import com.pms.ipadmission.service.AdmissionService;
 import com.pms.ipbilling.entity.IpPayment;
+import com.pms.ipbilling.repository.IpPaymentRepository;
 import com.pms.registration.entity.Patient;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -34,14 +36,17 @@ public class IpPaymentRequestService {
     private final IpPaymentRequestRepository repository;
     private final AdmissionRepository admissionRepository;
     private final AdmissionService admissionService;
+    private final IpPaymentRepository paymentRepository;
 
     public IpPaymentRequestService(
             IpPaymentRequestRepository repository,
             AdmissionRepository admissionRepository,
-            AdmissionService admissionService) {
+            AdmissionService admissionService,
+            IpPaymentRepository paymentRepository) {
         this.repository = repository;
         this.admissionRepository = admissionRepository;
         this.admissionService = admissionService;
+        this.paymentRepository = paymentRepository;
     }
 
     public List<IpPaymentRequestDto> listPending() {
@@ -118,6 +123,56 @@ public class IpPaymentRequestService {
                 finalSettlement,
                 dueAmount,
                 request.getAmount());
+    }
+
+    /** Advance Cancel: every still-reversible approved request for a patient, searched by UHID across all their admissions. */
+    public List<CancellationRequestRowDto> searchCancellableByUhid(String uhid) {
+        return repository.findApprovedByPatientUhid(uhid).stream().map(this::toCancellationRow).toList();
+    }
+
+    /**
+     * Reverses an approved cashier request (Cancel and Convert to Credit both
+     * call this - only the reason text differs): marks the linked IpPayment
+     * fully refunded and undoes its effect on the admission's advance amount.
+     */
+    @Transactional
+    public IpPaymentRequestDto cancel(Long id, String reason) {
+        IpPaymentRequest request = getOrThrow(id);
+        if (request.getStatus() != PaymentRequestStatus.APPROVED) {
+            throw new IllegalArgumentException("Only approved requests can be cancelled");
+        }
+
+        IpPayment payment = request.getIpPayment();
+        if (payment != null) {
+            payment.setRefundAmount(payment.getInvoicedAmount());
+            payment.setNetAmount(payment.getInvoicedAmount() - payment.getRefundAmount());
+            paymentRepository.save(payment);
+        }
+        admissionService.reverseCashierPayment(request.getAdmission().getId(), request.getAmount());
+
+        request.setStatus(PaymentRequestStatus.CANCELLED);
+        request.setCancelReason(reason);
+        request.setCancelledAt(Instant.now());
+        request.setCancelledBy(currentUsername());
+
+        return toDto(repository.save(request));
+    }
+
+    private CancellationRequestRowDto toCancellationRow(IpPaymentRequest request) {
+        Admission admission = request.getAdmission();
+        Patient patient = admission.getPatient();
+        IpPayment payment = request.getIpPayment();
+        return new CancellationRequestRowDto(
+                request.getId(),
+                patient.getRegistrationNumber(),
+                (patient.getFirstName() + " " + (patient.getLastName() != null ? patient.getLastName() : "")).trim(),
+                admission.getAdmissionNumber(),
+                request.getAmount(),
+                request.getPaymentMode(),
+                request.getApprovedAt(),
+                requestTypeLabel(request.getRequestType()),
+                "Pending",
+                payment != null ? payment.getReceiptNumber() : null);
     }
 
     private String requestTypeLabel(PaymentRequestType type) {

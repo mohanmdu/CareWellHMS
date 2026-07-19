@@ -1,6 +1,7 @@
 package com.pms.cashier.controller;
 
 import com.pms.cashier.dto.AdvanceReportRowDto;
+import com.pms.cashier.dto.CancellationRequestRowDto;
 import com.pms.cashier.dto.IpPaymentRequestDto;
 import com.pms.cashier.entity.PaymentRequestType;
 import com.pms.cashier.service.IpPaymentRequestService;
@@ -57,5 +58,15 @@ public class IpPaymentRequestController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
         return service.getAdvanceReport(fromDate, toDate);
+    }
+
+    @GetMapping("/cancellable")
+    public List<CancellationRequestRowDto> cancellable(@RequestParam String uhid) {
+        return service.searchCancellableByUhid(uhid);
+    }
+
+    @PatchMapping("/{id}/cancel")
+    public IpPaymentRequestDto cancel(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        return service.cancel(id, body.get("reason"));
     }
 }

@@ -1,0 +1,81 @@
+<div class="hms-page">
+  @if (!searched()) {
+    <div class="ac-search-wrap">
+      <section class="hms-card-surface ac-search-card">
+        <h1 class="ac-search-title">Cancellation/Refund Search Input</h1>
+
+        <div class="ac-search-body">
+          <label class="ac-search-label" for="ac-uhid">Patient UHID :</label>
+          <input
+            id="ac-uhid"
+            class="ac-search-input"
+            type="text"
+            [(ngModel)]="uhid"
+            name="uhid"
+            (keyup.enter)="search()"
+          />
+
+          @if (successMessage()) {
+            <p class="ac-success-message">{{ successMessage() }}</p>
+          }
+
+          <button mat-flat-button color="primary" type="button" [disabled]="!uhid.trim() || loading()" (click)="search()">
+            Submit
+          </button>
+        </div>
+      </section>
+    </div>
+  } @else {
+    <section class="hms-card-surface ac-results-section">
+      <h1 class="ac-results-title">Cancellation/Refund Requests</h1>
+
+      @if (loading()) {
+        <mat-progress-bar mode="indeterminate" />
+      }
+
+      @if (!loading() && rows().length === 0) {
+        <app-empty-state icon="search_off" title="No pending requests" message="No approved advance/settlement/due amount requests found for this UHID." />
+      } @else if (rows().length > 0) {
+        <div class="ac-table-wrap">
+          <table class="ac-table">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Patient ID</th>
+                <th>Patient Name</th>
+                <th>IPID</th>
+                <th>Amount</th>
+                <th>Payment Types</th>
+                <th>Invoice Date</th>
+                <th>Type</th>
+                <th>Payment Status</th>
+                <th>Invoice ID</th>
+                <th>Cancel/Refund</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of rows(); track row.id; let i = $index) {
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ row.patientUhid ?? '—' }}</td>
+                  <td>{{ row.patientName }}</td>
+                  <td>{{ row.admissionNumber }}</td>
+                  <td>{{ row.amount | number: '1.0-2' }}</td>
+                  <td>{{ row.paymentMode ?? '—' }}</td>
+                  <td>{{ row.invoiceDate | date: 'dd/MM/yy HH:mm' }}</td>
+                  <td>{{ row.type }}</td>
+                  <td>{{ row.paymentStatus }}</td>
+                  <td>{{ row.invoiceId ?? '—' }}</td>
+                  <td class="ac-actions-cell">
+                    <button mat-flat-button color="primary" type="button" (click)="convertToCredit(row)">Convert to Credit</button>
+                    <button mat-flat-button color="primary" type="button" (click)="cancel(row)">Cancel</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</div>

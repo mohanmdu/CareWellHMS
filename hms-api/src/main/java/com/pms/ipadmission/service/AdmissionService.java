@@ -229,6 +229,20 @@ public class AdmissionService {
         return paymentRepository.save(payment);
     }
 
+    /**
+     * Advance Cancel: undoes a previously-collected cashier payment (Cancel /
+     * Convert to Credit both reverse the same way, only the reason differs).
+     * No status guard here - unlike collecting a new payment, reversing one
+     * is an administrative correction that must work regardless of what the
+     * admission's current lifecycle state is (even after discharge).
+     */
+    @Transactional
+    public void reverseCashierPayment(Long id, double amount) {
+        Admission admission = getOrThrow(id);
+        admission.setAdvanceAmount(admission.getAdvanceAmount() - amount);
+        repository.save(admission);
+    }
+
     private String nextReceiptNumber() {
         return "RCPT" + String.format("%06d", receiptSequence.incrementAndGet());
     }

@@ -149,6 +149,11 @@ export const routes: Routes = [
           import('./features/ip-admission/reports/advance-report.component').then((m) => m.AdvanceReportComponent)
       },
       {
+        path: 'ip/reports/advance-cancel',
+        loadComponent: () =>
+          import('./features/ip-admission/reports/advance-cancel.component').then((m) => m.AdvanceCancelComponent)
+      },
+      {
         path: 'masters/cms/site-content',
         loadComponent: () =>
           import('./features/masters-admin/website-cms/site-content/cms-site-content.component').then(

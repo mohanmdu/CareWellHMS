@@ -21,4 +21,12 @@ public interface IpPaymentRequestRepository extends JpaRepository<IpPaymentReque
             ORDER BY r.approvedAt ASC
             """)
     List<IpPaymentRequest> findApprovedForReport(@Param("fromInstant") Instant fromInstant, @Param("toInstant") Instant toInstant);
+
+    @Query("""
+            SELECT r FROM IpPaymentRequest r
+            WHERE r.status = com.pms.cashier.entity.PaymentRequestStatus.APPROVED
+              AND r.admission.patient.registrationNumber = :uhid
+            ORDER BY r.approvedAt DESC
+            """)
+    List<IpPaymentRequest> findApprovedByPatientUhid(@Param("uhid") String uhid);
 }
