@@ -24,7 +24,8 @@ const STATUS_TONE: Record<string, StatusBadgeTone> = {
   REGISTERED: 'warning',
   ADMITTED: 'info',
   DISCHARGE_INITIATED: 'warning',
-  DISCHARGED: 'success'
+  DISCHARGED: 'success',
+  CANCELLED: 'danger'
 };
 
 /**
@@ -173,5 +174,32 @@ export class AdmissionWorklistComponent {
       return;
     }
     this.router.navigate(['/ip/admissions', admission.id, 'billing']);
+  }
+
+  cancelAdmission(admission: Admission): void {
+    if (admission.id === null) {
+      return;
+    }
+    this.promptDialog
+      .prompt({
+        title: `Cancel admission - ${admission.admissionNumber}`,
+        message: 'This voids the admission (frees the room, if any) and moves it to Cancelled Admissions.',
+        fields: [{ key: 'reason', label: 'Reason for cancellation', type: 'textarea', required: true }],
+        confirmLabel: 'Cancel Admission',
+        destructive: true
+      })
+      .subscribe((values) => {
+        if (!values || admission.id === null) {
+          return;
+        }
+        this.admissionService.cancel(admission.id, values['reason'] as string).subscribe({
+          next: () => {
+            this.notification.success('Admission cancelled.');
+            this.refresh();
+            this.refreshAvailableRooms();
+          },
+          error: (err) => this.notification.error(err.error?.message ?? 'Failed to cancel the admission.')
+        });
+      });
   }
 }

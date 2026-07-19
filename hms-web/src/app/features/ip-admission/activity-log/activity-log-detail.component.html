@@ -1,0 +1,74 @@
+<div class="hms-page ald-page">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading() && entry(); as entry) {
+    <div #reportContent>
+      <section class="hms-card-surface ald-section">
+        <header class="ald-header">
+          <h1 class="ald-title">Activity Log Details</h1>
+          <app-status-badge [label]="entry.status" [tone]="statusTone[entry.status] ?? 'neutral'" />
+        </header>
+
+        <div class="ald-grid">
+          <div class="ald-col">
+            <h2 class="ald-group-title">Patient</h2>
+            <div class="ald-row"><span>Patient UHID</span><strong>{{ entry.patientUhid ?? '—' }}</strong></div>
+            <div class="ald-row"><span>Patient Name</span><strong>{{ entry.patientName ?? '—' }}</strong></div>
+            <div class="ald-row"><span>OP Number</span><strong>{{ entry.opNumber ?? '—' }}</strong></div>
+            <div class="ald-row"><span>IP Number</span><strong>{{ entry.ipNumber ?? '—' }}</strong></div>
+          </div>
+
+          <div class="ald-col">
+            <h2 class="ald-group-title">Action</h2>
+            <div class="ald-row"><span>Module Name</span><strong>{{ entry.module }}</strong></div>
+            <div class="ald-row"><span>Screen Name</span><strong>{{ entry.screenName ?? '—' }}</strong></div>
+            <div class="ald-row"><span>Operation Performed</span><strong>{{ entry.operation }}</strong></div>
+            <div class="ald-row"><span>Action Date &amp; Time</span><strong>{{ entry.performedAt | date: 'dd/MM/yyyy HH:mm:ss' }}</strong></div>
+          </div>
+
+          <div class="ald-col">
+            <h2 class="ald-group-title">Performed By</h2>
+            <div class="ald-row"><span>Action Performed By</span><strong>{{ entry.performedBy }}</strong></div>
+            <div class="ald-row"><span>User Role</span><strong>Not Tracked</strong></div>
+            <div class="ald-row"><span>Department</span><strong>Not Tracked</strong></div>
+          </div>
+
+          <div class="ald-col">
+            <h2 class="ald-group-title">System (dummy)</h2>
+            <div class="ald-row"><span>IP Address</span><strong>Not Tracked</strong></div>
+            <div class="ald-row"><span>System Name</span><strong>Not Tracked</strong></div>
+            <div class="ald-row"><span>Audit ID</span><strong>{{ entry.id }}</strong></div>
+          </div>
+        </div>
+
+        <div class="ald-diff">
+          <h2 class="ald-group-title">Changed Values</h2>
+          <div class="ald-diff-grid">
+            <div class="ald-diff-box ald-diff-old">
+              <span class="ald-diff-label">Old Value (Previous Content)</span>
+              <p>{{ entry.previousContent ?? 'No previous value recorded (Create operation).' }}</p>
+            </div>
+            <div class="ald-diff-box ald-diff-new">
+              <span class="ald-diff-label">New Value (Content)</span>
+              <p>{{ entry.content ?? '—' }}</p>
+            </div>
+          </div>
+        </div>
+
+        @if (entry.remarks) {
+          <div class="ald-remarks">
+            <h2 class="ald-group-title">Remarks</h2>
+            <p>{{ entry.remarks }}</p>
+          </div>
+        }
+      </section>
+    </div>
+
+    <div class="ald-actions">
+      <button mat-flat-button color="primary" type="button" (click)="print()">Print</button>
+      <button mat-stroked-button type="button" (click)="back()">Back</button>
+    </div>
+  }
+</div>

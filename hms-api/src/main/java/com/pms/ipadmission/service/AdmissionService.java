@@ -1,5 +1,7 @@
 package com.pms.ipadmission.service;
 
+import com.pms.activitylog.service.ActivityLogEntry;
+import com.pms.activitylog.service.ActivityLogService;
 import com.pms.common.EntityNotFoundException;
 import com.pms.common.FileStorageService;
 import com.pms.ipadmission.dto.AdmissionDto;
@@ -54,6 +56,7 @@ public class AdmissionService {
     private final FileStorageService fileStorageService;
     private final IpPaymentRepository paymentRepository;
     private final AdmissionRoomHistoryRepository roomHistoryRepository;
+    private final ActivityLogService activityLogService;
     private final AtomicInteger sequence = new AtomicInteger(0);
     private final AtomicInteger receiptSequence = new AtomicInteger(0);
     private final AtomicInteger dischargeSequence = new AtomicInteger(0);
@@ -65,7 +68,8 @@ public class AdmissionService {
             RoomTypeRepository roomTypeRepository,
             FileStorageService fileStorageService,
             IpPaymentRepository paymentRepository,
-            AdmissionRoomHistoryRepository roomHistoryRepository) {
+            AdmissionRoomHistoryRepository roomHistoryRepository,
+            ActivityLogService activityLogService) {
         this.repository = repository;
         this.patientRepository = patientRepository;
         this.roomRepository = roomRepository;
@@ -73,6 +77,7 @@ public class AdmissionService {
         this.fileStorageService = fileStorageService;
         this.paymentRepository = paymentRepository;
         this.roomHistoryRepository = roomHistoryRepository;
+        this.activityLogService = activityLogService;
         this.sequence.set((int) repository.count());
         this.receiptSequence.set((int) paymentRepository.count());
         this.dischargeSequence.set((int) repository.findAll().stream().filter(a -> a.getDischargeNumber() != null).count());
@@ -106,12 +111,19 @@ public class AdmissionService {
         admission.setAdmissionDate(LocalDateTime.now());
         admission.setStatus(AdmissionStatus.ADMITTED);
         admission.setAdvanceAmount(0);
+        admission.setCreatedBy(currentUsername());
 
         room.setStatus(RoomStatus.ALLOCATED);
         roomRepository.save(room);
 
         Admission saved = repository.save(admission);
         openRoomHistoryPeriod(saved, room, saved.getAdmissionDate());
+        activityLogService.log(new ActivityLogEntry("Admission", "Create")
+                .content("Admitted directly to Room " + room.getRoomNumber() + " (" + room.getRoomType().getName() + ")")
+                .status("Success")
+                .patient(patient.getRegistrationNumber(), patientDisplayName(patient))
+                .ipNumber(saved.getAdmissionNumber())
+                .screenName("New Admission"));
         return toDto(saved);
     }
 
@@ -153,6 +165,12 @@ public class AdmissionService {
 
         Admission saved = repository.save(admission);
         openRoomHistoryPeriod(saved, room, saved.getAdmissionDate());
+        activityLogService.log(new ActivityLogEntry("Admission", "Update")
+                .content("Ward Allocation: assigned Room " + room.getRoomNumber() + " (" + room.getRoomType().getName() + ")")
+                .status("Success")
+                .patient(saved.getPatient().getRegistrationNumber(), patientDisplayName(saved.getPatient()))
+                .ipNumber(saved.getAdmissionNumber())
+                .screenName("Ward Allocation"));
         return toDto(saved);
     }
 
@@ -169,9 +187,17 @@ public class AdmissionService {
         admission.setAdmissionDate(dto.admissionDate() != null ? dto.admissionDate() : LocalDateTime.now());
         admission.setStatus(AdmissionStatus.REGISTERED);
         admission.setAdvanceAmount(0);
+        admission.setCreatedBy(currentUsername());
         applyIntakeFields(admission, dto);
 
-        return toDto(repository.save(admission));
+        Admission saved = repository.save(admission);
+        activityLogService.log(new ActivityLogEntry("Admission", "Create")
+                .content("Registered" + (admission.getRoomType() != null ? " for " + admission.getRoomType().getName() : ""))
+                .status("Success")
+                .patient(patient.getRegistrationNumber(), patientDisplayName(patient))
+                .ipNumber(saved.getAdmissionNumber())
+                .screenName("Casualty/Emergency Admission"));
+        return toDto(saved);
     }
 
     @Transactional
@@ -268,7 +294,14 @@ public class AdmissionService {
         admission.setDischargeType(dischargeType);
         admission.setDischargeNumber(nextDischargeNumber());
 
-        return toDto(repository.save(admission));
+        Admission saved = repository.save(admission);
+        activityLogService.log(new ActivityLogEntry("Discharge", "Update")
+                .content("Discharge initiated (" + dischargeType + "), Discharge No: " + saved.getDischargeNumber())
+                .status("Pending")
+                .patient(saved.getPatient().getRegistrationNumber(), patientDisplayName(saved.getPatient()))
+                .ipNumber(saved.getAdmissionNumber())
+                .screenName("Initiate Discharge"));
+        return toDto(saved);
     }
 
     /** Stage 2 of discharge: settles the balance, frees the room, and transitions straight to DISCHARGED. */
@@ -292,7 +325,14 @@ public class AdmissionService {
             roomRepository.save(room);
         }
 
-        return toDto(repository.save(admission));
+        Admission saved = repository.save(admission);
+        activityLogService.log(new ActivityLogEntry("Discharge", "Discharge Completed")
+                .content("Total Billed: " + totalBilled + ", Settlement: " + saved.getSettlementAmount())
+                .status("Success")
+                .patient(saved.getPatient().getRegistrationNumber(), patientDisplayName(saved.getPatient()))
+                .ipNumber(saved.getAdmissionNumber())
+                .screenName("Finalize Discharge"));
+        return toDto(saved);
     }
 
     private String nextDischargeNumber() {
@@ -346,6 +386,54 @@ public class AdmissionService {
 
         Admission saved = repository.save(admission);
         openRoomHistoryPeriod(saved, newRoom, effectiveChangeTime);
+        activityLogService.log(new ActivityLogEntry("Admission", "Update")
+                .content("Ward changed to Room " + newRoom.getRoomNumber() + " (" + newRoom.getRoomType().getName() + ")")
+                .previousContent(oldRoom != null ? "Was in Room " + oldRoom.getRoomNumber() : "No prior room")
+                .status("Updated")
+                .patient(saved.getPatient().getRegistrationNumber(), patientDisplayName(saved.getPatient()))
+                .ipNumber(saved.getAdmissionNumber())
+                .screenName("Ward Change"));
+        return toDto(saved);
+    }
+
+    /**
+     * Cancelled Admissions (PDF audit screen): voids a REGISTERED or ADMITTED
+     * admission before it reaches discharge. Frees the room (if one was
+     * assigned) and closes out its open AdmissionRoomHistory period exactly
+     * like a discharge would, but transitions straight to CANCELLED instead.
+     */
+    @Transactional
+    public AdmissionDto cancelAdmission(Long id, String reason) {
+        Admission admission = getOrThrow(id);
+        if (admission.getStatus() != AdmissionStatus.REGISTERED && admission.getStatus() != AdmissionStatus.ADMITTED) {
+            throw new IllegalArgumentException(
+                    "Admission " + admission.getAdmissionNumber() + " can no longer be cancelled in its current state");
+        }
+
+        LocalDateTime cancelledAt = LocalDateTime.now();
+        Room room = admission.getRoom();
+        if (room != null) {
+            Optional<AdmissionRoomHistory> openPeriod = roomHistoryRepository.findByAdmissionIdAndToDateIsNull(id);
+            openPeriod.ifPresent(period -> {
+                period.setToDate(cancelledAt);
+                roomHistoryRepository.save(period);
+            });
+            room.setStatus(RoomStatus.AVAILABLE);
+            roomRepository.save(room);
+        }
+
+        admission.setStatus(AdmissionStatus.CANCELLED);
+        admission.setCancelledAt(cancelledAt);
+        admission.setCancelledBy(currentUsername());
+        admission.setCancellationReason(reason);
+
+        Admission saved = repository.save(admission);
+        activityLogService.log(new ActivityLogEntry("Admission", "Cancel")
+                .content("Reason: " + reason)
+                .status("Cancelled")
+                .patient(saved.getPatient().getRegistrationNumber(), patientDisplayName(saved.getPatient()))
+                .ipNumber(saved.getAdmissionNumber())
+                .screenName("Cancelled Admissions"));
         return toDto(saved);
     }
 
@@ -355,6 +443,10 @@ public class AdmissionService {
         period.setRoom(room);
         period.setFromDate(fromDate);
         roomHistoryRepository.save(period);
+    }
+
+    private String patientDisplayName(Patient patient) {
+        return (patient.getFirstName() + " " + (patient.getLastName() != null ? patient.getLastName() : "")).trim();
     }
 
     private void applyIntakeFields(Admission admission, AdmissionDto dto) {
@@ -420,7 +512,7 @@ public class AdmissionService {
                 admission.getId(),
                 admission.getAdmissionNumber(),
                 patient.getId(),
-                (patient.getFirstName() + " " + (patient.getLastName() != null ? patient.getLastName() : "")).trim(),
+                patientDisplayName(patient),
                 patient.getRegistrationNumber(),
                 patient.getGender(),
                 patient.getAge(),
@@ -460,6 +552,10 @@ public class AdmissionService {
                 admission.getAadhaarNumber(),
                 admission.isVentilatorRequired(),
                 admission.isMonitorRequired(),
-                admission.getPhotoPath());
+                admission.getPhotoPath(),
+                admission.getCreatedBy(),
+                admission.getCancelledAt(),
+                admission.getCancelledBy(),
+                admission.getCancellationReason());
     }
 }

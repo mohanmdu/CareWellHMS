@@ -1,4 +1,4 @@
-export type AdmissionStatus = 'REGISTERED' | 'ADMITTED' | 'DISCHARGE_INITIATED' | 'DISCHARGED';
+export type AdmissionStatus = 'REGISTERED' | 'ADMITTED' | 'DISCHARGE_INITIATED' | 'DISCHARGED' | 'CANCELLED';
 export type AdmissionPaymentType = 'CASH' | 'INSURANCE' | 'CORPORATE';
 
 export const DISCHARGE_TYPE_OPTIONS = ['Regular Discharge', 'Death', 'Against Medical Advice', 'Absconding'];
@@ -48,6 +48,10 @@ export interface Admission {
   ventilatorRequired: boolean;
   monitorRequired: boolean;
   photoPath: string | null;
+  createdBy: string | null;
+  cancelledAt: string | null;
+  cancelledBy: string | null;
+  cancellationReason: string | null;
 }
 
 export type AdmissionRegistrationInput = Pick<

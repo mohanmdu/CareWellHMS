@@ -83,4 +83,9 @@ public class AdmissionController {
         LocalDateTime changedAt = rawDate != null ? LocalDateTime.parse(rawDate.toString()) : null;
         return service.changeRoom(id, roomId, changedAt);
     }
+
+    @PatchMapping("/{id}/cancel")
+    public AdmissionDto cancel(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        return service.cancelAdmission(id, body.get("reason"));
+    }
 }

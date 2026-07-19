@@ -1,5 +1,7 @@
 package com.pms.ipbilling.service;
 
+import com.pms.activitylog.service.ActivityLogEntry;
+import com.pms.activitylog.service.ActivityLogService;
 import com.pms.common.EntityNotFoundException;
 import com.pms.ipadmission.entity.Admission;
 import com.pms.ipadmission.entity.AdmissionPaymentType;
@@ -9,6 +11,8 @@ import com.pms.ipadmission.entity.RoomType;
 import com.pms.ipadmission.repository.AdmissionRepository;
 import com.pms.ipadmission.repository.AdmissionRoomHistoryRepository;
 import com.pms.ipbilling.dto.AdmissionReportRowDto;
+import com.pms.ipbilling.dto.CancelledAdmissionDetailDto;
+import com.pms.ipbilling.dto.CancelledAdmissionRowDto;
 import com.pms.ipbilling.dto.DischargeListRowDto;
 import com.pms.ipbilling.dto.IpBillingLedgerDto;
 import com.pms.ipbilling.dto.IpBillingLedgerRowDto;
@@ -61,6 +65,7 @@ public class IpBillingService {
     private final IpBillingCategoryRepository categoryRepository;
     private final IpBillingComponentRepository componentRepository;
     private final ConsultantRepository consultantRepository;
+    private final ActivityLogService activityLogService;
 
     public IpBillingService(
             IpBillingLineItemRepository lineItemRepository,
@@ -69,7 +74,8 @@ public class IpBillingService {
             AdmissionRoomHistoryRepository roomHistoryRepository,
             IpBillingCategoryRepository categoryRepository,
             IpBillingComponentRepository componentRepository,
-            ConsultantRepository consultantRepository) {
+            ConsultantRepository consultantRepository,
+            ActivityLogService activityLogService) {
         this.lineItemRepository = lineItemRepository;
         this.paymentRepository = paymentRepository;
         this.admissionRepository = admissionRepository;
@@ -77,6 +83,7 @@ public class IpBillingService {
         this.categoryRepository = categoryRepository;
         this.componentRepository = componentRepository;
         this.consultantRepository = consultantRepository;
+        this.activityLogService = activityLogService;
     }
 
     public List<IpPaymentDto> listPayments(Long admissionId) {
@@ -114,13 +121,21 @@ public class IpBillingService {
         item.setRequestedOn(Instant.now());
         item.setCreatedBy(currentUsername());
 
-        return toDto(lineItemRepository.save(item));
+        IpBillingLineItem saved = lineItemRepository.save(item);
+        activityLogService.log(new ActivityLogEntry("IP Billing", "Create")
+                .content(component.getName() + " x" + saved.getQuantity() + " = " + saved.getLineTotal())
+                .status("Success")
+                .patient(admission.getPatient().getRegistrationNumber(), patientDisplayName(admission))
+                .ipNumber(admission.getAdmissionNumber())
+                .screenName("Patient Billing Advice"));
+        return toDto(saved);
     }
 
     @Transactional
     public IpBillingLineItemDto updateLineItem(Long id, IpBillingLineItemDto dto) {
         IpBillingLineItem item = lineItemRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Billing line item not found: " + id));
+        String previousContent = lineItemSummary(item);
         if (dto.remarks() != null) {
             item.setRemarks(dto.remarks());
         }
@@ -140,15 +155,42 @@ public class IpBillingService {
             item.setDiscountReason(dto.discountReason());
         }
         item.setLineTotal(item.getQuantity() * item.getUnitAmount());
-        return toDto(lineItemRepository.save(item));
+        IpBillingLineItem saved = lineItemRepository.save(item);
+        Admission admission = saved.getAdmission();
+        activityLogService.log(new ActivityLogEntry("IP Billing", "Update")
+                .content(lineItemSummary(saved))
+                .previousContent(previousContent)
+                .status("Updated")
+                .patient(admission.getPatient().getRegistrationNumber(), patientDisplayName(admission))
+                .ipNumber(admission.getAdmissionNumber())
+                .screenName("Patient Billing Advice"));
+        return toDto(saved);
     }
 
     @Transactional
     public void deleteLineItem(Long id) {
-        if (!lineItemRepository.existsById(id)) {
-            throw new EntityNotFoundException("Billing line item not found: " + id);
-        }
+        IpBillingLineItem item = lineItemRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Billing line item not found: " + id));
+        Admission admission = item.getAdmission();
+        String content = lineItemSummary(item);
         lineItemRepository.deleteById(id);
+        activityLogService.log(new ActivityLogEntry("IP Billing", "Delete")
+                .content(content)
+                .status("Deleted")
+                .patient(admission.getPatient().getRegistrationNumber(), patientDisplayName(admission))
+                .ipNumber(admission.getAdmissionNumber())
+                .screenName("Patient Billing Advice"));
+    }
+
+    private String lineItemSummary(IpBillingLineItem item) {
+        return item.getComponent().getName() + " x" + item.getQuantity() + " = " + item.getLineTotal()
+                + (item.getDiscountAmount() > 0 ? ", Discount: " + item.getDiscountAmount() : "")
+                + (item.getRefundAmount() > 0 ? ", Refund: " + item.getRefundAmount() : "");
+    }
+
+    private String patientDisplayName(Admission admission) {
+        Patient patient = admission.getPatient();
+        return (patient.getFirstName() + " " + (patient.getLastName() != null ? patient.getLastName() : "")).trim();
     }
 
     public IpBillingLedgerDto getLedger(Long admissionId) {
@@ -248,6 +290,94 @@ public class IpBillingService {
                 breakdown.refund(),
                 breakdown.discount(),
                 breakdown.net() - paidAmount);
+    }
+
+    /** Cancelled Admissions (PDF audit screen): one row per CANCELLED admission, filtered by an exact date-time range. */
+    public List<CancelledAdmissionRowDto> getCancelledAdmissions(LocalDateTime fromDateTime, LocalDateTime toDateTime) {
+        return admissionRepository.findCancelledForList(fromDateTime, toDateTime).stream()
+                .map(this::toCancelledAdmissionRow)
+                .toList();
+    }
+
+    private CancelledAdmissionRowDto toCancelledAdmissionRow(Admission admission) {
+        Patient patient = admission.getPatient();
+        Room room = admission.getRoom();
+        RoomType roomType = admission.getRoomType();
+        return new CancelledAdmissionRowDto(
+                admission.getId(),
+                patient.getRegistrationNumber(),
+                (patient.getFirstName() + " " + (patient.getLastName() != null ? patient.getLastName() : "")).trim(),
+                admission.getAdmissionNumber(),
+                admission.getDescriptionOfCase(),
+                admission.getPaymentType() != null ? admission.getPaymentType().name() : null,
+                admission.getPrimaryConsultant(),
+                admission.getReferralDoctor(),
+                room != null ? room.getRoomType().getName() : (roomType != null ? roomType.getName() : null),
+                admission.getCreatedAt(),
+                admission.getCreatedBy(),
+                admission.getCancelledAt(),
+                admission.getCancelledBy(),
+                admission.getCancellationReason(),
+                computeRefundBreakdown(admission).status());
+    }
+
+    /** Cancelled Admission detail (PDF: "View Details" drill-down), including a financial summary if any advance was collected. */
+    public CancelledAdmissionDetailDto getCancelledAdmissionDetail(Long admissionId) {
+        Admission admission = admissionRepository.findById(admissionId)
+                .orElseThrow(() -> new EntityNotFoundException("Admission not found: " + admissionId));
+        Patient patient = admission.getPatient();
+        Room room = admission.getRoom();
+        RoomType roomType = admission.getRoomType();
+        RefundBreakdown refund = computeRefundBreakdown(admission);
+        double admissionCharges = computeNetTotal(admission);
+        double advanceAmount = admission.getAdvanceAmount();
+
+        return new CancelledAdmissionDetailDto(
+                admission.getId(),
+                admission.getAdmissionNumber(),
+                patient.getRegistrationNumber(),
+                (patient.getFirstName() + " " + (patient.getLastName() != null ? patient.getLastName() : "")).trim(),
+                patient.getGender(),
+                patient.getAge(),
+                patient.getMobileNumber(),
+                patient.getAddress(),
+                admission.getAdmissionDate(),
+                admission.getCancelledAt(),
+                room != null ? room.getRoomType().getName() : (roomType != null ? roomType.getName() : null),
+                room != null ? room.getRoomNumber() : null,
+                admission.getPrimaryConsultant(),
+                admission.getReferralDoctor(),
+                admission.getPaymentType() != null ? admission.getPaymentType().name() : null,
+                admission.getStatus().name(),
+                admission.getCancellationReason(),
+                admission.getCancelledBy(),
+                admission.getRemarks(),
+                admission.getCreatedAt(),
+                admission.getCreatedBy(),
+                admissionCharges,
+                advanceAmount,
+                refund.totalRefunded(),
+                advanceAmount - admissionCharges,
+                refund.status());
+    }
+
+    /** Refund status for a cancelled admission, derived from its real IpPayment history (ties into the existing Advance Cancel reversal). */
+    private RefundBreakdown computeRefundBreakdown(Admission admission) {
+        List<IpPayment> payments = paymentRepository.findByAdmissionIdOrderByPaymentDateDesc(admission.getId());
+        double totalInvoiced = payments.stream().mapToDouble(IpPayment::getInvoicedAmount).sum();
+        double totalRefunded = payments.stream().mapToDouble(IpPayment::getRefundAmount).sum();
+        String status;
+        if (totalInvoiced <= 0) {
+            status = "Not Applicable";
+        } else if (admission.getAdvanceAmount() <= 0) {
+            status = "Completed";
+        } else {
+            status = "Pending";
+        }
+        return new RefundBreakdown(totalRefunded, status);
+    }
+
+    private record RefundBreakdown(double totalRefunded, String status) {
     }
 
     private boolean matchesPaymentTypeFilter(Admission admission, String filter) {

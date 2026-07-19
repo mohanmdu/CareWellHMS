@@ -154,6 +154,34 @@ export const routes: Routes = [
           import('./features/ip-admission/reports/advance-cancel.component').then((m) => m.AdvanceCancelComponent)
       },
       {
+        path: 'ip/reports/cancelled-admissions',
+        loadComponent: () =>
+          import('./features/ip-admission/reports/cancelled-admissions-list.component').then(
+            (m) => m.CancelledAdmissionsListComponent
+          )
+      },
+      {
+        path: 'ip/reports/cancelled-admissions/:id',
+        loadComponent: () =>
+          import('./features/ip-admission/reports/cancelled-admission-detail.component').then(
+            (m) => m.CancelledAdmissionDetailComponent
+          )
+      },
+      {
+        path: 'ip/reports/activity-log',
+        loadComponent: () =>
+          import('./features/ip-admission/activity-log/activity-log-list.component').then(
+            (m) => m.ActivityLogListComponent
+          )
+      },
+      {
+        path: 'ip/reports/activity-log/:id',
+        loadComponent: () =>
+          import('./features/ip-admission/activity-log/activity-log-detail.component').then(
+            (m) => m.ActivityLogDetailComponent
+          )
+      },
+      {
         path: 'masters/cms/site-content',
         loadComponent: () =>
           import('./features/masters-admin/website-cms/site-content/cms-site-content.component').then(

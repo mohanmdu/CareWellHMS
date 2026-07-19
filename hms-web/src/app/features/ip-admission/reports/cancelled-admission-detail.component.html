@@ -1,0 +1,76 @@
+<div class="hms-page cad-page">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading() && detail(); as detail) {
+    <div #reportContent>
+      <section class="hms-card-surface cad-section">
+        <header class="cad-header">
+          <h1 class="cad-title">Cancelled Admission Information</h1>
+          <app-status-badge [label]="detail.refundStatus" [tone]="refundStatusTone[detail.refundStatus] ?? 'neutral'" />
+        </header>
+
+        <div class="cad-grid">
+          <div class="cad-col">
+            <h2 class="cad-group-title">Patient</h2>
+            <div class="cad-row"><span>Patient Name</span><strong>{{ detail.patientName }}</strong></div>
+            <div class="cad-row"><span>UHID</span><strong>{{ detail.patientUhid ?? '—' }}</strong></div>
+            <div class="cad-row"><span>IP Number</span><strong>{{ detail.admissionNumber }}</strong></div>
+            <div class="cad-row"><span>Gender</span><strong>{{ detail.patientGender ?? '—' }}</strong></div>
+            <div class="cad-row"><span>Age</span><strong>{{ detail.patientAge ?? '—' }}</strong></div>
+            <div class="cad-row"><span>Mobile Number</span><strong>{{ detail.patientMobileNumber ?? '—' }}</strong></div>
+            <div class="cad-row"><span>Address</span><strong>{{ detail.patientAddress ?? '—' }}</strong></div>
+          </div>
+
+          <div class="cad-col">
+            <h2 class="cad-group-title">Admission</h2>
+            <div class="cad-row"><span>Admission Date &amp; Time</span><strong>{{ detail.admissionDate | date: 'dd/MM/yyyy HH:mm' }}</strong></div>
+            <div class="cad-row"><span>Ward Type</span><strong>{{ detail.wardType ?? '—' }}</strong></div>
+            <div class="cad-row"><span>Bed Number</span><strong>{{ detail.bedNumber ?? '—' }}</strong></div>
+            <div class="cad-row"><span>Primary Consultant</span><strong>{{ detail.primaryConsultant ?? '—' }}</strong></div>
+            <div class="cad-row"><span>Referral Doctor</span><strong>{{ detail.referralDoctor ?? '—' }}</strong></div>
+            <div class="cad-row"><span>Payment Type</span><strong>{{ detail.paymentType ?? '—' }}</strong></div>
+            <div class="cad-row"><span>Admission Status</span><strong>{{ detail.admissionStatus }}</strong></div>
+          </div>
+
+          <div class="cad-col">
+            <h2 class="cad-group-title">Cancellation</h2>
+            <div class="cad-row"><span>Cancellation Date &amp; Time</span><strong>{{ detail.cancelledAt | date: 'dd/MM/yyyy HH:mm' }}</strong></div>
+            <div class="cad-row"><span>Cancelled By</span><strong>{{ detail.cancelledBy ?? '—' }}</strong></div>
+            <div class="cad-row cad-row-wide"><span>Cancellation Reason</span><strong>{{ detail.cancellationReason ?? '—' }}</strong></div>
+            <div class="cad-row cad-row-wide"><span>Remarks</span><strong>{{ detail.remarks ?? '—' }}</strong></div>
+          </div>
+
+          <div class="cad-col">
+            <h2 class="cad-group-title">Audit Information</h2>
+            <div class="cad-row"><span>Created Date &amp; Time</span><strong>{{ detail.createdAt | date: 'dd/MM/yyyy HH:mm' }}</strong></div>
+            <div class="cad-row"><span>Created By</span><strong>{{ detail.createdBy ?? '—' }}</strong></div>
+          </div>
+        </div>
+
+        @if (detail.advanceAmount > 0 || detail.admissionCharges > 0) {
+          <div class="cad-financial">
+            <h2 class="cad-group-title">Financial Summary</h2>
+            <div class="cad-financial-grid">
+              <div class="cad-financial-item"><span>Admission Charges</span><strong>{{ detail.admissionCharges | number: '1.0-2' }}</strong></div>
+              <div class="cad-financial-item"><span>Advance Amount</span><strong>{{ detail.advanceAmount | number: '1.0-2' }}</strong></div>
+              <div class="cad-financial-item"><span>Refund Amount</span><strong>{{ detail.refundAmount | number: '1.0-2' }}</strong></div>
+              <div class="cad-financial-item"><span>Balance Amount</span><strong>{{ detail.balanceAmount | number: '1.0-2' }}</strong></div>
+              <div class="cad-financial-item">
+                <span>Refund Status</span>
+                <app-status-badge [label]="detail.refundStatus" [tone]="refundStatusTone[detail.refundStatus] ?? 'neutral'" />
+              </div>
+            </div>
+          </div>
+        }
+      </section>
+    </div>
+
+    <div class="cad-actions">
+      <button mat-flat-button color="primary" type="button" (click)="print()">Print Cancellation Report</button>
+      <button mat-stroked-button type="button" (click)="back()">Back</button>
+      <button mat-stroked-button type="button" (click)="close()">Close</button>
+    </div>
+  }
+</div>

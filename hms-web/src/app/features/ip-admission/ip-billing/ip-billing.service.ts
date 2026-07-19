@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
   AdmissionReportRow,
+  CancelledAdmissionDetail,
+  CancelledAdmissionRow,
   DischargeListRow,
   IpBillingLedger,
   IpBillingLineItem,
@@ -82,5 +84,20 @@ export class IpBillingService {
       params = params.set('billingType', billingType);
     }
     return this.http.get<DischargeListRow[]>(`${this.baseUrl}/reports/discharge-list`, { params });
+  }
+
+  getCancelledAdmissions(fromDateTime?: string, toDateTime?: string): Observable<CancelledAdmissionRow[]> {
+    let params = new HttpParams();
+    if (fromDateTime) {
+      params = params.set('fromDateTime', fromDateTime);
+    }
+    if (toDateTime) {
+      params = params.set('toDateTime', toDateTime);
+    }
+    return this.http.get<CancelledAdmissionRow[]>(`${this.baseUrl}/reports/cancelled-admissions`, { params });
+  }
+
+  getCancelledAdmissionDetail(admissionId: number): Observable<CancelledAdmissionDetail> {
+    return this.http.get<CancelledAdmissionDetail>(`${this.baseUrl}/reports/cancelled-admissions/${admissionId}`);
   }
 }

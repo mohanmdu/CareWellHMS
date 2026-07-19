@@ -104,3 +104,50 @@ export interface DischargeListRow {
   discountAmount: number;
   balanceAmount: number;
 }
+
+export interface CancelledAdmissionRow {
+  admissionId: number;
+  patientUhid: string | null;
+  patientName: string | null;
+  admissionNumber: string | null;
+  caseDescription: string | null;
+  paymentType: string | null;
+  primaryConsultant: string | null;
+  referralDoctor: string | null;
+  wardType: string | null;
+  createdAt: string | null;
+  createdBy: string | null;
+  cancelledAt: string | null;
+  cancelledBy: string | null;
+  cancellationReason: string | null;
+  refundStatus: string;
+}
+
+export interface CancelledAdmissionDetail {
+  admissionId: number;
+  admissionNumber: string | null;
+  patientUhid: string | null;
+  patientName: string | null;
+  patientGender: string | null;
+  patientAge: number | null;
+  patientMobileNumber: string | null;
+  patientAddress: string | null;
+  admissionDate: string | null;
+  cancelledAt: string | null;
+  wardType: string | null;
+  bedNumber: string | null;
+  primaryConsultant: string | null;
+  referralDoctor: string | null;
+  paymentType: string | null;
+  admissionStatus: string;
+  cancellationReason: string | null;
+  cancelledBy: string | null;
+  remarks: string | null;
+  createdAt: string | null;
+  createdBy: string | null;
+  admissionCharges: number;
+  advanceAmount: number;
+  refundAmount: number;
+  balanceAmount: number;
+  refundStatus: string;
+}

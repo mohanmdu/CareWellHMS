@@ -49,5 +49,9 @@ public record AdmissionDto(
         String aadhaarNumber,
         Boolean ventilatorRequired,
         Boolean monitorRequired,
-        String photoPath) {
+        String photoPath,
+        String createdBy,
+        LocalDateTime cancelledAt,
+        String cancelledBy,
+        String cancellationReason) {
 }

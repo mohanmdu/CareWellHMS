@@ -50,4 +50,8 @@ export class AdmissionService {
   finalizeDischarge(id: number, totalBilled: number, dischargeSummary: string | null): Observable<Admission> {
     return this.http.patch<Admission>(`${this.baseUrl}/${id}/finalize-discharge`, { totalBilled, dischargeSummary });
   }
+
+  cancel(id: number, reason: string): Observable<Admission> {
+    return this.http.patch<Admission>(`${this.baseUrl}/${id}/cancel`, { reason });
+  }
 }

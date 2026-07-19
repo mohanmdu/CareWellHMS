@@ -27,4 +27,13 @@ public interface AdmissionRepository extends JpaRepository<Admission, Long> {
             ORDER BY a.dischargeDate DESC
             """)
     List<Admission> findDischargedForList(@Param("fromDate") LocalDateTime fromDate, @Param("toDate") LocalDateTime toDate);
+
+    @Query("""
+            SELECT a FROM Admission a
+            WHERE a.status = com.pms.ipadmission.entity.AdmissionStatus.CANCELLED
+              AND (:fromDate IS NULL OR a.cancelledAt >= :fromDate)
+              AND (:toDate IS NULL OR a.cancelledAt <= :toDate)
+            ORDER BY a.cancelledAt DESC
+            """)
+    List<Admission> findCancelledForList(@Param("fromDate") LocalDateTime fromDate, @Param("toDate") LocalDateTime toDate);
 }

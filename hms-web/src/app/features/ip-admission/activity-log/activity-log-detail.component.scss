@@ -1,0 +1,125 @@
+.ald-page {
+  max-width: 960px;
+}
+
+.ald-section {
+  padding: var(--hms-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-4);
+}
+
+.ald-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hms-space-3);
+  padding-bottom: var(--hms-space-3);
+  border-bottom: 2px solid var(--hms-color-border, #e0e0e0);
+}
+
+.ald-title {
+  margin: 0;
+  font-size: var(--hms-font-size-lg);
+  color: var(--hms-color-primary, #1565c0);
+}
+
+.ald-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--hms-space-4);
+}
+
+.ald-group-title {
+  margin: 0 0 var(--hms-space-2);
+  font-size: var(--hms-font-size-md);
+  color: var(--hms-color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.ald-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-1) 0;
+  font-size: var(--hms-font-size-sm);
+  border-bottom: 1px solid var(--hms-color-border, #f0f0f0);
+
+  span {
+    color: var(--hms-color-text-muted);
+  }
+
+  strong {
+    text-align: right;
+  }
+}
+
+.ald-diff {
+  border-top: 2px solid var(--hms-color-border, #e0e0e0);
+  padding-top: var(--hms-space-3);
+}
+
+.ald-diff-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--hms-space-3);
+}
+
+.ald-diff-box {
+  border-radius: var(--hms-radius-md, 4px);
+  padding: var(--hms-space-3);
+
+  p {
+    margin: var(--hms-space-2) 0 0;
+    font-size: var(--hms-font-size-sm);
+  }
+}
+
+.ald-diff-label {
+  font-size: var(--hms-font-size-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.ald-diff-old {
+  background: #fdecea;
+  border: 1px solid #f5c2c0;
+
+  .ald-diff-label {
+    color: #c62828;
+  }
+}
+
+.ald-diff-new {
+  background: #e8f5e9;
+  border: 1px solid #bfe3c1;
+
+  .ald-diff-label {
+    color: #2e7d32;
+  }
+}
+
+.ald-remarks {
+  border-top: 2px solid var(--hms-color-border, #e0e0e0);
+  padding-top: var(--hms-space-3);
+
+  p {
+    margin: 0;
+    font-size: var(--hms-font-size-sm);
+  }
+}
+
+.ald-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--hms-space-3);
+  margin-top: var(--hms-space-4);
+}
+
+@media print {
+  .ald-actions {
+    display: none !important;
+  }
+}

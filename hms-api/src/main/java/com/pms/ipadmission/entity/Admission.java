@@ -95,6 +95,19 @@ public class Admission extends Auditable {
     @Column(name = "discharge_number")
     private String dischargeNumber;
 
+    /** Username of whoever registered/admitted this patient (register()/admit()) - for the Cancelled Admissions audit trail. */
+    @Column(name = "created_by")
+    private String createdBy;
+
+    @Column(name = "cancelled_at")
+    private LocalDateTime cancelledAt;
+
+    @Column(name = "cancelled_by")
+    private String cancelledBy;
+
+    @Column(name = "cancellation_reason", length = 500)
+    private String cancellationReason;
+
     // --- Registration/intake fields captured at IP Admission Advice (Step 1) ---
 
     @Column(name = "attender_name")

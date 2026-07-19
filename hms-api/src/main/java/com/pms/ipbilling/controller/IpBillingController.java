@@ -1,6 +1,8 @@
 package com.pms.ipbilling.controller;
 
 import com.pms.ipbilling.dto.AdmissionReportRowDto;
+import com.pms.ipbilling.dto.CancelledAdmissionDetailDto;
+import com.pms.ipbilling.dto.CancelledAdmissionRowDto;
 import com.pms.ipbilling.dto.DischargeListRowDto;
 import com.pms.ipbilling.dto.IpBillingLedgerDto;
 import com.pms.ipbilling.dto.IpBillingLineItemDto;
@@ -9,6 +11,7 @@ import com.pms.ipbilling.dto.IpPaymentDto;
 import com.pms.ipbilling.service.IpBillingService;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -79,5 +82,17 @@ public class IpBillingController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
             @RequestParam(required = false) String billingType) {
         return service.getDischargeList(fromDate, toDate, billingType);
+    }
+
+    @GetMapping("/reports/cancelled-admissions")
+    public List<CancelledAdmissionRowDto> cancelledAdmissions(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDateTime,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDateTime) {
+        return service.getCancelledAdmissions(fromDateTime, toDateTime);
+    }
+
+    @GetMapping("/reports/cancelled-admissions/{admissionId}")
+    public CancelledAdmissionDetailDto cancelledAdmissionDetail(@PathVariable Long admissionId) {
+        return service.getCancelledAdmissionDetail(admissionId);
     }
 }

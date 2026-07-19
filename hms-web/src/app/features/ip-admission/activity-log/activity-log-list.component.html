@@ -1,0 +1,148 @@
+<div class="hms-page">
+  <section class="hms-card-surface al-section">
+    <div class="al-header">
+      <h1 class="al-title">IP/OP Billing Activity Log</h1>
+      <div class="al-header-filters">
+        <label class="al-header-label">
+          From
+          <input type="date" class="al-inline-input" [(ngModel)]="fromDate" />
+        </label>
+        <label class="al-header-label">
+          To
+          <input type="date" class="al-inline-input" [(ngModel)]="toDate" />
+        </label>
+        <button mat-flat-button color="primary" type="button" (click)="search()">Submit</button>
+      </div>
+    </div>
+
+    <div class="al-toolbar">
+      <span class="al-record-count">Total Records: <strong>{{ filteredRows().length }}</strong></span>
+      <div class="al-toolbar-actions">
+        <button mat-stroked-button type="button" (click)="toggleAdvancedFilters()">
+          <mat-icon aria-hidden="true">tune</mat-icon>
+          {{ showAdvancedFilters() ? 'Hide Filters' : 'Advanced Filters' }}
+        </button>
+        <app-table-search placeholder="Search UHID, name, OP/IP number..." [value]="quickSearchTerm()" (valueChange)="onQuickSearch($event)" />
+        <button mat-icon-button type="button" aria-label="Print" [disabled]="filteredRows().length === 0" (click)="print()">
+          <mat-icon aria-hidden="true">print</mat-icon>
+        </button>
+        <button mat-icon-button type="button" aria-label="Export CSV" [disabled]="filteredRows().length === 0" (click)="exportCsv()">
+          <mat-icon aria-hidden="true">grid_on</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    @if (showAdvancedFilters()) {
+      <div class="al-advanced-filters">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Patient UHID</mat-label>
+          <input matInput [(ngModel)]="filterPatientUhid" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Patient Name</mat-label>
+          <input matInput [(ngModel)]="filterPatientName" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>OP Number</mat-label>
+          <input matInput [(ngModel)]="filterOpNumber" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>IP Number</mat-label>
+          <input matInput [(ngModel)]="filterIpNumber" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Module</mat-label>
+          <mat-select [(ngModel)]="filterModule">
+            <mat-option value="">All modules</mat-option>
+            @for (m of modules; track m) {
+              <mat-option [value]="m">{{ m }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Operation</mat-label>
+          <mat-select [(ngModel)]="filterOperation">
+            <mat-option value="">All operations</mat-option>
+            @for (o of operations; track o) {
+              <mat-option [value]="o">{{ o }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Created By</mat-label>
+          <input matInput [(ngModel)]="filterPerformedBy" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Status</mat-label>
+          <mat-select [(ngModel)]="filterStatus">
+            <mat-option value="">All statuses</mat-option>
+            @for (s of statuses; track s) {
+              <mat-option [value]="s">{{ s }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <button mat-flat-button color="primary" type="button" (click)="search()">Apply Filters</button>
+      </div>
+    }
+
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    @if (!loading() && searched() && filteredRows().length === 0) {
+      <app-empty-state icon="fact_check" title="No Activity Records Found" message="No activity log entries match these filters." />
+    } @else if (filteredRows().length > 0) {
+      <div #reportContent>
+        <div class="al-table-wrap">
+          <table class="al-table">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Patient UHID</th>
+                <th>Patient Name</th>
+                <th>OP Number</th>
+                <th>IP Number</th>
+                <th>Module</th>
+                <th>Operation</th>
+                <th>Content</th>
+                <th>Previous Content</th>
+                <th>Created By</th>
+                <th>Action Time</th>
+                <th>Status</th>
+                <th>View Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of pagination.page(); track row.id; let i = $index) {
+                <tr>
+                  <td>{{ pagination.pageIndex() * pagination.pageSize() + i + 1 }}</td>
+                  <td>{{ row.patientUhid ?? '—' }}</td>
+                  <td>{{ row.patientName ?? '—' }}</td>
+                  <td>{{ row.opNumber ?? '—' }}</td>
+                  <td>{{ row.ipNumber ?? '—' }}</td>
+                  <td>{{ row.module }}</td>
+                  <td>{{ row.operation }}</td>
+                  <td class="al-content-cell">{{ row.content ?? '—' }}</td>
+                  <td class="al-content-cell">{{ row.previousContent ?? '—' }}</td>
+                  <td>{{ row.performedBy }}</td>
+                  <td>{{ row.performedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                  <td><app-status-badge [label]="row.status" [tone]="statusTone[row.status] ?? 'neutral'" /></td>
+                  <td>
+                    <button mat-flat-button color="primary" type="button" (click)="viewDetails(row)">View</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <mat-paginator
+        [length]="pagination.length()"
+        [pageIndex]="pagination.pageIndex()"
+        [pageSize]="pagination.pageSize()"
+        [pageSizeOptions]="[10, 20, 50]"
+        (page)="pagination.onPage($event)"
+      />
+    }
+  </section>
+</div>

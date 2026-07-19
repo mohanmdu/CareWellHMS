@@ -98,7 +98,9 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: 'Consultant Wise Report', route: '/ip/reports/consultant-wise', icon: 'summarize' },
       { label: 'Admission Report', route: '/ip/reports/admission', icon: 'receipt_long' },
       { label: 'Advance Report', route: '/ip/reports/advance', icon: 'payments' },
-      { label: 'Advance Cancel', route: '/ip/reports/advance-cancel', icon: 'cancel' }
+      { label: 'Advance Cancel', route: '/ip/reports/advance-cancel', icon: 'cancel' },
+      { label: 'Cancelled Admissions', route: '/ip/reports/cancelled-admissions', icon: 'event_busy' },
+      { label: 'IP/OP Tracking Report', route: '/ip/reports/activity-log', icon: 'manage_search' }
     ]
   },
   {

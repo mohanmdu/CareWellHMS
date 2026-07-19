@@ -1,5 +1,7 @@
 package com.pms.cashier.service;
 
+import com.pms.activitylog.service.ActivityLogEntry;
+import com.pms.activitylog.service.ActivityLogService;
 import com.pms.cashier.dto.AdvanceReportRowDto;
 import com.pms.cashier.dto.CancellationRequestRowDto;
 import com.pms.cashier.dto.IpPaymentRequestDto;
@@ -37,16 +39,19 @@ public class IpPaymentRequestService {
     private final AdmissionRepository admissionRepository;
     private final AdmissionService admissionService;
     private final IpPaymentRepository paymentRepository;
+    private final ActivityLogService activityLogService;
 
     public IpPaymentRequestService(
             IpPaymentRequestRepository repository,
             AdmissionRepository admissionRepository,
             AdmissionService admissionService,
-            IpPaymentRepository paymentRepository) {
+            IpPaymentRepository paymentRepository,
+            ActivityLogService activityLogService) {
         this.repository = repository;
         this.admissionRepository = admissionRepository;
         this.admissionService = admissionService;
         this.paymentRepository = paymentRepository;
+        this.activityLogService = activityLogService;
     }
 
     public List<IpPaymentRequestDto> listPending() {
@@ -77,7 +82,15 @@ public class IpPaymentRequestService {
         request.setRequestedAt(Instant.now());
         request.setRequestedBy(currentUsername());
 
-        return toDto(repository.save(request));
+        IpPaymentRequest saved = repository.save(request);
+        Patient patient = admission.getPatient();
+        activityLogService.log(new ActivityLogEntry("Advance Payment", "Create")
+                .content(requestTypeLabel(requestType) + " request for " + amount + (description != null && !description.isBlank() ? " (" + description + ")" : ""))
+                .status("Pending")
+                .patient(patient.getRegistrationNumber(), patientDisplayName(patient))
+                .ipNumber(admission.getAdmissionNumber())
+                .screenName("Patient IP Details"));
+        return toDto(saved);
     }
 
     @Transactional
@@ -96,7 +109,16 @@ public class IpPaymentRequestService {
         request.setApprovedBy(currentUsername());
         request.setIpPayment(payment);
 
-        return toDto(repository.save(request));
+        IpPaymentRequest saved = repository.save(request);
+        Admission admission = request.getAdmission();
+        Patient patient = admission.getPatient();
+        activityLogService.log(new ActivityLogEntry("Advance Payment", "Payment Received")
+                .content(request.getAmount() + " received via " + paymentMode + " (Receipt " + payment.getReceiptNumber() + ")")
+                .status("Approved")
+                .patient(patient.getRegistrationNumber(), patientDisplayName(patient))
+                .ipNumber(admission.getAdmissionNumber())
+                .screenName("Cashier Approval"));
+        return toDto(saved);
     }
 
     /** Advance Report: every approved cashier request in a date range, one row per request. */
@@ -155,7 +177,20 @@ public class IpPaymentRequestService {
         request.setCancelledAt(Instant.now());
         request.setCancelledBy(currentUsername());
 
-        return toDto(repository.save(request));
+        IpPaymentRequest saved = repository.save(request);
+        Admission admission = request.getAdmission();
+        Patient patient = admission.getPatient();
+        activityLogService.log(new ActivityLogEntry("Refund", "Refund Processed")
+                .content("Refunded " + request.getAmount() + ". Reason: " + reason)
+                .status("Cancelled")
+                .patient(patient.getRegistrationNumber(), patientDisplayName(patient))
+                .ipNumber(admission.getAdmissionNumber())
+                .screenName("Advance Cancel"));
+        return toDto(saved);
+    }
+
+    private String patientDisplayName(Patient patient) {
+        return (patient.getFirstName() + " " + (patient.getLastName() != null ? patient.getLastName() : "")).trim();
     }
 
     private CancellationRequestRowDto toCancellationRow(IpPaymentRequest request) {

@@ -10,5 +10,6 @@ public enum AdmissionStatus {
     REGISTERED,
     ADMITTED,
     DISCHARGE_INITIATED,
-    DISCHARGED
+    DISCHARGED,
+    CANCELLED
 }

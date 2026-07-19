@@ -1,0 +1,137 @@
+.al-section {
+  padding: var(--hms-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+}
+
+.al-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hms-space-3);
+  background: var(--hms-color-primary, #1565c0);
+  color: #fff;
+  padding: var(--hms-space-3) var(--hms-space-4);
+  border-radius: var(--hms-radius-md, 4px);
+}
+
+.al-title {
+  margin: 0;
+  font-size: var(--hms-font-size-lg);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.al-header-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--hms-space-3);
+}
+
+.al-header-label {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+  font-weight: 600;
+  font-size: var(--hms-font-size-sm);
+}
+
+.al-inline-input {
+  padding: var(--hms-space-1) var(--hms-space-2);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--hms-radius-sm, 2px);
+  font: inherit;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  color-scheme: dark;
+}
+
+.al-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hms-space-3);
+}
+
+.al-record-count {
+  font-size: var(--hms-font-size-md);
+}
+
+.al-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--hms-space-2);
+}
+
+.al-advanced-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  gap: var(--hms-space-3);
+  background: var(--hms-color-surface-alt, #f7f7f7);
+  border-radius: var(--hms-radius-md, 4px);
+  padding: var(--hms-space-3);
+
+  mat-form-field {
+    min-width: 160px;
+    flex: 1;
+  }
+}
+
+.al-table-wrap {
+  overflow: auto;
+  max-height: 65vh;
+  border: 1px solid var(--hms-color-border, #e0e0e0);
+  border-radius: var(--hms-radius-md, 4px);
+}
+
+.al-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--hms-font-size-sm);
+
+  th,
+  td {
+    padding: var(--hms-space-2) var(--hms-space-3);
+    text-align: left;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--hms-color-border, #e0e0e0);
+  }
+
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #37474f;
+    color: #fff;
+    font-weight: 600;
+  }
+
+  tbody tr:nth-child(even) {
+    background: var(--hms-color-surface-alt, #f7f7f7);
+  }
+}
+
+.al-content-cell {
+  max-width: 220px;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+@media (max-width: 900px) {
+  .al-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .al-header-filters,
+  .al-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

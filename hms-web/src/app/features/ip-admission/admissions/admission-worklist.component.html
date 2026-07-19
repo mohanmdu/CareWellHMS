@@ -103,6 +103,9 @@
               @if (admission.status === 'ADMITTED' || admission.status === 'DISCHARGE_INITIATED') {
                 <button mat-stroked-button color="warn" type="button" (click)="goToBilling(admission)">Billing</button>
               }
+              @if (admission.status === 'REGISTERED' || admission.status === 'ADMITTED') {
+                <button mat-stroked-button color="warn" type="button" (click)="cancelAdmission(admission)">Cancel</button>
+              }
             </div>
           </td>
         </ng-container>

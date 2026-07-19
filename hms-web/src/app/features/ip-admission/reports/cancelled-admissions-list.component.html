@@ -1,0 +1,86 @@
+<div class="hms-page">
+  <section class="hms-card-surface ca-section">
+    <div class="ca-header">
+      <h1 class="ca-title">Cancelled Admissions</h1>
+      <div class="ca-filters">
+        <label class="ca-filter-label">
+          From
+          <input type="datetime-local" class="ca-inline-input" [(ngModel)]="fromDateTime" />
+        </label>
+        <label class="ca-filter-label">
+          To
+          <input type="datetime-local" class="ca-inline-input" [(ngModel)]="toDateTime" />
+        </label>
+        <button mat-flat-button color="primary" type="button" (click)="search()">Submit</button>
+      </div>
+    </div>
+
+    <div class="ca-toolbar">
+      <app-table-search placeholder="Search UHID, name, IPID, or reason..." [value]="searchTerm()" (valueChange)="onSearch($event)" />
+    </div>
+
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    @if (!loading() && searched() && filteredRows().length === 0) {
+      <app-empty-state icon="cancel" title="No cancelled admissions" message="No admissions match these filters." />
+    } @else if (filteredRows().length > 0) {
+      <div class="ca-table-wrap">
+        <table class="ca-table">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Patient UHID</th>
+              <th>Patient Name</th>
+              <th>Patient IPID</th>
+              <th>Case Description</th>
+              <th>Payment Type</th>
+              <th>Primary Consultant</th>
+              <th>Referral Doctor</th>
+              <th>Ward Type</th>
+              <th>Created Date &amp; Time</th>
+              <th>Created By</th>
+              <th>Cancelled Date &amp; Time</th>
+              <th>Cancelled By</th>
+              <th>Cancellation Reason</th>
+              <th>Refund Status</th>
+              <th>View</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of pagination.page(); track row.admissionId; let i = $index) {
+              <tr>
+                <td>{{ pagination.pageIndex() * pagination.pageSize() + i + 1 }}</td>
+                <td>{{ row.patientUhid ?? '—' }}</td>
+                <td>{{ row.patientName }}</td>
+                <td>{{ row.admissionNumber }}</td>
+                <td>{{ row.caseDescription ?? '—' }}</td>
+                <td>{{ row.paymentType ?? '—' }}</td>
+                <td>{{ row.primaryConsultant ?? '—' }}</td>
+                <td>{{ row.referralDoctor ?? '—' }}</td>
+                <td>{{ row.wardType ?? '—' }}</td>
+                <td>{{ row.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td>{{ row.createdBy ?? '—' }}</td>
+                <td>{{ row.cancelledAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td>{{ row.cancelledBy ?? '—' }}</td>
+                <td>{{ row.cancellationReason ?? '—' }}</td>
+                <td><app-status-badge [label]="row.refundStatus" [tone]="refundStatusTone[row.refundStatus] ?? 'neutral'" /></td>
+                <td>
+                  <button mat-flat-button color="primary" type="button" (click)="viewDetails(row)">View Details</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <mat-paginator
+        [length]="pagination.length()"
+        [pageIndex]="pagination.pageIndex()"
+        [pageSize]="pagination.pageSize()"
+        [pageSizeOptions]="[10, 20, 50]"
+        (page)="pagination.onPage($event)"
+      />
+    }
+  </section>
+</div>
