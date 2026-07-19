@@ -87,6 +87,14 @@ public class Admission extends Auditable {
     @Column(name = "discharge_summary", length = 2000)
     private String dischargeSummary;
 
+    /** Regular Discharge / Death / Against Medical Advice / Absconding - set at Initiate Discharge. */
+    @Column(name = "discharge_type")
+    private String dischargeType;
+
+    /** Assigned once Finalize Discharge transitions the admission to DISCHARGED. */
+    @Column(name = "discharge_number")
+    private String dischargeNumber;
+
     // --- Registration/intake fields captured at IP Admission Advice (Step 1) ---
 
     @Column(name = "attender_name")

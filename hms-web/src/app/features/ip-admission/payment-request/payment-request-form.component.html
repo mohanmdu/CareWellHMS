@@ -1,0 +1,74 @@
+<div class="hms-page">
+  <app-page-header title="Patient IP Details" subtitle="Send an advance, final settlement, or due amount request to the cashier." />
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading() && admission(); as admission) {
+    <section class="hms-card-surface pr-details-section">
+      <div class="pr-details-table-wrap">
+        <table class="pr-details-table">
+          <thead>
+            <tr>
+              <th>IP Number</th>
+              <th>Name</th>
+              <th>Gender</th>
+              <th>Age</th>
+              <th>Height</th>
+              <th>Weight</th>
+              <th>Address</th>
+              <th>Primary Consultant</th>
+              <th>Patient ID</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{{ admission.admissionNumber }}</td>
+              <td>{{ admission.patientName }}</td>
+              <td>{{ admission.patientGender ?? '—' }}</td>
+              <td>{{ admission.patientAge ?? '—' }}</td>
+              <td>{{ admission.heightCm ?? '—' }}</td>
+              <td>{{ admission.weightKg ?? '—' }}</td>
+              <td>{{ admission.patientAddress ?? '—' }}</td>
+              <td>{{ admission.primaryConsultant ?? '—' }}</td>
+              <td>{{ admission.patientUhid ?? '—' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="hms-card-surface pr-form-section">
+      <div class="hms-form-grid">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Enter the Advance amount</mat-label>
+          <input matInput type="number" min="0" [(ngModel)]="form.amount" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Enter the Description</mat-label>
+          <input matInput [(ngModel)]="form.description" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Request type</mat-label>
+          <mat-select [(ngModel)]="form.requestType">
+            @for (option of requestTypeOptions; track option.value) {
+              <mat-option [value]="option.value">{{ option.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="hms-inline-actions">
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          [disabled]="!form.amount || form.amount <= 0 || submitting()"
+          (click)="submit()"
+        >
+          Submit
+        </button>
+      </div>
+    </section>
+  }
+</div>

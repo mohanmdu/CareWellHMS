@@ -390,6 +390,45 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'ip/admissions/:id/payment-request',
+        loadComponent: () =>
+          import('./features/ip-admission/payment-request/payment-request-form.component').then(
+            (m) => m.PaymentRequestFormComponent
+          )
+      },
+      {
+        path: 'ip/admissions/:id/payment-request/success',
+        loadComponent: () =>
+          import('./features/ip-admission/payment-request/payment-request-success.component').then(
+            (m) => m.PaymentRequestSuccessComponent
+          )
+      },
+      {
+        path: 'ip/discharge-list',
+        loadComponent: () =>
+          import('./features/ip-admission/discharge/discharge-list.component').then((m) => m.DischargeListComponent)
+      },
+      {
+        path: 'cashier/dashboard',
+        loadComponent: () =>
+          import('./features/cashier/cashier-dashboard.component').then((m) => m.CashierDashboardComponent)
+      },
+      {
+        path: 'cashier/ip-approvals',
+        loadComponent: () =>
+          import('./features/cashier/ip-approval-queue.component').then((m) => m.IpApprovalQueueComponent)
+      },
+      {
+        path: 'cashier/ip-approvals/:id',
+        loadComponent: () =>
+          import('./features/cashier/ip-approval-detail.component').then((m) => m.IpApprovalDetailComponent)
+      },
+      {
+        path: 'cashier/ip-approvals/:id/receipt',
+        loadComponent: () =>
+          import('./features/cashier/advance-receipt.component').then((m) => m.AdvanceReceiptComponent)
+      },
+      {
         path: 'insurance/claims',
         loadComponent: () =>
           import('./features/insurance/claims/insurance-claim-worklist.component').then(

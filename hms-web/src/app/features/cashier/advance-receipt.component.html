@@ -1,0 +1,100 @@
+<div class="hms-page ar-page">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading() && request(); as request) {
+    <div class="ar-layout">
+      <div class="receipt ar-receipt" #receiptContent>
+        <div class="receipt-header">
+          @if (clinicSettings()?.logoUrl; as logo) {
+            <img [src]="logo" alt="" class="receipt-logo" />
+          }
+          <div class="receipt-clinic-info">
+            <strong class="receipt-clinic-name">{{ clinicSettings()?.name ?? 'Hospital' }}</strong>
+            @if (clinicSettings()?.address) {
+              <span>{{ clinicSettings()?.address }}</span>
+            }
+          </div>
+        </div>
+
+        <h2 class="ar-title">Advance Receipt</h2>
+
+        <div class="receipt-meta">
+          <span>Name: {{ request.patientName }}</span>
+          <span>UHID: {{ request.patientUhid ?? '—' }}</span>
+        </div>
+        <div class="receipt-meta">
+          <span>Age: {{ request.patientAge ?? '—' }}</span>
+          <span>Gender: {{ request.patientGender ?? '—' }}</span>
+        </div>
+        <div class="receipt-meta">
+          <span>Invoice No: {{ request.receiptNumber ?? '—' }}</span>
+          <span>Invoice Date: {{ request.approvedAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+
+        <table class="receipt-items-table">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Description</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>{{ request.description || 'Amount' }}</td>
+              <td>{{ request.amount | number: '1.0-2' }}</td>
+            </tr>
+            <tr class="receipt-total-row">
+              <td></td>
+              <td>Total</td>
+              <td>{{ request.amount | number: '1.0-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="receipt-words">Received the sum of Rupees <strong>{{ amountInWords }}</strong> only.</p>
+
+        <div class="ar-payment-modes">
+          @for (bucket of paymentModeBuckets; track bucket.label) {
+            <span class="ar-payment-mode" [class.ar-payment-mode-active]="isModeTicked(bucket)">
+              @if (isModeTicked(bucket)) {
+                <mat-icon aria-hidden="true">check_box</mat-icon>
+              } @else {
+                <mat-icon aria-hidden="true">check_box_outline_blank</mat-icon>
+              }
+              {{ bucket.label }}
+            </span>
+          }
+        </div>
+
+        <div class="ar-summary">
+          <div class="ar-summary-row">
+            <span>Total Amount Due</span>
+            <strong>{{ totalAmountDue() | number: '1.0-2' }}</strong>
+          </div>
+          <div class="ar-summary-row">
+            <span>Amount Received</span>
+            <strong>{{ request.amount | number: '1.0-2' }}</strong>
+          </div>
+          <div class="ar-summary-row">
+            <span>Balance Due</span>
+            <strong>{{ balanceDue() | number: '1.0-2' }}</strong>
+          </div>
+        </div>
+
+        <p class="receipt-signature">Cashier</p>
+      </div>
+
+      <div class="ar-actions">
+        <button mat-stroked-button type="button" (click)="print()">
+          <mat-icon aria-hidden="true">print</mat-icon>
+          Print
+        </button>
+        <button mat-flat-button color="primary" type="button" (click)="goToBilling()">Go to Billing</button>
+      </div>
+    </div>
+  }
+</div>

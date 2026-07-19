@@ -23,6 +23,7 @@ import { AdmissionService } from './admission.service';
 const STATUS_TONE: Record<string, StatusBadgeTone> = {
   REGISTERED: 'warning',
   ADMITTED: 'info',
+  DISCHARGE_INITIATED: 'warning',
   DISCHARGED: 'success'
 };
 
@@ -167,33 +168,10 @@ export class AdmissionWorklistComponent {
       });
   }
 
-  discharge(admission: Admission): void {
+  goToBilling(admission: Admission): void {
     if (admission.id === null) {
       return;
     }
-    this.promptDialog
-      .prompt({
-        title: `Discharge - ${admission.admissionNumber}`,
-        fields: [
-          { key: 'totalBilled', label: 'Total billed amount for this stay', type: 'number', required: true, min: 0 },
-          { key: 'dischargeSummary', label: 'Discharge summary', type: 'textarea' }
-        ],
-        confirmLabel: 'Discharge'
-      })
-      .subscribe((values) => {
-        if (!values || admission.id === null) {
-          return;
-        }
-        this.admissionService
-          .discharge(admission.id, values['totalBilled'] as number, values['dischargeSummary'] as string)
-          .subscribe({
-            next: () => {
-              this.notification.success('Patient discharged.');
-              this.refresh();
-              this.refreshAvailableRooms();
-            },
-            error: (err) => this.notification.error(err.error?.message ?? 'Failed to discharge patient.')
-          });
-      });
+    this.router.navigate(['/ip/admissions', admission.id, 'billing']);
   }
 }

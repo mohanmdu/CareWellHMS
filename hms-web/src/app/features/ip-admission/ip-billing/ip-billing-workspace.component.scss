@@ -123,6 +123,37 @@
   color: var(--hms-color-text-muted);
 }
 
+.ip-discharge-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hms-space-3);
+  align-items: start;
+
+  mat-form-field {
+    flex: 1;
+    min-width: 200px;
+  }
+}
+
+.ip-discharge-pending,
+.ip-discharge-done {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-4);
+  flex-wrap: wrap;
+}
+
+.ip-discharge-number {
+  font-weight: 600;
+  color: var(--hms-color-primary, #1565c0);
+}
+
+.ip-discharge-done-label {
+  font-weight: 700;
+  color: var(--hms-color-danger, #c62828);
+  text-transform: uppercase;
+}
+
 .ip-billing-sidebar {
   padding: var(--hms-space-4);
   text-align: center;

@@ -1,0 +1,51 @@
+package com.pms.cashier.controller;
+
+import com.pms.cashier.dto.IpPaymentRequestDto;
+import com.pms.cashier.entity.PaymentRequestType;
+import com.pms.cashier.service.IpPaymentRequestService;
+import java.util.List;
+import java.util.Map;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+/** Cashier Approval Workflow REST endpoints (PDF: Advance Request -> Cashier Dashboard -> IP Approval Queue -> Receipt). */
+@RestController
+@RequestMapping("/api/cashier/payment-requests")
+public class IpPaymentRequestController {
+
+    private final IpPaymentRequestService service;
+
+    public IpPaymentRequestController(IpPaymentRequestService service) {
+        this.service = service;
+    }
+
+    @GetMapping("/pending")
+    public List<IpPaymentRequestDto> listPending() {
+        return service.listPending();
+    }
+
+    @GetMapping("/pending/count")
+    public Map<String, Long> countPending() {
+        return Map.of("ip", service.countPending());
+    }
+
+    @GetMapping("/{id}")
+    public IpPaymentRequestDto get(@PathVariable Long id) {
+        return service.findById(id);
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public IpPaymentRequestDto create(@RequestBody Map<String, Object> body) {
+        Long admissionId = ((Number) body.get("admissionId")).longValue();
+        PaymentRequestType requestType = PaymentRequestType.valueOf((String) body.get("requestType"));
+        double amount = ((Number) body.get("amount")).doubleValue();
+        String description = (String) body.get("description");
+        return service.create(admissionId, requestType, amount, description);
+    }
+
+    @PatchMapping("/{id}/approve")
+    public IpPaymentRequestDto approve(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        return service.approve(id, body.get("paymentMode"));
+    }
+}

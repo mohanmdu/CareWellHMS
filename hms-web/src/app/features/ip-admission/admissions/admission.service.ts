@@ -43,7 +43,11 @@ export class AdmissionService {
     return this.http.patch<Admission>(`${this.baseUrl}/${id}/advance-payment`, { amount });
   }
 
-  discharge(id: number, totalBilled: number, dischargeSummary: string): Observable<Admission> {
-    return this.http.patch<Admission>(`${this.baseUrl}/${id}/discharge`, { totalBilled, dischargeSummary });
+  initiateDischarge(id: number, dischargeDate: string, dischargeType: string): Observable<Admission> {
+    return this.http.patch<Admission>(`${this.baseUrl}/${id}/initiate-discharge`, { dischargeDate, dischargeType });
+  }
+
+  finalizeDischarge(id: number, totalBilled: number, dischargeSummary: string | null): Observable<Admission> {
+    return this.http.patch<Admission>(`${this.baseUrl}/${id}/finalize-discharge`, { totalBilled, dischargeSummary });
   }
 }

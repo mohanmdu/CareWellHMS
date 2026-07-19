@@ -1,0 +1,46 @@
+<div class="hms-page">
+  <app-page-header title="In-Patient Request for Cashier Approval" subtitle="Pick a pending request to select a payment mode and collect it." />
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading() && requests().length === 0) {
+    <app-empty-state icon="fact_check" title="No pending requests" message="New IP payment requests will appear here." />
+  } @else if (!loading()) {
+    <section class="hms-card-surface iaq-table-section">
+      <div class="iaq-table-wrap">
+        <table class="iaq-table">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Patient ID</th>
+              <th>Patient Name</th>
+              <th>Patient IPID</th>
+              <th>Created By</th>
+              <th>Date &amp; Time</th>
+              <th>Amount</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (request of requests(); track request.id; let i = $index) {
+              <tr>
+                <td>{{ i + 1 }}</td>
+                <td>{{ request.patientUhid ?? '—' }}</td>
+                <td>{{ request.patientName }}</td>
+                <td>{{ request.admissionNumber }}</td>
+                <td>{{ request.requestedBy ?? '—' }}</td>
+                <td>{{ request.requestedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td>{{ request.amount | number: '1.0-2' }}</td>
+                <td>
+                  <button mat-flat-button color="primary" type="button" (click)="view(request)">View</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</div>

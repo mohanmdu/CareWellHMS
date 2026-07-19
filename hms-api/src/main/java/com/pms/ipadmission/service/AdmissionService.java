@@ -52,6 +52,7 @@ public class AdmissionService {
     private final IpPaymentRepository paymentRepository;
     private final AtomicInteger sequence = new AtomicInteger(0);
     private final AtomicInteger receiptSequence = new AtomicInteger(0);
+    private final AtomicInteger dischargeSequence = new AtomicInteger(0);
 
     public AdmissionService(
             AdmissionRepository repository,
@@ -68,6 +69,7 @@ public class AdmissionService {
         this.paymentRepository = paymentRepository;
         this.sequence.set((int) repository.count());
         this.receiptSequence.set((int) paymentRepository.count());
+        this.dischargeSequence.set((int) repository.findAll().stream().filter(a -> a.getDischargeNumber() != null).count());
     }
 
     public List<AdmissionDto> findAll() {
@@ -191,6 +193,32 @@ public class AdmissionService {
         return toDto(saved);
     }
 
+    /**
+     * Collects a cashier-approved payment (Advance / Final Settlement / Due
+     * Amount request types all share this mechanism - only the ledger label
+     * and payment mode differ). Unlike addAdvancePayment, this also accepts
+     * DISCHARGE_INITIATED admissions since a Final Settlement is typically
+     * collected between Initiate Discharge and Finalize Discharge.
+     */
+    @Transactional
+    public IpPayment recordCashierPayment(Long id, double amount, String description, String paymentMode) {
+        Admission admission = getOrThrow(id);
+        requirePayable(admission);
+        admission.setAdvanceAmount(admission.getAdvanceAmount() + amount);
+        Admission saved = repository.save(admission);
+
+        IpPayment payment = new IpPayment();
+        payment.setAdmission(saved);
+        payment.setPaymentDate(Instant.now());
+        payment.setReceiptNumber(nextReceiptNumber());
+        payment.setDescription(description);
+        payment.setPaymentType(paymentMode);
+        payment.setInvoicedAmount(amount);
+        payment.setNetAmount(amount);
+        payment.setCreatedBy(currentUsername());
+        return paymentRepository.save(payment);
+    }
+
     private String nextReceiptNumber() {
         return "RCPT" + String.format("%06d", receiptSequence.incrementAndGet());
     }
@@ -200,23 +228,51 @@ public class AdmissionService {
         return authentication != null ? authentication.getName() : "system";
     }
 
+    /**
+     * Stage 1 of discharge (PDF p.13): sets the discharge date/type and assigns
+     * the discharge number - room stays occupied, nothing settled yet. The
+     * discharge number is issued here (not at Finalize) because the legacy
+     * screen already displays it while "Finalize Discharge" is still pending.
+     */
     @Transactional
-    public AdmissionDto discharge(Long id, double totalBilled, String dischargeSummary) {
+    public AdmissionDto initiateDischarge(Long id, LocalDateTime dischargeDate, String dischargeType) {
         Admission admission = getOrThrow(id);
         requireAdmitted(admission);
 
+        admission.setStatus(AdmissionStatus.DISCHARGE_INITIATED);
+        admission.setDischargeDate(dischargeDate != null ? dischargeDate : LocalDateTime.now());
+        admission.setDischargeType(dischargeType);
+        admission.setDischargeNumber(nextDischargeNumber());
+
+        return toDto(repository.save(admission));
+    }
+
+    /** Stage 2 of discharge: settles the balance, frees the room, and transitions straight to DISCHARGED. */
+    @Transactional
+    public AdmissionDto finalizeDischarge(Long id, double totalBilled, String dischargeSummary) {
+        Admission admission = getOrThrow(id);
+        if (admission.getStatus() != AdmissionStatus.DISCHARGE_INITIATED) {
+            throw new IllegalArgumentException(
+                    "Admission " + admission.getAdmissionNumber() + " has not initiated discharge yet");
+        }
+
         admission.setStatus(AdmissionStatus.DISCHARGED);
-        admission.setDischargeDate(LocalDateTime.now());
         admission.setDischargeSummary(dischargeSummary);
         admission.setTotalBilled(totalBilled);
         // Positive = refund owed to patient; negative = balance due from patient.
         admission.setSettlementAmount(admission.getAdvanceAmount() - totalBilled);
 
         Room room = admission.getRoom();
-        room.setStatus(RoomStatus.AVAILABLE);
-        roomRepository.save(room);
+        if (room != null) {
+            room.setStatus(RoomStatus.AVAILABLE);
+            roomRepository.save(room);
+        }
 
         return toDto(repository.save(admission));
+    }
+
+    private String nextDischargeNumber() {
+        return "DIS" + String.format("%06d", dischargeSequence.incrementAndGet());
     }
 
     /** Ward Change (Inpatient List "Ward Change" action): moves an ADMITTED patient to a different available room. */
@@ -285,6 +341,15 @@ public class AdmissionService {
         }
     }
 
+    /** Allows payments both while ADMITTED and while a discharge is initiated (Final Settlement window). */
+    private void requirePayable(Admission admission) {
+        AdmissionStatus status = admission.getStatus();
+        if (status != AdmissionStatus.ADMITTED && status != AdmissionStatus.DISCHARGE_INITIATED) {
+            throw new IllegalArgumentException(
+                    "Admission " + admission.getAdmissionNumber() + " cannot accept payments in its current state");
+        }
+    }
+
     private String nextAdmissionNumber() {
         return "IP" + String.format("%06d", sequence.incrementAndGet());
     }
@@ -318,6 +383,8 @@ public class AdmissionService {
                 admission.getSettlementAmount(),
                 admission.getDischargeDate(),
                 admission.getDischargeSummary(),
+                admission.getDischargeType(),
+                admission.getDischargeNumber(),
                 admission.getAttenderName(),
                 admission.getRelationType(),
                 admission.getFatherSpouseName(),

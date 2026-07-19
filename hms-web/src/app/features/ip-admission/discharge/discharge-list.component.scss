@@ -1,0 +1,14 @@
+.dl-table-section {
+  padding: var(--hms-space-5);
+  overflow-x: auto;
+}
+
+.dl-table {
+  width: 100%;
+}
+
+@media (max-width: 720px) {
+  .dl-table-section {
+    padding: var(--hms-space-3);
+  }
+}

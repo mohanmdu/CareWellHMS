@@ -3,6 +3,7 @@ package com.pms.ipadmission.controller;
 import com.pms.ipadmission.dto.AdmissionDto;
 import com.pms.ipadmission.service.AdmissionService;
 import jakarta.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
@@ -60,11 +61,19 @@ public class AdmissionController {
         return service.addAdvancePayment(id, body.getOrDefault("amount", 0.0));
     }
 
-    @PatchMapping("/{id}/discharge")
-    public AdmissionDto discharge(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+    @PatchMapping("/{id}/initiate-discharge")
+    public AdmissionDto initiateDischarge(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        Object rawDate = body.get("dischargeDate");
+        LocalDateTime dischargeDate = rawDate != null ? LocalDateTime.parse(rawDate.toString()) : null;
+        String dischargeType = (String) body.get("dischargeType");
+        return service.initiateDischarge(id, dischargeDate, dischargeType);
+    }
+
+    @PatchMapping("/{id}/finalize-discharge")
+    public AdmissionDto finalizeDischarge(@PathVariable Long id, @RequestBody Map<String, Object> body) {
         double totalBilled = ((Number) body.getOrDefault("totalBilled", 0)).doubleValue();
         String dischargeSummary = (String) body.get("dischargeSummary");
-        return service.discharge(id, totalBilled, dischargeSummary);
+        return service.finalizeDischarge(id, totalBilled, dischargeSummary);
     }
 
     @PatchMapping("/{id}/change-room")

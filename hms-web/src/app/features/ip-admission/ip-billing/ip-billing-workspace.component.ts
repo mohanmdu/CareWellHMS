@@ -8,7 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { forkJoin, Observable } from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ConfirmDialogService } from '../../../shared/services/confirm-dialog.service';
 import { NotificationService } from '../../../shared/services/notification.service';
 import { PromptDialogService } from '../../../shared/services/prompt-dialog.service';
@@ -18,7 +18,7 @@ import { IpBillingCategory } from '../../masters-admin/ip-billing-categories/ip-
 import { IpBillingCategoryService } from '../../masters-admin/ip-billing-categories/ip-billing-category.service';
 import { IpBillingComponent as IpBillingComponentMaster } from '../../masters-admin/ip-billing-components/ip-billing-component.model';
 import { IpBillingComponentService } from '../../masters-admin/ip-billing-components/ip-billing-component.service';
-import { Admission } from '../admissions/admission.model';
+import { Admission, DISCHARGE_TYPE_OPTIONS } from '../admissions/admission.model';
 import { AdmissionService } from '../admissions/admission.service';
 import { IpBillingLedger, IpBillingLineItem, IpPayment } from './ip-billing.model';
 import { IpBillingService } from './ip-billing.service';
@@ -64,6 +64,7 @@ const UNIT_OPTIONS = ['Each', 'Day', 'Hour', 'Session'];
 })
 export class IpBillingWorkspaceComponent {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly admissionService = inject(AdmissionService);
   private readonly billingService = inject(IpBillingService);
   private readonly categoryService = inject(IpBillingCategoryService);
@@ -74,7 +75,15 @@ export class IpBillingWorkspaceComponent {
   private readonly confirmDialog = inject(ConfirmDialogService);
 
   readonly unitOptions = UNIT_OPTIONS;
+  readonly dischargeTypeOptions = DISCHARGE_TYPE_OPTIONS;
   private readonly admissionId = Number(this.route.snapshot.paramMap.get('id'));
+
+  dischargeForm = {
+    dischargeDate: '',
+    dischargeType: DISCHARGE_TYPE_OPTIONS[0]
+  };
+  initiatingDischarge = signal(false);
+  finalizingDischarge = signal(false);
 
   admission = signal<Admission | null>(null);
   ledger = signal<IpBillingLedger | null>(null);
@@ -293,27 +302,48 @@ export class IpBillingWorkspaceComponent {
     if (!admission || admission.id === null) {
       return;
     }
-    this.promptDialog
-      .prompt({
-        title: `Amount Received - ${admission.admissionNumber}`,
-        fields: [{ key: 'amount', label: 'Amount', type: 'number', required: true, min: 0 }]
-      })
-      .subscribe((values) => {
-        if (!values || admission.id === null) {
-          return;
+    this.router.navigate(['/ip/admissions', admission.id, 'payment-request']);
+  }
+
+  initiateDischarge(): void {
+    const admission = this.admission();
+    if (!admission || admission.id === null || !this.dischargeForm.dischargeDate || this.initiatingDischarge()) {
+      return;
+    }
+    this.initiatingDischarge.set(true);
+    this.admissionService
+      .initiateDischarge(admission.id, this.dischargeForm.dischargeDate, this.dischargeForm.dischargeType)
+      .subscribe({
+        next: () => {
+          this.initiatingDischarge.set(false);
+          this.notification.success('Discharge initiated.');
+          this.refreshAll();
+        },
+        error: (err) => {
+          this.initiatingDischarge.set(false);
+          this.notification.error(err.error?.message ?? 'Failed to initiate discharge.');
         }
-        const amount = values['amount'] as number;
-        if (!amount || amount <= 0) {
-          return;
-        }
-        this.admissionService.addAdvancePayment(admission.id, amount).subscribe({
-          next: () => {
-            this.notification.success('Payment recorded.');
-            this.refreshAll();
-          },
-          error: (err) => this.notification.error(err.error?.message ?? 'Failed to record payment.')
-        });
       });
+  }
+
+  finalizeDischarge(): void {
+    const admission = this.admission();
+    const ledger = this.ledger();
+    if (!admission || admission.id === null || !ledger || this.finalizingDischarge()) {
+      return;
+    }
+    this.finalizingDischarge.set(true);
+    this.admissionService.finalizeDischarge(admission.id, ledger.netTotal, admission.dischargeSummary ?? null).subscribe({
+      next: () => {
+        this.finalizingDischarge.set(false);
+        this.notification.success('Patient discharged.');
+        this.refreshAll();
+      },
+      error: (err) => {
+        this.finalizingDischarge.set(false);
+        this.notification.error(err.error?.message ?? 'Failed to finalize discharge.');
+      }
+    });
   }
 
   printAdmissionSlip(): void {

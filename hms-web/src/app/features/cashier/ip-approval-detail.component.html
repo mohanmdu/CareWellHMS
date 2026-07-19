@@ -1,0 +1,46 @@
+<div class="hms-page">
+  <app-page-header title="Appointments for Cashier Approval" subtitle="Select the payment mode used to collect this request." />
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading() && request(); as request) {
+    <section class="hms-card-surface iad-section">
+      <div class="iad-table-wrap">
+        <table class="iad-table">
+          <thead>
+            <tr>
+              <th>Patient ID</th>
+              <th>Patient Name</th>
+              <th>Patient IPID</th>
+              <th>Description</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{{ request.patientUhid ?? '—' }}</td>
+              <td>{{ request.patientName }}</td>
+              <td>{{ request.admissionNumber }}</td>
+              <td>{{ request.description ?? '—' }}</td>
+              <td>{{ request.amount | number: '1.0-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="iad-form">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Select Payment Mode</mat-label>
+          <mat-select [(ngModel)]="paymentMode">
+            @for (mode of paymentModeOptions; track mode) {
+              <mat-option [value]="mode">{{ mode }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <button mat-flat-button color="primary" type="button" [disabled]="submitting()" (click)="submit()">Submit</button>
+      </div>
+    </section>
+  }
+</div>

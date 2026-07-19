@@ -99,7 +99,9 @@
                 <button mat-stroked-button color="primary" type="button" (click)="addAdvance(admission)">
                   Add Advance
                 </button>
-                <button mat-stroked-button color="warn" type="button" (click)="discharge(admission)">Discharge</button>
+              }
+              @if (admission.status === 'ADMITTED' || admission.status === 'DISCHARGE_INITIATED') {
+                <button mat-stroked-button color="warn" type="button" (click)="goToBilling(admission)">Billing</button>
               }
             </div>
           </td>

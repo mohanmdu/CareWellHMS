@@ -1,5 +1,7 @@
-export type AdmissionStatus = 'REGISTERED' | 'ADMITTED' | 'DISCHARGED';
+export type AdmissionStatus = 'REGISTERED' | 'ADMITTED' | 'DISCHARGE_INITIATED' | 'DISCHARGED';
 export type AdmissionPaymentType = 'CASH' | 'INSURANCE' | 'CORPORATE';
+
+export const DISCHARGE_TYPE_OPTIONS = ['Regular Discharge', 'Death', 'Against Medical Advice', 'Absconding'];
 
 export interface Admission {
   id: number | null;
@@ -22,6 +24,8 @@ export interface Admission {
   settlementAmount: number | null;
   dischargeDate: string | null;
   dischargeSummary: string | null;
+  dischargeType: string | null;
+  dischargeNumber: string | null;
   attenderName: string | null;
   relationType: string | null;
   fatherSpouseName: string | null;

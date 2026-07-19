@@ -1,0 +1,19 @@
+<div class="hms-page">
+  <app-page-header title="Approvals / Refund" subtitle="Real-time pending request counts across modules." />
+
+  <div class="cd-card-row">
+    @for (card of cards(); track card.label) {
+      <button
+        type="button"
+        class="cd-card"
+        [class]="card.tone"
+        [class.cd-card-interactive]="card.route !== null"
+        [disabled]="card.route === null"
+        (click)="open(card)"
+      >
+        <span class="cd-card-count">{{ card.count ?? 0 }}</span>
+        <span class="cd-card-label">{{ card.label }}</span>
+      </button>
+    }
+  </div>
+</div>

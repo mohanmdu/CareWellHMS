@@ -26,6 +26,8 @@ public record AdmissionDto(
         Double settlementAmount,
         LocalDateTime dischargeDate,
         String dischargeSummary,
+        String dischargeType,
+        String dischargeNumber,
         String attenderName,
         String relationType,
         String fatherSpouseName,

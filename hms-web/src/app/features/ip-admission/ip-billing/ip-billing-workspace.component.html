@@ -258,6 +258,48 @@
             </div>
           }
         </section>
+
+        <!-- Discharge -->
+        <section class="hms-card-surface ip-billing-section ip-discharge-section">
+          <h2 class="ip-billing-ledger-title">Discharge</h2>
+          @if (admission.status === 'ADMITTED') {
+            <div class="ip-discharge-form">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Discharge Date &amp; Time</mat-label>
+                <input matInput type="datetime-local" [(ngModel)]="dischargeForm.dischargeDate" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Discharge Type</mat-label>
+                <mat-select [(ngModel)]="dischargeForm.dischargeType">
+                  @for (option of dischargeTypeOptions; track option) {
+                    <mat-option [value]="option">{{ option }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              <button
+                mat-flat-button
+                color="accent"
+                type="button"
+                [disabled]="!dischargeForm.dischargeDate || initiatingDischarge()"
+                (click)="initiateDischarge()"
+              >
+                Initiate Discharge
+              </button>
+            </div>
+          } @else if (admission.status === 'DISCHARGE_INITIATED') {
+            <div class="ip-discharge-pending">
+              <span class="ip-discharge-number">Discharge No: {{ admission.dischargeNumber }}</span>
+              <button mat-flat-button color="accent" type="button" [disabled]="finalizingDischarge()" (click)="finalizeDischarge()">
+                Finalize Discharge
+              </button>
+            </div>
+          } @else if (admission.status === 'DISCHARGED') {
+            <div class="ip-discharge-done">
+              <span class="ip-discharge-done-label">Discharged</span>
+              <span class="ip-discharge-number">Discharge No: {{ admission.dischargeNumber }}</span>
+            </div>
+          }
+        </section>
       </div>
 
       <!-- Sidebar -->
@@ -277,7 +319,9 @@
         <div class="ip-billing-meta">Billing Type: {{ admission.paymentType ?? '—' }}</div>
 
         <div class="ip-billing-sidebar-actions">
-          <button mat-flat-button color="primary" type="button" (click)="amountReceived()">Amount Received</button>
+          @if (admission.status !== 'DISCHARGED') {
+            <button mat-flat-button color="primary" type="button" (click)="amountReceived()">Amount Received</button>
+          }
           <button mat-stroked-button color="warn" type="button" (click)="printAdmissionSlip()">Admission Slip</button>
         </div>
 
