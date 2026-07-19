@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { Admission, AdmissionRegistrationInput } from './admission.model';
+import { Admission, AdmissionAdmitInput, AdmissionRegistrationInput } from './admission.model';
 
 @Injectable({ providedIn: 'root' })
 export class AdmissionService {
@@ -19,6 +19,14 @@ export class AdmissionService {
 
   admit(patientId: number, roomId: number): Observable<Admission> {
     return this.http.post<Admission>(this.baseUrl, { patientId, roomId });
+  }
+
+  admitRegistered(id: number, input: AdmissionAdmitInput): Observable<Admission> {
+    return this.http.patch<Admission>(`${this.baseUrl}/${id}/admit`, input);
+  }
+
+  changeRoom(id: number, roomId: number): Observable<Admission> {
+    return this.http.patch<Admission>(`${this.baseUrl}/${id}/change-room`, { roomId });
   }
 
   register(input: AdmissionRegistrationInput): Observable<Admission> {

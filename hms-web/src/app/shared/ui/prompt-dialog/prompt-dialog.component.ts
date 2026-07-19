@@ -4,14 +4,21 @@ import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+
+export interface PromptDialogSelectOption {
+  value: string | number;
+  label: string;
+}
 
 export interface PromptDialogField {
   key: string;
   label: string;
-  type?: 'text' | 'number' | 'textarea';
+  type?: 'text' | 'number' | 'textarea' | 'select';
   initialValue?: string | number;
   required?: boolean;
   min?: number;
+  options?: PromptDialogSelectOption[];
 }
 
 export interface PromptDialogData {
@@ -34,7 +41,7 @@ export type PromptDialogValues = Record<string, string | number>;
 @Component({
   selector: 'app-prompt-dialog',
   standalone: true,
-  imports: [FormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule],
+  imports: [FormsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule],
   templateUrl: './prompt-dialog.component.html',
   styleUrl: './prompt-dialog.component.scss'
 })
@@ -56,7 +63,13 @@ export class PromptDialogComponent {
         return true;
       }
       const value = this.values[field.key];
-      return field.type === 'number' ? value !== null && value !== undefined : String(value ?? '').trim().length > 0;
+      if (field.type === 'number') {
+        return value !== null && value !== undefined;
+      }
+      if (field.type === 'select') {
+        return value !== null && value !== undefined && value !== '';
+      }
+      return String(value ?? '').trim().length > 0;
     });
   }
 
@@ -67,7 +80,14 @@ export class PromptDialogComponent {
     const trimmed: PromptDialogValues = {};
     for (const field of this.data.fields) {
       const value = this.values[field.key];
-      trimmed[field.key] = field.type === 'number' ? Number(value) : String(value).trim();
+      if (field.type === 'number') {
+        trimmed[field.key] = Number(value);
+      } else if (field.type === 'select') {
+        // Preserve the option's native type (e.g. a numeric id) rather than stringifying it.
+        trimmed[field.key] = value;
+      } else {
+        trimmed[field.key] = String(value).trim();
+      }
     }
     this.dialogRef.close(trimmed);
   }

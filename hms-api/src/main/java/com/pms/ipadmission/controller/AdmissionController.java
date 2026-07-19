@@ -50,6 +50,11 @@ public class AdmissionController {
         return service.uploadPhoto(id, file);
     }
 
+    @PatchMapping("/{id}/admit")
+    public AdmissionDto admitRegistered(@PathVariable Long id, @Valid @RequestBody AdmissionDto dto) {
+        return service.admitRegistered(id, dto);
+    }
+
     @PatchMapping("/{id}/advance-payment")
     public AdmissionDto addAdvancePayment(@PathVariable Long id, @RequestBody Map<String, Double> body) {
         return service.addAdvancePayment(id, body.getOrDefault("amount", 0.0));
@@ -60,5 +65,10 @@ public class AdmissionController {
         double totalBilled = ((Number) body.getOrDefault("totalBilled", 0)).doubleValue();
         String dischargeSummary = (String) body.get("dischargeSummary");
         return service.discharge(id, totalBilled, dischargeSummary);
+    }
+
+    @PatchMapping("/{id}/change-room")
+    public AdmissionDto changeRoom(@PathVariable Long id, @RequestBody Map<String, Long> body) {
+        return service.changeRoom(id, body.get("roomId"));
     }
 }

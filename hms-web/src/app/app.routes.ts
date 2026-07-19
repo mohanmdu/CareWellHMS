@@ -127,6 +127,67 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'masters/cms/site-content',
+        loadComponent: () =>
+          import('./features/masters-admin/website-cms/site-content/cms-site-content.component').then(
+            (m) => m.CmsSiteContentComponent
+          )
+      },
+      {
+        path: 'masters/cms/faqs',
+        loadComponent: () =>
+          import('./features/masters-admin/website-cms/faqs/cms-faq-list.component').then((m) => m.CmsFaqListComponent)
+      },
+      {
+        path: 'masters/cms/health-packages',
+        loadComponent: () =>
+          import('./features/masters-admin/website-cms/health-packages/cms-health-package-list.component').then(
+            (m) => m.CmsHealthPackageListComponent
+          )
+      },
+      {
+        path: 'masters/cms/banner-slides',
+        loadComponent: () =>
+          import('./features/masters-admin/website-cms/banner-slides/cms-banner-slide-list.component').then(
+            (m) => m.CmsBannerSlideListComponent
+          )
+      },
+      {
+        path: 'masters/cms/gallery-items',
+        loadComponent: () =>
+          import('./features/masters-admin/website-cms/gallery-items/cms-gallery-item-list.component').then(
+            (m) => m.CmsGalleryItemListComponent
+          )
+      },
+      {
+        path: 'masters/cms/news-events',
+        loadComponent: () =>
+          import('./features/masters-admin/website-cms/news-events/cms-news-event-list.component').then(
+            (m) => m.CmsNewsEventListComponent
+          )
+      },
+      {
+        path: 'masters/cms/testimonials',
+        loadComponent: () =>
+          import('./features/masters-admin/website-cms/testimonials/cms-testimonial-list.component').then(
+            (m) => m.CmsTestimonialListComponent
+          )
+      },
+      {
+        path: 'masters/cms/blog-posts',
+        loadComponent: () =>
+          import('./features/masters-admin/website-cms/blog-posts/cms-blog-post-list.component').then(
+            (m) => m.CmsBlogPostListComponent
+          )
+      },
+      {
+        path: 'masters/cms/career-openings',
+        loadComponent: () =>
+          import('./features/masters-admin/website-cms/career-openings/cms-career-opening-list.component').then(
+            (m) => m.CmsCareerOpeningListComponent
+          )
+      },
+      {
         path: 'appointments/book',
         loadComponent: () =>
           import('./features/appointments/booking/booking-wizard.component').then((m) => m.BookingWizardComponent)
@@ -298,6 +359,34 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/ip-admission/admissions/admission-registration-form.component').then(
             (m) => m.AdmissionRegistrationFormComponent
+          )
+      },
+      {
+        path: 'ip/admissions/:id/admit',
+        loadComponent: () =>
+          import('./features/ip-admission/admissions/admission-ward-allocation.component').then(
+            (m) => m.AdmissionWardAllocationComponent
+          )
+      },
+      {
+        path: 'ip/admissions/:id/confirmation',
+        loadComponent: () =>
+          import('./features/ip-admission/admissions/admission-confirmation.component').then(
+            (m) => m.AdmissionConfirmationComponent
+          )
+      },
+      {
+        path: 'ip/inpatient-list',
+        loadComponent: () =>
+          import('./features/ip-admission/inpatient-list/inpatient-list.component').then(
+            (m) => m.InpatientListComponent
+          )
+      },
+      {
+        path: 'ip/admissions/:id/billing',
+        loadComponent: () =>
+          import('./features/ip-admission/ip-billing/ip-billing-workspace.component').then(
+            (m) => m.IpBillingWorkspaceComponent
           )
       },
       {

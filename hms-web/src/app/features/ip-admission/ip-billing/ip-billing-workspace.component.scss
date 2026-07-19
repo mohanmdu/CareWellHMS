@@ -1,0 +1,196 @@
+.ip-billing-page {
+  padding: var(--hms-space-4);
+}
+
+.ip-billing-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: var(--hms-space-4);
+  align-items: start;
+}
+
+.ip-billing-main {
+  min-width: 0;
+}
+
+.ip-billing-section {
+  padding: var(--hms-space-4);
+  margin-bottom: var(--hms-space-4);
+}
+
+.ip-billing-title,
+.ip-billing-ledger-title {
+  font-size: var(--hms-font-size-lg);
+  margin: 0 0 var(--hms-space-3);
+}
+
+.ip-billing-advice-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hms-space-3);
+  align-items: start;
+  margin-bottom: var(--hms-space-3);
+
+  mat-form-field {
+    flex: 1;
+    min-width: 160px;
+  }
+}
+
+.ip-billing-narrow-field {
+  flex: 0 1 100px !important;
+  min-width: 90px !important;
+}
+
+.ip-billing-total-field {
+  display: flex;
+  flex-direction: column;
+  min-width: 90px;
+  padding-top: var(--hms-space-1);
+}
+
+.ip-billing-total-label {
+  font-size: var(--hms-font-size-sm);
+  color: var(--hms-color-text-muted);
+}
+
+.ip-billing-total-value {
+  font-weight: 600;
+}
+
+.ip-billing-table-wrap {
+  overflow-x: auto;
+}
+
+.ip-billing-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--hms-font-size-sm);
+
+  th,
+  td {
+    padding: var(--hms-space-2) var(--hms-space-3);
+    text-align: left;
+    border-bottom: 1px solid var(--hms-color-border, #e0e0e0);
+    white-space: nowrap;
+  }
+
+  th {
+    font-weight: 600;
+    color: var(--hms-color-text-muted);
+  }
+}
+
+.ip-billing-confirm-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--hms-space-3);
+}
+
+.ip-billing-ledger-row-expandable {
+  cursor: pointer;
+
+  &:hover {
+    background: var(--hms-color-surface-hover, #f5f5f5);
+  }
+}
+
+.ip-billing-expand-icon {
+  vertical-align: middle;
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+  color: var(--hms-color-text-muted);
+}
+
+.ip-billing-breakdown-row td {
+  padding: 0;
+  background: var(--hms-color-surface, #fafafa);
+}
+
+.ip-billing-breakdown-table {
+  margin: var(--hms-space-2) var(--hms-space-3);
+  width: calc(100% - #{2} * var(--hms-space-3));
+}
+
+.ip-billing-net-total-row td {
+  font-weight: 700;
+  border-top: 2px solid var(--hms-color-border, #e0e0e0);
+  border-bottom: none;
+}
+
+.ip-billing-empty {
+  color: var(--hms-color-text-muted);
+}
+
+.ip-billing-sidebar {
+  padding: var(--hms-space-4);
+  text-align: center;
+  position: sticky;
+  top: var(--hms-space-4);
+}
+
+.ip-billing-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto var(--hms-space-3);
+}
+
+.ip-billing-avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--hms-color-primary, #1565c0);
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.ip-billing-patient-name {
+  font-weight: 700;
+  color: var(--hms-color-primary, #1565c0);
+  margin-bottom: var(--hms-space-2);
+}
+
+.ip-billing-meta {
+  font-size: var(--hms-font-size-sm);
+  color: var(--hms-color-text-muted);
+  text-align: left;
+  overflow-wrap: break-word;
+  margin-bottom: var(--hms-space-1);
+}
+
+.ip-billing-sidebar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-2);
+  margin: var(--hms-space-3) 0;
+}
+
+.ip-billing-amount-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--hms-font-size-sm);
+  padding-top: var(--hms-space-2);
+  border-top: 1px solid var(--hms-color-border, #e0e0e0);
+  margin-top: var(--hms-space-2);
+}
+
+@media (max-width: 960px) {
+  .ip-billing-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ip-billing-sidebar {
+    position: static;
+  }
+}
+
+@media print {
+  app-header,
+  .ip-billing-sidebar-actions {
+    display: none !important;
+  }
+}

@@ -16,6 +16,12 @@
           [required]="!!field.required"
           [attr.cdkFocusInitial]="first ? '' : null"
         ></textarea>
+      } @else if (field.type === 'select') {
+        <mat-select [name]="field.key" [(ngModel)]="values[field.key]" [required]="!!field.required" [attr.cdkFocusInitial]="first ? '' : null">
+          @for (option of field.options; track option.value) {
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+          }
+        </mat-select>
       } @else {
         <input
           matInput

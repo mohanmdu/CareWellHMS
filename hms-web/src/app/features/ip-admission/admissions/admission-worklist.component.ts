@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
+import { Router } from '@angular/router';
 import { NotificationService } from '../../../shared/services/notification.service';
 import { PromptDialogService } from '../../../shared/services/prompt-dialog.service';
 import { EmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
@@ -20,6 +21,7 @@ import { Admission } from './admission.model';
 import { AdmissionService } from './admission.service';
 
 const STATUS_TONE: Record<string, StatusBadgeTone> = {
+  REGISTERED: 'warning',
   ADMITTED: 'info',
   DISCHARGED: 'success'
 };
@@ -55,6 +57,7 @@ export class AdmissionWorklistComponent {
   private readonly admissionService = inject(AdmissionService);
   private readonly notification = inject(NotificationService);
   private readonly promptDialog = inject(PromptDialogService);
+  private readonly router = inject(Router);
 
   readonly displayedColumns = [
     'admissionNumber',
@@ -128,6 +131,13 @@ export class AdmissionWorklistComponent {
         this.notification.error(err.error?.message ?? 'Failed to admit patient.');
       }
     });
+  }
+
+  goToWardAllocation(admission: Admission): void {
+    if (admission.id === null) {
+      return;
+    }
+    this.router.navigate(['/ip/admissions', admission.id, 'admit']);
   }
 
   addAdvance(admission: Admission): void {

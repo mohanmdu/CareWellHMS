@@ -49,10 +49,10 @@ public class Admission extends Auditable {
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
-    // Nullable: set only once Ward Allocation (a later batch) finalizes the
-    // bed assignment. Until then the admission sits at status = REGISTERED
-    // with only a roomType preference, matching the legacy's two-step
-    // register-then-admit flow.
+    // Nullable: set only once Ward Allocation (AdmissionService.admitRegistered)
+    // finalizes the bed assignment. Until then the admission sits at
+    // status = REGISTERED with only a roomType preference, matching the
+    // legacy's two-step register-then-admit flow.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id")
     private Room room;

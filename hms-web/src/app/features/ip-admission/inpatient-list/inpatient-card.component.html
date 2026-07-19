@@ -1,0 +1,41 @@
+@let a = admission();
+
+<article class="ip-card">
+  <div class="ip-card-section ip-card-patient">
+    @if (a.photoPath) {
+      <img [src]="a.photoPath" alt="" class="ip-card-avatar" />
+    } @else {
+      <div class="ip-card-avatar ip-card-avatar-placeholder" aria-hidden="true">{{ initials() }}</div>
+    }
+    <div class="ip-card-patient-details">
+      <a class="ip-card-name" [routerLink]="['/ip/admissions', a.id, 'billing']">{{ a.patientName }}</a>
+      <div class="ip-card-meta">UHID {{ a.patientUhid ?? '—' }}</div>
+      <div class="ip-card-meta">Inpatient ID <strong>{{ a.admissionNumber }}</strong></div>
+      <div class="ip-card-meta">{{ a.maritalStatus ?? '—' }} / {{ a.patientGender ?? '—' }} / {{ a.patientAge ?? '—' }} yrs</div>
+      <div class="ip-card-address">{{ a.patientAddress ?? '—' }}</div>
+      <div class="ip-card-meta">Attender: {{ a.attenderName ?? '—' }} / {{ a.relationMobileNo ?? '—' }}</div>
+      <div class="ip-card-meta">Alternate No: {{ a.patientMobileNumber ?? '—' }}</div>
+    </div>
+  </div>
+
+  <div class="ip-card-section ip-card-other">
+    <div class="ip-card-label">Other Details</div>
+    <div class="ip-card-meta">DOA: {{ a.admissionDate | date: 'dd/MM/yyyy HH:mm' }}</div>
+    <div class="ip-card-meta">Payment Type: {{ a.paymentType ?? '—' }}</div>
+    <div class="ip-card-meta">Location: {{ a.roomTypeName ?? '—' }} - {{ a.roomNumber ?? '—' }}</div>
+    <div class="ip-card-meta">ICD Code: {{ '' }}</div>
+  </div>
+
+  <div class="ip-card-section ip-card-consultant">
+    <div class="ip-card-label">Consultant</div>
+    <div class="ip-card-consultant-name">{{ a.primaryConsultant ?? '—' }}</div>
+    <div class="ip-card-meta">Ref By: {{ a.referralDoctor ?? '—' }}</div>
+    <div class="ip-card-consultant-actions">
+      <a mat-stroked-button color="primary" [routerLink]="['/ip/admissions', a.id, 'billing']">Billing</a>
+      <button mat-flat-button color="primary" type="button" (click)="wardChange.emit(a)">Ward Change</button>
+    </div>
+    @if (!a.advanceAmount) {
+      <div class="ip-card-warning">Advance amount is yet to be raised</div>
+    }
+  </div>
+</article>

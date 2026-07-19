@@ -1,0 +1,295 @@
+<div class="hms-page ip-billing-page">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading() && admission(); as admission) {
+    <div class="ip-billing-layout">
+      <div class="ip-billing-main">
+        <!-- Patient Billing Advice -->
+        <section class="hms-card-surface ip-billing-section">
+          <h2 class="ip-billing-title">Patient Billing Advice</h2>
+          <div class="ip-billing-advice-form">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Category</mat-label>
+              <mat-select [(ngModel)]="form.categoryId">
+                @for (category of categories(); track category.id) {
+                  <mat-option [value]="category.id">{{ category.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Consultant</mat-label>
+              <mat-select [(ngModel)]="form.consultantId">
+                <mat-option [value]="null">—</mat-option>
+                @for (consultant of consultants(); track consultant.id) {
+                  <mat-option [value]="consultant.id">{{ consultant.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Component</mat-label>
+              <mat-select [(ngModel)]="form.componentId" (selectionChange)="onComponentChange($event.value)">
+                @for (component of components(); track component.id) {
+                  <mat-option [value]="component.id">{{ component.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Remarks</mat-label>
+              <input matInput [(ngModel)]="form.remarks" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="ip-billing-narrow-field">
+              <mat-label>Qty</mat-label>
+              <input matInput type="number" min="1" [(ngModel)]="form.quantity" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="ip-billing-narrow-field">
+              <mat-label>Amount</mat-label>
+              <input matInput type="number" min="0" [(ngModel)]="form.unitAmount" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="ip-billing-narrow-field">
+              <mat-label>Units</mat-label>
+              <mat-select [(ngModel)]="form.units">
+                @for (unit of unitOptions; track unit) {
+                  <mat-option [value]="unit">{{ unit }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <div class="ip-billing-total-field">
+              <span class="ip-billing-total-label">Total</span>
+              <span class="ip-billing-total-value">{{ formTotal() | number: '1.0-2' }}</span>
+            </div>
+            <button
+              mat-flat-button
+              color="primary"
+              type="button"
+              [disabled]="!form.categoryId || !form.componentId || form.quantity <= 0"
+              (click)="addToBuffer()"
+            >
+              Add
+            </button>
+          </div>
+
+          @if (buffer().length > 0) {
+            <div class="ip-billing-table-wrap">
+              <table class="ip-billing-table">
+                <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th>Consultant</th>
+                    <th>Component</th>
+                    <th>Quantity</th>
+                    <th>Amount</th>
+                    <th>Units</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of buffer(); track $index) {
+                    <tr>
+                      <td>{{ row.categoryName }}</td>
+                      <td>{{ row.consultantName ?? '—' }}</td>
+                      <td>{{ row.componentName }}</td>
+                      <td>{{ row.quantity }}</td>
+                      <td>{{ row.total | number: '1.0-2' }}</td>
+                      <td>{{ row.units }}</td>
+                      <td>
+                        <button mat-icon-button type="button" [attr.aria-label]="'Remove ' + row.componentName" (click)="removeFromBuffer($index)">
+                          <mat-icon aria-hidden="true">close</mat-icon>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            <div class="ip-billing-confirm-row">
+              <button mat-flat-button color="primary" type="button" [disabled]="confirming()" (click)="confirmBuffer()">Confirm</button>
+            </div>
+          }
+        </section>
+
+        <!-- BILLING ledger -->
+        <section class="hms-card-surface ip-billing-section">
+          <h2 class="ip-billing-ledger-title">Billing</h2>
+          @if (ledger(); as ledger) {
+            <div class="ip-billing-table-wrap">
+              <table class="ip-billing-table ip-billing-ledger-table">
+                <thead>
+                  <tr>
+                    <th>Invoices</th>
+                    <th>Invoiced amount</th>
+                    <th>Discounts</th>
+                    <th>Refunds</th>
+                    <th>Net</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of ledger.rows; track row.category) {
+                    <tr
+                      class="ip-billing-ledger-row"
+                      [class.ip-billing-ledger-row-expandable]="row.lineItems.length > 0"
+                      (click)="row.lineItems.length > 0 && toggleCategory(row.category)"
+                    >
+                      <td>
+                        {{ row.category }}
+                        @if (row.lineItems.length > 0) {
+                          <mat-icon aria-hidden="true" class="ip-billing-expand-icon">{{
+                            expandedCategories().has(row.category) ? 'expand_less' : 'expand_more'
+                          }}</mat-icon>
+                        }
+                      </td>
+                      <td>{{ row.invoiced | number: '1.0-2' }}</td>
+                      <td>{{ row.discount | number: '1.0-2' }}</td>
+                      <td>{{ row.refund | number: '1.0-2' }}</td>
+                      <td>{{ row.net | number: '1.0-2' }}</td>
+                    </tr>
+                    @if (expandedCategories().has(row.category) && row.lineItems.length > 0) {
+                      <tr class="ip-billing-breakdown-row">
+                        <td colspan="5">
+                          <table class="ip-billing-table ip-billing-breakdown-table">
+                            <thead>
+                              <tr>
+                                <th>Component</th>
+                                <th>Requested On</th>
+                                <th>Quantity</th>
+                                <th>Rate</th>
+                                <th>Units</th>
+                                <th>Invoiced Amount</th>
+                                <th>Discount</th>
+                                <th>Net</th>
+                                <th>Discount Reason</th>
+                                <th>Created By</th>
+                                <th></th>
+                                <th></th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              @for (item of row.lineItems; track item.id) {
+                                <tr>
+                                  <td>{{ item.componentName }}</td>
+                                  <td>{{ item.requestedOn | date: 'dd/MM/yyyy HH:mm' }}</td>
+                                  <td>{{ item.quantity }}</td>
+                                  <td>{{ item.unitAmount | number: '1.0-2' }}</td>
+                                  <td>{{ item.units ?? '—' }}</td>
+                                  <td>{{ item.lineTotal | number: '1.0-2' }}</td>
+                                  <td>{{ item.discountAmount | number: '1.0-2' }}</td>
+                                  <td>{{ (item.lineTotal - item.discountAmount - item.refundAmount) | number: '1.0-2' }}</td>
+                                  <td>{{ item.discountReason ?? '—' }}</td>
+                                  <td>{{ item.createdBy ?? '—' }}</td>
+                                  <td>
+                                    <button mat-icon-button type="button" [attr.aria-label]="'Edit ' + item.componentName" (click)="editLineItem(item)">
+                                      <mat-icon aria-hidden="true">edit</mat-icon>
+                                    </button>
+                                  </td>
+                                  <td>
+                                    <button
+                                      mat-icon-button
+                                      type="button"
+                                      color="warn"
+                                      [attr.aria-label]="'Delete ' + item.componentName"
+                                      (click)="deleteLineItem(item)"
+                                    >
+                                      <mat-icon aria-hidden="true">delete</mat-icon>
+                                    </button>
+                                  </td>
+                                </tr>
+                              }
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+                    }
+                  }
+                </tbody>
+                <tfoot>
+                  <tr class="ip-billing-net-total-row">
+                    <td>Net Total</td>
+                    <td>{{ ledger.netInvoiced | number: '1.0-2' }}</td>
+                    <td>{{ ledger.netDiscount | number: '1.0-2' }}</td>
+                    <td>{{ ledger.netRefund | number: '1.0-2' }}</td>
+                    <td>{{ ledger.netTotal | number: '1.0-2' }}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          }
+        </section>
+
+        <!-- Payments -->
+        <section class="hms-card-surface ip-billing-section">
+          <h2 class="ip-billing-ledger-title">Payments</h2>
+          @if (payments().length === 0) {
+            <p class="ip-billing-empty">No payments recorded yet.</p>
+          } @else {
+            <div class="ip-billing-table-wrap">
+              <table class="ip-billing-table">
+                <thead>
+                  <tr>
+                    <th>S.No</th>
+                    <th>Payment Date</th>
+                    <th>Invoice No</th>
+                    <th>Description</th>
+                    <th>Receipt #</th>
+                    <th>Payment Type</th>
+                    <th>Created By</th>
+                    <th>Invoiced</th>
+                    <th>Refund</th>
+                    <th>Net Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (payment of payments(); track payment.id; let i = $index) {
+                    <tr>
+                      <td>{{ i + 1 }}</td>
+                      <td>{{ payment.paymentDate | date: 'dd/MM/yyyy HH:mm' }}</td>
+                      <td>—</td>
+                      <td>{{ payment.description ?? '—' }}</td>
+                      <td>{{ payment.receiptNumber }}</td>
+                      <td>{{ payment.paymentType ?? '—' }}</td>
+                      <td>{{ payment.createdBy ?? '—' }}</td>
+                      <td>{{ payment.invoicedAmount | number: '1.0-2' }}</td>
+                      <td>{{ payment.refundAmount | number: '1.0-2' }}</td>
+                      <td>{{ payment.netAmount | number: '1.0-2' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </section>
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="ip-billing-sidebar hms-card-surface">
+        @if (admission.photoPath) {
+          <img [src]="admission.photoPath" alt="" class="ip-billing-avatar" />
+        } @else {
+          <div class="ip-billing-avatar ip-billing-avatar-placeholder" aria-hidden="true">{{ initials() }}</div>
+        }
+        <div class="ip-billing-patient-name">{{ admission.patientName }}</div>
+        <div class="ip-billing-meta">{{ admission.patientGender }} / {{ admission.maritalStatus ?? '—' }}</div>
+        <div class="ip-billing-meta">UHID: {{ admission.patientUhid ?? '—' }}</div>
+        <div class="ip-billing-meta">Inpatient ID: <strong>{{ admission.admissionNumber }}</strong></div>
+        <div class="ip-billing-meta">DOA: {{ admission.admissionDate | date: 'dd/MM/yyyy HH:mm' }}</div>
+        <div class="ip-billing-meta">Phone: {{ admission.patientMobileNumber ?? '—' }}</div>
+        <div class="ip-billing-meta">Address: {{ admission.patientAddress ?? '—' }}</div>
+        <div class="ip-billing-meta">Billing Type: {{ admission.paymentType ?? '—' }}</div>
+
+        <div class="ip-billing-sidebar-actions">
+          <button mat-flat-button color="primary" type="button" (click)="amountReceived()">Amount Received</button>
+          <button mat-stroked-button color="warn" type="button" (click)="printAdmissionSlip()">Admission Slip</button>
+        </div>
+
+        <div class="ip-billing-amount-row">
+          <span>Available Amount:</span>
+          <strong>{{ availableAmount() | number: '1.0-2' }}</strong>
+        </div>
+        <div class="ip-billing-amount-row">
+          <span>Pharmacy Due:</span>
+          <strong>0.00</strong>
+        </div>
+      </aside>
+    </div>
+  }
+</div>

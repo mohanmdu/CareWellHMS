@@ -80,7 +80,8 @@ export const NAV_GROUPS: NavGroup[] = [
     label: 'IP Admission',
     items: [
       { label: 'New Admission', route: '/ip/admissions/new', icon: 'person_add' },
-      { label: 'IP Admissions', route: '/ip/admissions', icon: 'local_hospital' }
+      { label: 'IP Admissions', route: '/ip/admissions', icon: 'local_hospital' },
+      { label: 'In Patient List', route: '/ip/inpatient-list', icon: 'groups' }
     ]
   },
   {
@@ -89,6 +90,20 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: 'IP Billing Categories', route: '/masters/ip-billing-categories', icon: 'category' },
       { label: 'IP Billing Components', route: '/masters/ip-billing-components', icon: 'sell' },
       { label: 'Billing Activity Log', route: '/masters/ip-billing-activity-log', icon: 'history' }
+    ]
+  },
+  {
+    label: 'Website CMS',
+    items: [
+      { label: 'Site Content', route: '/masters/cms/site-content', icon: 'article' },
+      { label: 'Banner Slides', route: '/masters/cms/banner-slides', icon: 'wallpaper' },
+      { label: 'Gallery', route: '/masters/cms/gallery-items', icon: 'photo_library' },
+      { label: 'News & Events', route: '/masters/cms/news-events', icon: 'campaign' },
+      { label: 'Testimonials', route: '/masters/cms/testimonials', icon: 'format_quote' },
+      { label: 'FAQs', route: '/masters/cms/faqs', icon: 'quiz' },
+      { label: 'Health Packages', route: '/masters/cms/health-packages', icon: 'medical_information' },
+      { label: 'Blog Posts', route: '/masters/cms/blog-posts', icon: 'article' },
+      { label: 'Career Openings', route: '/masters/cms/career-openings', icon: 'work' }
     ]
   },
   {

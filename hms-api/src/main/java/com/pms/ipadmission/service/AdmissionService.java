@@ -11,11 +11,15 @@ import com.pms.ipadmission.entity.RoomType;
 import com.pms.ipadmission.repository.AdmissionRepository;
 import com.pms.ipadmission.repository.RoomRepository;
 import com.pms.ipadmission.repository.RoomTypeRepository;
+import com.pms.ipbilling.entity.IpPayment;
+import com.pms.ipbilling.repository.IpPaymentRepository;
 import com.pms.registration.entity.Patient;
 import com.pms.registration.repository.PatientRepository;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,11 +33,12 @@ import org.springframework.web.multipart.MultipartFile;
  * operations and a signed settlementAmount instead of separate
  * refund/balance-due code paths.
  *
- * register() is the new two-step flow's Step 1 (Casualty/Emergency Admission
+ * register() is the two-step flow's Step 1 (Casualty/Emergency Admission
  * batch): captures intake details and a room *type* preference only, no room
- * assigned yet. admit() remains the older direct single-step path (room
- * required upfront) used by the existing AdmissionWorklistComponent until
- * Ward Allocation (a later batch) replaces it.
+ * assigned yet. admitRegistered() is Step 2 (Ward Allocation): assigns a bed
+ * to that REGISTERED admission and flips it to ADMITTED. admit() remains a
+ * separate direct single-step path (room required upfront) still used by the
+ * AdmissionWorklistComponent's "New Admission" quick-admit section.
  */
 @Service
 @Transactional(readOnly = true)
@@ -44,20 +49,25 @@ public class AdmissionService {
     private final RoomRepository roomRepository;
     private final RoomTypeRepository roomTypeRepository;
     private final FileStorageService fileStorageService;
+    private final IpPaymentRepository paymentRepository;
     private final AtomicInteger sequence = new AtomicInteger(0);
+    private final AtomicInteger receiptSequence = new AtomicInteger(0);
 
     public AdmissionService(
             AdmissionRepository repository,
             PatientRepository patientRepository,
             RoomRepository roomRepository,
             RoomTypeRepository roomTypeRepository,
-            FileStorageService fileStorageService) {
+            FileStorageService fileStorageService,
+            IpPaymentRepository paymentRepository) {
         this.repository = repository;
         this.patientRepository = patientRepository;
         this.roomRepository = roomRepository;
         this.roomTypeRepository = roomTypeRepository;
         this.fileStorageService = fileStorageService;
+        this.paymentRepository = paymentRepository;
         this.sequence.set((int) repository.count());
+        this.receiptSequence.set((int) paymentRepository.count());
     }
 
     public List<AdmissionDto> findAll() {
@@ -88,6 +98,45 @@ public class AdmissionService {
         admission.setAdmissionDate(LocalDateTime.now());
         admission.setStatus(AdmissionStatus.ADMITTED);
         admission.setAdvanceAmount(0);
+
+        room.setStatus(RoomStatus.ALLOCATED);
+        roomRepository.save(room);
+
+        return toDto(repository.save(admission));
+    }
+
+    /**
+     * Step 2 of the two-step flow (Ward Allocation): lets staff review/correct
+     * the intake details captured at registration, assigns a bed, records an
+     * initial advance, and flips the admission to ADMITTED in one step -
+     * mirrors the legacy "Edit Admission Advice + Ward Allocation" screen.
+     * Reuses applyIntakeFields() so this and register() stay in sync field-for-field.
+     */
+    @Transactional
+    public AdmissionDto admitRegistered(Long id, AdmissionDto dto) {
+        Admission admission = getOrThrow(id);
+        if (admission.getStatus() != AdmissionStatus.REGISTERED) {
+            throw new IllegalArgumentException(
+                    "Admission " + admission.getAdmissionNumber() + " is not pending registration");
+        }
+        if (dto.roomId() == null) {
+            throw new IllegalArgumentException("Room is required to admit a patient");
+        }
+        Room room = roomRepository.findById(dto.roomId())
+                .orElseThrow(() -> new EntityNotFoundException("Room not found: " + dto.roomId()));
+        if (room.getStatus() != RoomStatus.AVAILABLE) {
+            throw new IllegalArgumentException("Room " + room.getRoomNumber() + " is not available");
+        }
+
+        applyIntakeFields(admission, dto);
+        if (dto.admissionDate() != null) {
+            admission.setAdmissionDate(dto.admissionDate());
+        }
+        if (dto.advanceAmount() != null) {
+            admission.setAdvanceAmount(dto.advanceAmount());
+        }
+        admission.setRoom(room);
+        admission.setStatus(AdmissionStatus.ADMITTED);
 
         room.setStatus(RoomStatus.ALLOCATED);
         roomRepository.save(room);
@@ -126,7 +175,29 @@ public class AdmissionService {
         Admission admission = getOrThrow(id);
         requireAdmitted(admission);
         admission.setAdvanceAmount(admission.getAdvanceAmount() + amount);
-        return toDto(repository.save(admission));
+        Admission saved = repository.save(admission);
+
+        IpPayment payment = new IpPayment();
+        payment.setAdmission(saved);
+        payment.setPaymentDate(Instant.now());
+        payment.setReceiptNumber(nextReceiptNumber());
+        payment.setDescription("Advance");
+        payment.setPaymentType(saved.getPaymentType() != null ? saved.getPaymentType().name() : null);
+        payment.setInvoicedAmount(amount);
+        payment.setNetAmount(amount);
+        payment.setCreatedBy(currentUsername());
+        paymentRepository.save(payment);
+
+        return toDto(saved);
+    }
+
+    private String nextReceiptNumber() {
+        return "RCPT" + String.format("%06d", receiptSequence.incrementAndGet());
+    }
+
+    private String currentUsername() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null ? authentication.getName() : "system";
     }
 
     @Transactional
@@ -144,6 +215,34 @@ public class AdmissionService {
         Room room = admission.getRoom();
         room.setStatus(RoomStatus.AVAILABLE);
         roomRepository.save(room);
+
+        return toDto(repository.save(admission));
+    }
+
+    /** Ward Change (Inpatient List "Ward Change" action): moves an ADMITTED patient to a different available room. */
+    @Transactional
+    public AdmissionDto changeRoom(Long id, Long newRoomId) {
+        Admission admission = getOrThrow(id);
+        requireAdmitted(admission);
+        if (newRoomId == null) {
+            throw new IllegalArgumentException("A room is required to change ward");
+        }
+
+        Room newRoom = roomRepository.findById(newRoomId)
+                .orElseThrow(() -> new EntityNotFoundException("Room not found: " + newRoomId));
+        if (newRoom.getStatus() != RoomStatus.AVAILABLE) {
+            throw new IllegalArgumentException("Room " + newRoom.getRoomNumber() + " is not available");
+        }
+
+        Room oldRoom = admission.getRoom();
+        if (oldRoom != null && !oldRoom.getId().equals(newRoom.getId())) {
+            oldRoom.setStatus(RoomStatus.AVAILABLE);
+            roomRepository.save(oldRoom);
+        }
+
+        admission.setRoom(newRoom);
+        newRoom.setStatus(RoomStatus.ALLOCATED);
+        roomRepository.save(newRoom);
 
         return toDto(repository.save(admission));
     }
@@ -203,6 +302,11 @@ public class AdmissionService {
                 admission.getAdmissionNumber(),
                 patient.getId(),
                 (patient.getFirstName() + " " + (patient.getLastName() != null ? patient.getLastName() : "")).trim(),
+                patient.getRegistrationNumber(),
+                patient.getGender(),
+                patient.getAge(),
+                patient.getMobileNumber(),
+                patient.getAddress(),
                 room != null ? room.getId() : null,
                 room != null ? room.getRoomNumber() : null,
                 roomType != null ? roomType.getId() : (room != null ? room.getRoomType().getId() : null),

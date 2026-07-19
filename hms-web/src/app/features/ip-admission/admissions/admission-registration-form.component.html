@@ -84,6 +84,10 @@
           <input matInput type="number" min="0" name="periodOfStayDays" [(ngModel)]="form.periodOfStayDays" />
         </mat-form-field>
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Date</mat-label>
+          <input matInput type="datetime-local" name="admissionDate" [(ngModel)]="form.admissionDate" required />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Description of Case</mat-label>
           <mat-select name="descriptionOfCase" [(ngModel)]="form.descriptionOfCase">
             @for (option of descriptionOfCaseOptions; track option) {

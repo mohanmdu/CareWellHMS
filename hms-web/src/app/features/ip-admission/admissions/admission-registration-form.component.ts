@@ -26,7 +26,14 @@ const PAYMENT_TYPE_OPTIONS: { value: AdmissionPaymentType; label: string }[] = [
   { value: 'CORPORATE', label: 'Corporate' }
 ];
 
+function nowAsDatetimeLocal(): string {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+}
+
 const EMPTY_FORM: Omit<AdmissionRegistrationInput, 'patientId'> = {
+  admissionDate: '',
   roomTypeId: null,
   attenderName: null,
   relationType: null,
@@ -90,7 +97,7 @@ export class AdmissionRegistrationFormComponent {
   photoPreviewUrl = signal<string | null>(null);
   private photoFile: File | null = null;
 
-  form: Omit<AdmissionRegistrationInput, 'patientId'> = { ...EMPTY_FORM };
+  form: Omit<AdmissionRegistrationInput, 'patientId'> = { ...EMPTY_FORM, admissionDate: nowAsDatetimeLocal() };
 
   constructor() {
     const patientId = Number(this.route.snapshot.paramMap.get('patientId'));

@@ -1,0 +1,50 @@
+.ip-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--hms-space-2);
+  background: var(--hms-color-warning-container, #fff3e0);
+  border-left: 4px solid var(--hms-color-warning, #b26a00);
+  padding: var(--hms-space-3) var(--hms-space-4);
+  margin-bottom: var(--hms-space-4);
+}
+
+.ip-status-title {
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.ip-status-metrics {
+  color: var(--hms-color-text-muted);
+}
+
+.ip-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--hms-space-4);
+}
+
+.ip-view-by-field {
+  width: 180px;
+}
+
+.ip-search {
+  flex: 1;
+  min-width: 240px;
+}
+
+.ip-list-section {
+  padding: var(--hms-space-4);
+}
+
+.ip-group-title {
+  font-size: var(--hms-font-size-lg);
+  margin: var(--hms-space-4) 0 var(--hms-space-2);
+
+  &:first-child {
+    margin-top: 0;
+  }
+}

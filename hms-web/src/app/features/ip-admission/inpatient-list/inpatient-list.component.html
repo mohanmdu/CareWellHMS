@@ -1,0 +1,56 @@
+<div class="hms-page">
+  <app-page-header title="In Patient List" subtitle="Active inpatient census, grouped by list, ward, or consultant.">
+    <button mat-icon-button type="button" aria-label="Export as CSV" (click)="exportCsv()">
+      <mat-icon aria-hidden="true">file_download</mat-icon>
+    </button>
+  </app-page-header>
+
+  <section class="hms-card-surface ip-status-bar">
+    <span class="ip-status-title">In Patient List</span>
+    <span class="ip-status-metrics">
+      Total Patients: <strong>{{ totalPatients() }}</strong>
+      &nbsp;Admitted: <strong>{{ admittedCount() }}</strong>
+      &nbsp;Discharged: <strong>{{ dischargedCount() }}</strong>
+    </span>
+  </section>
+
+  <section class="hms-card-surface ip-controls">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="ip-view-by-field">
+      <mat-label>View By</mat-label>
+      <mat-select [value]="viewBy()" (selectionChange)="onViewByChange($event.value)">
+        <mat-option value="LIST">List</mat-option>
+        <mat-option value="WARD">Ward</mat-option>
+        <mat-option value="CONSULTANT">Consultant</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <app-table-search placeholder="Search by name, UHID or IPID..." [value]="searchTerm()" (valueChange)="onSearch($event)" class="ip-search" />
+  </section>
+
+  <section class="hms-card-surface ip-list-section">
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    @if (!loading() && filteredPatients().length === 0) {
+      <app-empty-state icon="local_hospital" title="No admitted patients" message="Currently admitted patients will appear here." />
+    } @else if (!loading() && viewBy() === 'LIST') {
+      @for (admission of pagination.page(); track admission.id) {
+        <app-inpatient-card [admission]="admission" (wardChange)="wardChange($event)" />
+      }
+      <mat-paginator
+        [length]="pagination.length()"
+        [pageIndex]="pagination.pageIndex()"
+        [pageSize]="pagination.pageSize()"
+        [pageSizeOptions]="[10, 20, 50]"
+        (page)="pagination.onPage($event)"
+      />
+    } @else if (!loading()) {
+      @for (group of groups(); track group.label) {
+        <h3 class="ip-group-title">{{ group.label }}</h3>
+        @for (admission of group.admissions; track admission.id) {
+          <app-inpatient-card [admission]="admission" (wardChange)="wardChange($event)" />
+        }
+      }
+    }
+  </section>
+</div>

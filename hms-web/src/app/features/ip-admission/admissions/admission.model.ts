@@ -6,6 +6,11 @@ export interface Admission {
   admissionNumber: string | null;
   patientId: number;
   patientName: string | null;
+  patientUhid: string | null;
+  patientGender: string | null;
+  patientAge: number | null;
+  patientMobileNumber: string | null;
+  patientAddress: string | null;
   roomId: number | null;
   roomNumber: string | null;
   roomTypeId: number | null;
@@ -44,6 +49,7 @@ export interface Admission {
 export type AdmissionRegistrationInput = Pick<
   Admission,
   | 'patientId'
+  | 'admissionDate'
   | 'roomTypeId'
   | 'attenderName'
   | 'relationType'
@@ -66,4 +72,34 @@ export type AdmissionRegistrationInput = Pick<
   | 'aadhaarNumber'
   | 'ventilatorRequired'
   | 'monitorRequired'
+>;
+
+/** Ward Allocation step: edit intake details, assign a room, record an initial advance, and admit. */
+export type AdmissionAdmitInput = Pick<
+  Admission,
+  | 'patientId'
+  | 'admissionDate'
+  | 'roomId'
+  | 'attenderName'
+  | 'relationType'
+  | 'fatherSpouseName'
+  | 'relationMobileNo'
+  | 'occupation'
+  | 'maritalStatus'
+  | 'periodOfStayDays'
+  | 'descriptionOfCase'
+  | 'referralDoctor'
+  | 'primaryConsultant'
+  | 'secondaryConsultant'
+  | 'paymentType'
+  | 'heightCm'
+  | 'weightKg'
+  | 'mlc'
+  | 'insuranceType'
+  | 'patientType'
+  | 'remarks'
+  | 'aadhaarNumber'
+  | 'ventilatorRequired'
+  | 'monitorRequired'
+  | 'advanceAmount'
 >;
