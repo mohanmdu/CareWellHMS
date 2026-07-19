@@ -61,4 +61,16 @@ public class DepartmentController {
         service.restore(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/{id}/publish")
+    public ResponseEntity<Void> publish(@PathVariable Long id) {
+        service.publish(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/unpublish")
+    public ResponseEntity<Void> unpublish(@PathVariable Long id) {
+        service.unpublish(id);
+        return ResponseEntity.noContent().build();
+    }
 }

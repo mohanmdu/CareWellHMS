@@ -1,0 +1,108 @@
+<div class="hms-page">
+  <app-page-header title="Website Health Packages" subtitle="Health/checkup packages shown on the public website." />
+
+  <section class="hms-card-surface cms-health-package-form">
+    <form class="hms-inline-actions" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Name</mat-label>
+        <input matInput name="name" [(ngModel)]="form.name" required />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="cms-health-package-price-field" subscriptSizing="dynamic">
+        <mat-label>Price</mat-label>
+        <input matInput type="number" min="0" name="price" [(ngModel)]="form.price" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="cms-health-package-wide-field">
+        <mat-label>Description</mat-label>
+        <input matInput name="description" [(ngModel)]="form.description" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="cms-health-package-wide-field">
+        <mat-label>Includes</mat-label>
+        <input matInput name="includes" [(ngModel)]="form.includes" placeholder="e.g. Blood test, ECG, X-Ray" />
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="submit" [disabled]="saving() || !form.name.trim()">
+        <mat-icon aria-hidden="true">{{ editingId() !== null ? 'save' : 'add' }}</mat-icon>
+        {{ editingId() !== null ? 'Update' : 'Add' }}
+      </button>
+      @if (editingId() !== null) {
+        <button mat-stroked-button type="button" (click)="clear()">Clear</button>
+      }
+    </form>
+  </section>
+
+  <section class="hms-card-surface cms-health-package-section">
+    <h2 class="cms-health-package-section-title">Active Health Packages</h2>
+    @if (loadingActive()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+    @if (!loadingActive() && activePackages().length === 0) {
+      <app-empty-state icon="medical_information" title="No health packages yet" message="Add the first package above." />
+    } @else if (activePackages().length > 0) {
+      <div class="cms-health-package-table-wrap">
+        <table mat-table [dataSource]="activePackages()" class="cms-health-package-table">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Name</th>
+            <td mat-cell *matCellDef="let pkg">{{ pkg.name }}</td>
+          </ng-container>
+          <ng-container matColumnDef="price">
+            <th mat-header-cell *matHeaderCellDef>Price</th>
+            <td mat-cell *matCellDef="let pkg">{{ pkg.price | number: '1.0-2' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="description">
+            <th mat-header-cell *matHeaderCellDef>Description</th>
+            <td mat-cell *matCellDef="let pkg">{{ pkg.description }}</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="cms-health-package-actions-header"></th>
+            <td mat-cell *matCellDef="let pkg" class="cms-health-package-actions-cell">
+              <div class="cms-health-package-actions-row">
+                <button mat-icon-button type="button" [attr.aria-label]="'Edit ' + pkg.name" (click)="edit(pkg)">
+                  <mat-icon aria-hidden="true">edit</mat-icon>
+                </button>
+                <button mat-icon-button type="button" color="warn" [attr.aria-label]="'Deactivate ' + pkg.name" (click)="deactivate(pkg)">
+                  <mat-icon aria-hidden="true">delete</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="activeColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: activeColumns"></tr>
+        </table>
+      </div>
+    }
+  </section>
+
+  <section class="hms-card-surface cms-health-package-section">
+    <h2 class="cms-health-package-section-title">Deactivated Health Packages</h2>
+    @if (loadingInactive()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+    @if (!loadingInactive() && inactivePackages().length === 0) {
+      <app-empty-state icon="inbox" title="No deactivated health packages" message="Deactivated packages will appear here." />
+    } @else if (inactivePackages().length > 0) {
+      <div class="cms-health-package-table-wrap">
+        <table mat-table [dataSource]="inactivePackages()" class="cms-health-package-table">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Name</th>
+            <td mat-cell *matCellDef="let pkg">{{ pkg.name }}</td>
+          </ng-container>
+          <ng-container matColumnDef="price">
+            <th mat-header-cell *matHeaderCellDef>Price</th>
+            <td mat-cell *matCellDef="let pkg">{{ pkg.price | number: '1.0-2' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="description">
+            <th mat-header-cell *matHeaderCellDef>Description</th>
+            <td mat-cell *matCellDef="let pkg">{{ pkg.description }}</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="cms-health-package-actions-header"></th>
+            <td mat-cell *matCellDef="let pkg" class="cms-health-package-actions-cell">
+              <button mat-stroked-button color="primary" type="button" (click)="restore(pkg)">Activate</button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="inactiveColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: inactiveColumns"></tr>
+        </table>
+      </div>
+    }
+  </section>
+</div>

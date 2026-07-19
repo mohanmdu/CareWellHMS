@@ -27,9 +27,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
  * to unblock local frontend testing - see chat history 2026-07-09. The
  * passwordEncoder/userDetailsService beans below are left in place so
  * re-enabling is a one-line revert: swap permitAll() back to
- * .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+ * .requestMatchers("/actuator/health", "/actuator/info", "/api/public/**").permitAll()
  * .anyRequest().authenticated(), and restore .httpBasic(basic -> {}).
  * Do this before any environment other than a single developer's machine.
+ * NOTE: /api/public/** (the public hospital website's API surface, see
+ * com.pms.website) must stay permitAll() even after that revert - it is
+ * deliberately unauthenticated, not an oversight.
  */
 @Configuration
 @EnableWebSecurity
@@ -54,7 +57,9 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/public/**").permitAll()
+                        .anyRequest().permitAll());
         return http.build();
     }
 

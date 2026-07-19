@@ -1,0 +1,40 @@
+<div class="hms-page">
+  <app-page-header title="Website Site Content" subtitle="About Us, Mission, Vision and homepage intro text shown on the public website." />
+
+  <section class="hms-card-surface cms-site-content-section">
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    } @else {
+      <form class="hms-form-grid" (ngSubmit)="save()">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="cms-site-content-field-wide">
+          <mat-label>About Us</mat-label>
+          <textarea matInput name="aboutUsBody" rows="4" [(ngModel)]="form.aboutUsBody"></textarea>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="cms-site-content-field-wide">
+          <mat-label>Mission</mat-label>
+          <textarea matInput name="missionBody" rows="3" [(ngModel)]="form.missionBody"></textarea>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="cms-site-content-field-wide">
+          <mat-label>Vision</mat-label>
+          <textarea matInput name="visionBody" rows="3" [(ngModel)]="form.visionBody"></textarea>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Homepage intro title</mat-label>
+          <input matInput name="homeIntroTitle" [(ngModel)]="form.homeIntroTitle" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="cms-site-content-field-wide">
+          <mat-label>Homepage intro text</mat-label>
+          <textarea matInput name="homeIntroBody" rows="3" [(ngModel)]="form.homeIntroBody"></textarea>
+        </mat-form-field>
+
+        <div class="cms-site-content-submit">
+          <button mat-flat-button color="primary" type="submit" [disabled]="saving()">Save</button>
+        </div>
+      </form>
+    }
+  </section>
+</div>

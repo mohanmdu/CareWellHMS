@@ -5,6 +5,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { NotificationService } from '../../../shared/services/notification.service';
 import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
 import { ClinicSettingsService } from './clinic-settings.service';
@@ -12,7 +13,16 @@ import { ClinicSettingsService } from './clinic-settings.service';
 @Component({
   selector: 'app-clinic-settings-list',
   standalone: true,
-  imports: [FormsModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatIconModule, MatProgressBarModule, PageHeaderComponent],
+  imports: [
+    FormsModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
+    MatProgressBarModule,
+    MatSlideToggleModule,
+    PageHeaderComponent
+  ],
   templateUrl: './clinic-settings-list.component.html',
   styleUrl: './clinic-settings-list.component.scss'
 })
@@ -23,7 +33,9 @@ export class ClinicSettingsListComponent {
   loading = signal(true);
   saving = signal(false);
   uploadingLogo = signal(false);
+  uploadingFavicon = signal(false);
   logoUrl = signal<string | null>(null);
+  faviconUrl = signal<string | null>(null);
 
   form = {
     name: '',
@@ -31,7 +43,17 @@ export class ClinicSettingsListComponent {
     phone: '',
     email: '',
     tinNo: '',
-    dlNo: ''
+    dlNo: '',
+    websiteEnabled: false,
+    domain: '',
+    themePrimaryColor: '',
+    themeSecondaryColor: '',
+    seoDefaultTitle: '',
+    seoDefaultDescription: '',
+    socialFacebookUrl: '',
+    socialInstagramUrl: '',
+    socialYoutubeUrl: '',
+    whatsappNumber: ''
   };
 
   constructor() {
@@ -43,9 +65,20 @@ export class ClinicSettingsListComponent {
           phone: settings.phone ?? '',
           email: settings.email ?? '',
           tinNo: settings.tinNo ?? '',
-          dlNo: settings.dlNo ?? ''
+          dlNo: settings.dlNo ?? '',
+          websiteEnabled: settings.websiteEnabled,
+          domain: settings.domain ?? '',
+          themePrimaryColor: settings.themePrimaryColor ?? '',
+          themeSecondaryColor: settings.themeSecondaryColor ?? '',
+          seoDefaultTitle: settings.seoDefaultTitle ?? '',
+          seoDefaultDescription: settings.seoDefaultDescription ?? '',
+          socialFacebookUrl: settings.socialFacebookUrl ?? '',
+          socialInstagramUrl: settings.socialInstagramUrl ?? '',
+          socialYoutubeUrl: settings.socialYoutubeUrl ?? '',
+          whatsappNumber: settings.whatsappNumber ?? ''
         };
         this.logoUrl.set(settings.logoUrl);
+        this.faviconUrl.set(settings.faviconUrl);
         this.loading.set(false);
       },
       error: () => {
@@ -79,6 +112,26 @@ export class ClinicSettingsListComponent {
     });
   }
 
+  onFaviconSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    if (!file) {
+      return;
+    }
+    this.uploadingFavicon.set(true);
+    this.service.uploadFavicon(file).subscribe({
+      next: (settings) => {
+        this.faviconUrl.set(settings.faviconUrl);
+        this.uploadingFavicon.set(false);
+        this.notification.success('Favicon updated.');
+      },
+      error: () => {
+        this.uploadingFavicon.set(false);
+        this.notification.error('Failed to upload favicon.');
+      }
+    });
+  }
+
   save(): void {
     if (!this.isValid) {
       return;
@@ -91,7 +144,17 @@ export class ClinicSettingsListComponent {
         phone: this.form.phone.trim() || null,
         email: this.form.email.trim() || null,
         tinNo: this.form.tinNo.trim() || null,
-        dlNo: this.form.dlNo.trim() || null
+        dlNo: this.form.dlNo.trim() || null,
+        websiteEnabled: this.form.websiteEnabled,
+        domain: this.form.domain.trim() || null,
+        themePrimaryColor: this.form.themePrimaryColor.trim() || null,
+        themeSecondaryColor: this.form.themeSecondaryColor.trim() || null,
+        seoDefaultTitle: this.form.seoDefaultTitle.trim() || null,
+        seoDefaultDescription: this.form.seoDefaultDescription.trim() || null,
+        socialFacebookUrl: this.form.socialFacebookUrl.trim() || null,
+        socialInstagramUrl: this.form.socialInstagramUrl.trim() || null,
+        socialYoutubeUrl: this.form.socialYoutubeUrl.trim() || null,
+        whatsappNumber: this.form.whatsappNumber.trim() || null
       })
       .subscribe({
         next: () => {

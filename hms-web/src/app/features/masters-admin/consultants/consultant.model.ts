@@ -13,6 +13,7 @@ export interface Consultant {
   acceptingAppointments: boolean;
   imageUrl: string | null;
   active: boolean;
+  publishedToWeb: boolean;
   createdAt: string | null;
   createdBy: string | null;
   updatedAt: string | null;

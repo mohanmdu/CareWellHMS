@@ -49,6 +49,70 @@
           <textarea matInput name="address" rows="2" [(ngModel)]="form.address"></textarea>
         </mat-form-field>
 
+        <h2 class="clinic-settings-section-title">Website</h2>
+
+        <mat-slide-toggle name="websiteEnabled" [(ngModel)]="form.websiteEnabled" class="clinic-website-toggle">
+          Website enabled
+        </mat-slide-toggle>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Domain</mat-label>
+          <input matInput name="domain" [(ngModel)]="form.domain" placeholder="www.example-hospital.com" />
+        </mat-form-field>
+
+        <div class="clinic-favicon-row">
+          @if (faviconUrl()) {
+            <img [src]="faviconUrl()" alt="" class="clinic-favicon-preview" />
+          } @else {
+            <mat-icon aria-hidden="true" class="clinic-logo-fallback">image</mat-icon>
+          }
+          <button mat-stroked-button type="button" [disabled]="uploadingFavicon()" (click)="faviconInput.click()">
+            <mat-icon aria-hidden="true">upload</mat-icon>
+            {{ uploadingFavicon() ? 'Uploading…' : 'Change favicon' }}
+          </button>
+          <input #faviconInput type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="onFaviconSelected($event)" />
+        </div>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Theme primary color</mat-label>
+          <input matInput type="color" name="themePrimaryColor" [(ngModel)]="form.themePrimaryColor" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Theme secondary color</mat-label>
+          <input matInput type="color" name="themeSecondaryColor" [(ngModel)]="form.themeSecondaryColor" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>SEO default title</mat-label>
+          <input matInput name="seoDefaultTitle" [(ngModel)]="form.seoDefaultTitle" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="clinic-address-field">
+          <mat-label>SEO default description</mat-label>
+          <textarea matInput name="seoDefaultDescription" rows="2" [(ngModel)]="form.seoDefaultDescription"></textarea>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Facebook URL</mat-label>
+          <input matInput name="socialFacebookUrl" [(ngModel)]="form.socialFacebookUrl" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Instagram URL</mat-label>
+          <input matInput name="socialInstagramUrl" [(ngModel)]="form.socialInstagramUrl" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>YouTube URL</mat-label>
+          <input matInput name="socialYoutubeUrl" [(ngModel)]="form.socialYoutubeUrl" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>WhatsApp number</mat-label>
+          <input matInput name="whatsappNumber" [(ngModel)]="form.whatsappNumber" />
+        </mat-form-field>
+
         <div class="clinic-settings-submit">
           <button mat-flat-button color="primary" type="submit" [disabled]="!isValid || saving()">Save</button>
         </div>

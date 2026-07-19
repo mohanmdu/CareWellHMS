@@ -53,7 +53,7 @@ export class DepartmentListComponent {
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly router = inject(Router);
 
-  readonly activeColumns = ['name', 'createdAt', 'createdBy', 'consultants', 'actions'];
+  readonly activeColumns = ['name', 'createdAt', 'createdBy', 'consultants', 'website', 'actions'];
   readonly inactiveColumns = ['name', 'deactivatedAt', 'deactivatedBy', 'consultants', 'actions'];
 
   activeDepartments = signal<Department[]>([]);
@@ -182,5 +182,21 @@ export class DepartmentListComponent {
 
   viewConsultants(department: Department): void {
     this.router.navigate(['/masters/consultants'], { queryParams: { departmentId: department.id } });
+  }
+
+  togglePublish(department: Department): void {
+    if (department.id === null) {
+      return;
+    }
+    const request = department.publishedToWeb ? this.service.unpublish(department.id) : this.service.publish(department.id);
+    request.subscribe({
+      next: () => {
+        this.notification.success(
+          department.publishedToWeb ? 'Department removed from website.' : 'Department published to website.'
+        );
+        this.refreshActive();
+      },
+      error: () => this.notification.error('Failed to update website visibility.')
+    });
   }
 }

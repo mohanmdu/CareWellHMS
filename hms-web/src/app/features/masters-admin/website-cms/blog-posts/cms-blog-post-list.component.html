@@ -1,0 +1,134 @@
+<div class="hms-page">
+  <app-page-header title="Website Blog Posts" subtitle="Blog articles shown on the public website." />
+
+  <section class="hms-card-surface cms-blog-post-form">
+    <form class="hms-inline-actions" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Title</mat-label>
+        <input matInput name="title" [(ngModel)]="form.title" (ngModelChange)="onTitleChange()" required />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Slug</mat-label>
+        <input matInput name="slug" [(ngModel)]="form.slug" (ngModelChange)="onSlugChange()" required />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="cms-blog-post-wide-field">
+        <mat-label>Body</mat-label>
+        <input matInput name="body" [(ngModel)]="form.body" />
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="submit" [disabled]="saving() || !form.title.trim() || !form.slug.trim()">
+        <mat-icon aria-hidden="true">{{ editingId() !== null ? 'save' : 'add' }}</mat-icon>
+        {{ editingId() !== null ? 'Update' : 'Add' }}
+      </button>
+      @if (editingId() !== null) {
+        <button mat-stroked-button type="button" (click)="clear()">Clear</button>
+      }
+    </form>
+  </section>
+
+  <section class="hms-card-surface cms-blog-post-section">
+    <h2 class="cms-blog-post-section-title">Active Blog Posts</h2>
+    @if (loadingActive()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+    @if (!loadingActive() && activeItems().length === 0) {
+      <app-empty-state icon="article" title="No blog posts yet" message="Add the first post above." />
+    } @else if (activeItems().length > 0) {
+      <div class="cms-blog-post-table-wrap">
+        <table mat-table [dataSource]="activeItems()" class="cms-blog-post-table">
+          <ng-container matColumnDef="image">
+            <th mat-header-cell *matHeaderCellDef>Cover</th>
+            <td mat-cell *matCellDef="let item">
+              @if (item.coverImagePath) {
+                <img [src]="item.coverImagePath" alt="" class="cms-blog-post-thumb" />
+              } @else {
+                <mat-icon aria-hidden="true" class="cms-blog-post-thumb-fallback">image</mat-icon>
+              }
+              <button
+                mat-icon-button
+                type="button"
+                [attr.aria-label]="'Upload cover image for ' + item.title"
+                [disabled]="uploadingId() === item.id"
+                (click)="rowFileInput.click()"
+              >
+                <mat-icon aria-hidden="true">upload</mat-icon>
+              </button>
+              <input #rowFileInput type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="onImageSelected(item, $event)" />
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef>Title</th>
+            <td mat-cell *matCellDef="let item">{{ item.title }}</td>
+          </ng-container>
+          <ng-container matColumnDef="slug">
+            <th mat-header-cell *matHeaderCellDef>Slug</th>
+            <td mat-cell *matCellDef="let item">{{ item.slug }}</td>
+          </ng-container>
+          <ng-container matColumnDef="publishedAt">
+            <th mat-header-cell *matHeaderCellDef>Published</th>
+            <td mat-cell *matCellDef="let item">{{ item.publishedAt | date: 'medium' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="cms-blog-post-actions-header"></th>
+            <td mat-cell *matCellDef="let item" class="cms-blog-post-actions-cell">
+              <div class="cms-blog-post-actions-row">
+                <button mat-icon-button type="button" [attr.aria-label]="'Edit ' + item.title" (click)="edit(item)">
+                  <mat-icon aria-hidden="true">edit</mat-icon>
+                </button>
+                <button mat-icon-button type="button" color="warn" [attr.aria-label]="'Deactivate ' + item.title" (click)="deactivate(item)">
+                  <mat-icon aria-hidden="true">delete</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="activeColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: activeColumns"></tr>
+        </table>
+      </div>
+    }
+  </section>
+
+  <section class="hms-card-surface cms-blog-post-section">
+    <h2 class="cms-blog-post-section-title">Deactivated Blog Posts</h2>
+    @if (loadingInactive()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+    @if (!loadingInactive() && inactiveItems().length === 0) {
+      <app-empty-state icon="inbox" title="No deactivated blog posts" message="Deactivated posts will appear here." />
+    } @else if (inactiveItems().length > 0) {
+      <div class="cms-blog-post-table-wrap">
+        <table mat-table [dataSource]="inactiveItems()" class="cms-blog-post-table">
+          <ng-container matColumnDef="image">
+            <th mat-header-cell *matHeaderCellDef>Cover</th>
+            <td mat-cell *matCellDef="let item">
+              @if (item.coverImagePath) {
+                <img [src]="item.coverImagePath" alt="" class="cms-blog-post-thumb" />
+              } @else {
+                <mat-icon aria-hidden="true" class="cms-blog-post-thumb-fallback">image</mat-icon>
+              }
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef>Title</th>
+            <td mat-cell *matCellDef="let item">{{ item.title }}</td>
+          </ng-container>
+          <ng-container matColumnDef="slug">
+            <th mat-header-cell *matHeaderCellDef>Slug</th>
+            <td mat-cell *matCellDef="let item">{{ item.slug }}</td>
+          </ng-container>
+          <ng-container matColumnDef="publishedAt">
+            <th mat-header-cell *matHeaderCellDef>Published</th>
+            <td mat-cell *matCellDef="let item">{{ item.publishedAt | date: 'medium' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="cms-blog-post-actions-header"></th>
+            <td mat-cell *matCellDef="let item" class="cms-blog-post-actions-cell">
+              <button mat-stroked-button color="primary" type="button" (click)="restore(item)">Activate</button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="inactiveColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: inactiveColumns"></tr>
+        </table>
+      </div>
+    }
+  </section>
+</div>

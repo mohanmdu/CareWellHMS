@@ -38,4 +38,12 @@ export class DepartmentService {
   restore(id: number): Observable<void> {
     return this.http.patch<void>(`${this.baseUrl}/${id}/restore`, {});
   }
+
+  publish(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${id}/publish`, {});
+  }
+
+  unpublish(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${id}/unpublish`, {});
+  }
 }

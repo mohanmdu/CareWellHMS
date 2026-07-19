@@ -10,4 +10,6 @@ public interface DepartmentRepository extends JpaRepository<Department, Long> {
     List<Department> findByActiveTrueOrderByNameAsc();
 
     List<Department> findByActiveFalseOrderByUpdatedAtDesc();
+
+    List<Department> findByActiveTrueAndPublishedToWebTrueOrderByNameAsc();
 }

@@ -93,6 +93,20 @@ public class DepartmentService {
         recordAudit(department, RESTORE);
     }
 
+    @Transactional
+    public void publish(Long id) {
+        Department department = getOrThrow(id);
+        department.setPublishedToWeb(true);
+        repository.save(department);
+    }
+
+    @Transactional
+    public void unpublish(Long id) {
+        Department department = getOrThrow(id);
+        department.setPublishedToWeb(false);
+        repository.save(department);
+    }
+
     private void recordAudit(Department department, String operation) {
         auditLogRepository.save(
                 new DepartmentAuditLog(department.getId(), department.getName(), operation, currentUsername()));
@@ -129,6 +143,7 @@ public class DepartmentService {
                 department.getId(),
                 department.getName(),
                 department.isActive(),
+                department.isPublishedToWeb(),
                 department.getCreatedAt(),
                 created != null ? created.getPerformedBy() : null,
                 deactivated != null ? deactivated.getPerformedAt() : null,

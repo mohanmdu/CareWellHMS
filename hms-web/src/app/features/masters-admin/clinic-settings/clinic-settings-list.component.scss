@@ -30,6 +30,32 @@
   grid-column: 1 / -1;
 }
 
+.clinic-settings-section-title {
+  grid-column: 1 / -1;
+  font-size: var(--hms-font-size-lg);
+  margin: 0;
+  padding-top: var(--hms-space-3);
+  border-top: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
+}
+
+.clinic-website-toggle {
+  grid-column: 1 / -1;
+}
+
+.clinic-favicon-row {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-3);
+}
+
+.clinic-favicon-preview {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
+  border-radius: var(--hms-radius-md, 8px);
+}
+
 .clinic-settings-submit {
   display: flex;
   align-items: center;

@@ -10,4 +10,6 @@ public interface ConsultantRepository extends JpaRepository<Consultant, Long> {
     List<Consultant> findByActiveTrueOrderByNameAsc();
 
     List<Consultant> findByActiveFalseOrderByUpdatedAtDesc();
+
+    List<Consultant> findByActiveTrueAndPublishedToWebTrueOrderByNameAsc();
 }

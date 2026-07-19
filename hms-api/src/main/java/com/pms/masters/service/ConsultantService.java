@@ -100,6 +100,20 @@ public class ConsultantService {
     }
 
     @Transactional
+    public void publish(Long id) {
+        Consultant consultant = getOrThrow(id);
+        consultant.setPublishedToWeb(true);
+        repository.save(consultant);
+    }
+
+    @Transactional
+    public void unpublish(Long id) {
+        Consultant consultant = getOrThrow(id);
+        consultant.setPublishedToWeb(false);
+        repository.save(consultant);
+    }
+
+    @Transactional
     public ConsultantDto uploadImage(Long id, MultipartFile file) {
         Consultant consultant = getOrThrow(id);
         String imagePath = fileStorageService.store(file, "consultants");
@@ -182,6 +196,7 @@ public class ConsultantService {
                 consultant.isAcceptingAppointments(),
                 consultant.getImagePath(),
                 consultant.isActive(),
+                consultant.isPublishedToWeb(),
                 consultant.getCreatedAt(),
                 created != null ? created.getPerformedBy() : null,
                 updated != null ? updated.getPerformedAt() : null,

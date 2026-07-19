@@ -1,0 +1,138 @@
+<div class="hms-page">
+  <app-page-header title="Website Testimonials" subtitle="Patient testimonials shown on the public website." />
+
+  <section class="hms-card-surface cms-testimonial-form">
+    <form class="hms-inline-actions" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Patient Name</mat-label>
+        <input matInput name="patientName" [(ngModel)]="form.patientName" required />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="cms-testimonial-quote-field">
+        <mat-label>Quote</mat-label>
+        <input matInput name="quote" [(ngModel)]="form.quote" required />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="cms-testimonial-rating-field" subscriptSizing="dynamic">
+        <mat-label>Rating</mat-label>
+        <mat-select name="rating" [(ngModel)]="form.rating">
+          @for (option of ratingOptions; track option) {
+            <mat-option [value]="option">{{ option }} Star{{ option > 1 ? 's' : '' }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="submit" [disabled]="saving() || !form.patientName.trim() || !form.quote.trim()">
+        <mat-icon aria-hidden="true">{{ editingId() !== null ? 'save' : 'add' }}</mat-icon>
+        {{ editingId() !== null ? 'Update' : 'Add' }}
+      </button>
+      @if (editingId() !== null) {
+        <button mat-stroked-button type="button" (click)="clear()">Clear</button>
+      }
+    </form>
+  </section>
+
+  <section class="hms-card-surface cms-testimonial-section">
+    <h2 class="cms-testimonial-section-title">Active Testimonials</h2>
+    @if (loadingActive()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+    @if (!loadingActive() && activeItems().length === 0) {
+      <app-empty-state icon="format_quote" title="No testimonials yet" message="Add the first testimonial above." />
+    } @else if (activeItems().length > 0) {
+      <div class="cms-testimonial-table-wrap">
+        <table mat-table [dataSource]="activeItems()" class="cms-testimonial-table">
+          <ng-container matColumnDef="photo">
+            <th mat-header-cell *matHeaderCellDef>Photo</th>
+            <td mat-cell *matCellDef="let item">
+              @if (item.photoPath) {
+                <img [src]="item.photoPath" alt="" class="cms-testimonial-thumb" />
+              } @else {
+                <mat-icon aria-hidden="true" class="cms-testimonial-thumb-fallback">account_circle</mat-icon>
+              }
+              <button
+                mat-icon-button
+                type="button"
+                [attr.aria-label]="'Upload photo for ' + item.patientName"
+                [disabled]="uploadingId() === item.id"
+                (click)="rowFileInput.click()"
+              >
+                <mat-icon aria-hidden="true">upload</mat-icon>
+              </button>
+              <input #rowFileInput type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="onImageSelected(item, $event)" />
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="patientName">
+            <th mat-header-cell *matHeaderCellDef>Patient Name</th>
+            <td mat-cell *matCellDef="let item">{{ item.patientName }}</td>
+          </ng-container>
+          <ng-container matColumnDef="rating">
+            <th mat-header-cell *matHeaderCellDef>Rating</th>
+            <td mat-cell *matCellDef="let item">{{ item.rating ?? '-' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="quote">
+            <th mat-header-cell *matHeaderCellDef>Quote</th>
+            <td mat-cell *matCellDef="let item">{{ item.quote }}</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="cms-testimonial-actions-header"></th>
+            <td mat-cell *matCellDef="let item" class="cms-testimonial-actions-cell">
+              <div class="cms-testimonial-actions-row">
+                <button mat-icon-button type="button" [attr.aria-label]="'Edit ' + item.patientName" (click)="edit(item)">
+                  <mat-icon aria-hidden="true">edit</mat-icon>
+                </button>
+                <button mat-icon-button type="button" color="warn" [attr.aria-label]="'Deactivate ' + item.patientName" (click)="deactivate(item)">
+                  <mat-icon aria-hidden="true">delete</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="activeColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: activeColumns"></tr>
+        </table>
+      </div>
+    }
+  </section>
+
+  <section class="hms-card-surface cms-testimonial-section">
+    <h2 class="cms-testimonial-section-title">Deactivated Testimonials</h2>
+    @if (loadingInactive()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+    @if (!loadingInactive() && inactiveItems().length === 0) {
+      <app-empty-state icon="inbox" title="No deactivated testimonials" message="Deactivated testimonials will appear here." />
+    } @else if (inactiveItems().length > 0) {
+      <div class="cms-testimonial-table-wrap">
+        <table mat-table [dataSource]="inactiveItems()" class="cms-testimonial-table">
+          <ng-container matColumnDef="photo">
+            <th mat-header-cell *matHeaderCellDef>Photo</th>
+            <td mat-cell *matCellDef="let item">
+              @if (item.photoPath) {
+                <img [src]="item.photoPath" alt="" class="cms-testimonial-thumb" />
+              } @else {
+                <mat-icon aria-hidden="true" class="cms-testimonial-thumb-fallback">account_circle</mat-icon>
+              }
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="patientName">
+            <th mat-header-cell *matHeaderCellDef>Patient Name</th>
+            <td mat-cell *matCellDef="let item">{{ item.patientName }}</td>
+          </ng-container>
+          <ng-container matColumnDef="rating">
+            <th mat-header-cell *matHeaderCellDef>Rating</th>
+            <td mat-cell *matCellDef="let item">{{ item.rating ?? '-' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="quote">
+            <th mat-header-cell *matHeaderCellDef>Quote</th>
+            <td mat-cell *matCellDef="let item">{{ item.quote }}</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="cms-testimonial-actions-header"></th>
+            <td mat-cell *matCellDef="let item" class="cms-testimonial-actions-cell">
+              <button mat-stroked-button color="primary" type="button" (click)="restore(item)">Activate</button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="inactiveColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: inactiveColumns"></tr>
+        </table>
+      </div>
+    }
+  </section>
+</div>

@@ -47,6 +47,14 @@ export class ConsultantService {
     return this.http.patch<void>(`${this.baseUrl}/${id}/restore`, {});
   }
 
+  publish(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${id}/publish`, {});
+  }
+
+  unpublish(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${id}/unpublish`, {});
+  }
+
   uploadImage(id: number, file: File): Observable<Consultant> {
     const formData = new FormData();
     formData.append('file', file);

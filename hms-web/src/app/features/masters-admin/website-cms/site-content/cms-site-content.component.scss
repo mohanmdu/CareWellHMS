@@ -1,0 +1,13 @@
+.cms-site-content-section {
+  padding: var(--hms-space-5);
+}
+
+.cms-site-content-field-wide {
+  grid-column: 1 / -1;
+}
+
+.cms-site-content-submit {
+  display: flex;
+  align-items: center;
+  grid-column: 1 / -1;
+}

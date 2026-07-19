@@ -30,4 +30,9 @@ public class ClinicSettingsController {
     public ClinicSettingsDto uploadLogo(@RequestParam("file") MultipartFile file) {
         return service.uploadLogo(file);
     }
+
+    @PostMapping("/favicon")
+    public ClinicSettingsDto uploadFavicon(@RequestParam("file") MultipartFile file) {
+        return service.uploadFavicon(file);
+    }
 }

@@ -34,6 +34,16 @@ public class ClinicSettingsService {
         settings.setEmail(dto.email());
         settings.setTinNo(dto.tinNo());
         settings.setDlNo(dto.dlNo());
+        settings.setWebsiteEnabled(dto.websiteEnabled() != null && dto.websiteEnabled());
+        settings.setDomain(dto.domain());
+        settings.setThemePrimaryColor(dto.themePrimaryColor());
+        settings.setThemeSecondaryColor(dto.themeSecondaryColor());
+        settings.setSeoDefaultTitle(dto.seoDefaultTitle());
+        settings.setSeoDefaultDescription(dto.seoDefaultDescription());
+        settings.setSocialFacebookUrl(dto.socialFacebookUrl());
+        settings.setSocialInstagramUrl(dto.socialInstagramUrl());
+        settings.setSocialYoutubeUrl(dto.socialYoutubeUrl());
+        settings.setWhatsappNumber(dto.whatsappNumber());
         return toDto(repository.save(settings));
     }
 
@@ -44,6 +54,13 @@ public class ClinicSettingsService {
         return toDto(repository.save(settings));
     }
 
+    @Transactional
+    public ClinicSettingsDto uploadFavicon(MultipartFile file) {
+        ClinicSettings settings = getOrThrow();
+        settings.setFaviconPath(fileStorageService.store(file, "clinic"));
+        return toDto(repository.save(settings));
+    }
+
     private ClinicSettings getOrThrow() {
         return repository.findById(ClinicSettings.SINGLETON_ID)
                 .orElseThrow(() -> new EntityNotFoundException("Clinic settings not found"));
@@ -51,7 +68,23 @@ public class ClinicSettingsService {
 
     private ClinicSettingsDto toDto(ClinicSettings settings) {
         return new ClinicSettingsDto(
-                settings.getName(), settings.getAddress(), settings.getPhone(), settings.getEmail(), settings.getLogoPath(),
-                settings.getTinNo(), settings.getDlNo());
+                settings.getName(),
+                settings.getAddress(),
+                settings.getPhone(),
+                settings.getEmail(),
+                settings.getLogoPath(),
+                settings.getTinNo(),
+                settings.getDlNo(),
+                settings.isWebsiteEnabled(),
+                settings.getDomain(),
+                settings.getThemePrimaryColor(),
+                settings.getThemeSecondaryColor(),
+                settings.getFaviconPath(),
+                settings.getSeoDefaultTitle(),
+                settings.getSeoDefaultDescription(),
+                settings.getSocialFacebookUrl(),
+                settings.getSocialInstagramUrl(),
+                settings.getSocialYoutubeUrl(),
+                settings.getWhatsappNumber());
     }
 }

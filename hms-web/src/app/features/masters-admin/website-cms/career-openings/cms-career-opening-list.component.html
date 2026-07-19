@@ -1,0 +1,113 @@
+<div class="hms-page">
+  <app-page-header title="Website Career Openings" subtitle="Job openings shown on the public website." />
+
+  <section class="hms-card-surface cms-career-opening-form">
+    <form class="hms-inline-actions" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Title</mat-label>
+        <input matInput name="title" [(ngModel)]="form.title" required />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Department</mat-label>
+        <mat-select name="departmentId" [(ngModel)]="form.departmentId">
+          <mat-option [value]="null">(Not department-specific)</mat-option>
+          @for (department of departments(); track department.id) {
+            <mat-option [value]="department.id">{{ department.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Apply Email</mat-label>
+        <input matInput name="applyEmail" [(ngModel)]="form.applyEmail" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="cms-career-opening-wide-field">
+        <mat-label>Description</mat-label>
+        <input matInput name="description" [(ngModel)]="form.description" />
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="submit" [disabled]="saving() || !form.title.trim()">
+        <mat-icon aria-hidden="true">{{ editingId() !== null ? 'save' : 'add' }}</mat-icon>
+        {{ editingId() !== null ? 'Update' : 'Add' }}
+      </button>
+      @if (editingId() !== null) {
+        <button mat-stroked-button type="button" (click)="clear()">Clear</button>
+      }
+    </form>
+  </section>
+
+  <section class="hms-card-surface cms-career-opening-section">
+    <h2 class="cms-career-opening-section-title">Active Openings</h2>
+    @if (loadingActive()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+    @if (!loadingActive() && activeItems().length === 0) {
+      <app-empty-state icon="work" title="No career openings yet" message="Add the first opening above." />
+    } @else if (activeItems().length > 0) {
+      <div class="cms-career-opening-table-wrap">
+        <table mat-table [dataSource]="activeItems()" class="cms-career-opening-table">
+          <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef>Title</th>
+            <td mat-cell *matCellDef="let item">{{ item.title }}</td>
+          </ng-container>
+          <ng-container matColumnDef="departmentName">
+            <th mat-header-cell *matHeaderCellDef>Department</th>
+            <td mat-cell *matCellDef="let item">{{ item.departmentName ?? '—' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="applyEmail">
+            <th mat-header-cell *matHeaderCellDef>Apply Email</th>
+            <td mat-cell *matCellDef="let item">{{ item.applyEmail ?? '—' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="cms-career-opening-actions-header"></th>
+            <td mat-cell *matCellDef="let item" class="cms-career-opening-actions-cell">
+              <div class="cms-career-opening-actions-row">
+                <button mat-icon-button type="button" [attr.aria-label]="'Edit ' + item.title" (click)="edit(item)">
+                  <mat-icon aria-hidden="true">edit</mat-icon>
+                </button>
+                <button mat-icon-button type="button" color="warn" [attr.aria-label]="'Deactivate ' + item.title" (click)="deactivate(item)">
+                  <mat-icon aria-hidden="true">delete</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="activeColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: activeColumns"></tr>
+        </table>
+      </div>
+    }
+  </section>
+
+  <section class="hms-card-surface cms-career-opening-section">
+    <h2 class="cms-career-opening-section-title">Deactivated Openings</h2>
+    @if (loadingInactive()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+    @if (!loadingInactive() && inactiveItems().length === 0) {
+      <app-empty-state icon="inbox" title="No deactivated career openings" message="Deactivated openings will appear here." />
+    } @else if (inactiveItems().length > 0) {
+      <div class="cms-career-opening-table-wrap">
+        <table mat-table [dataSource]="inactiveItems()" class="cms-career-opening-table">
+          <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef>Title</th>
+            <td mat-cell *matCellDef="let item">{{ item.title }}</td>
+          </ng-container>
+          <ng-container matColumnDef="departmentName">
+            <th mat-header-cell *matHeaderCellDef>Department</th>
+            <td mat-cell *matCellDef="let item">{{ item.departmentName ?? '—' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="applyEmail">
+            <th mat-header-cell *matHeaderCellDef>Apply Email</th>
+            <td mat-cell *matCellDef="let item">{{ item.applyEmail ?? '—' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="cms-career-opening-actions-header"></th>
+            <td mat-cell *matCellDef="let item" class="cms-career-opening-actions-cell">
+              <button mat-stroked-button color="primary" type="button" (click)="restore(item)">Activate</button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="inactiveColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: inactiveColumns"></tr>
+        </table>
+      </div>
+    }
+  </section>
+</div>

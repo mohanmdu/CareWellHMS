@@ -1,0 +1,46 @@
+.cms-health-package-form {
+  padding: var(--hms-space-4) var(--hms-space-5);
+  margin-bottom: var(--hms-space-4);
+}
+
+.cms-health-package-price-field {
+  width: 140px;
+}
+
+.cms-health-package-wide-field {
+  flex: 1.5;
+  min-width: 220px;
+}
+
+.cms-health-package-section {
+  margin-bottom: var(--hms-space-4);
+}
+
+.cms-health-package-section-title {
+  font-size: var(--hms-font-size-lg);
+  margin: 0 0 var(--hms-space-3);
+}
+
+.cms-health-package-table-wrap {
+  overflow-x: auto;
+}
+
+.cms-health-package-table {
+  width: 100%;
+}
+
+.cms-health-package-actions-cell {
+  text-align: right;
+}
+
+.cms-health-package-actions-row {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+  justify-content: flex-end;
+}
+
+.cms-health-package-actions-header {
+  width: 0;
+  white-space: nowrap;
+}

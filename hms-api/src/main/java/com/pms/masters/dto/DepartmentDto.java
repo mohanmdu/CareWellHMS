@@ -7,6 +7,7 @@ public record DepartmentDto(
         Long id,
         @NotBlank String name,
         Boolean active,
+        Boolean publishedToWeb,
         Instant createdAt,
         String createdBy,
         Instant deactivatedAt,

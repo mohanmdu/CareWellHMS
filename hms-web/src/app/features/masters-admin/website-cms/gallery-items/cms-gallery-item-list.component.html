@@ -1,0 +1,170 @@
+<div class="hms-page">
+  <app-page-header title="Website Gallery" subtitle="Photos and videos shown on the public website's gallery page." />
+
+  <section class="hms-card-surface cms-gallery-item-form">
+    <form class="hms-inline-actions" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Type</mat-label>
+        <mat-select name="type" [(ngModel)]="form.type">
+          <mat-option value="PHOTO">Photo</mat-option>
+          <mat-option value="VIDEO">Video</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Title</mat-label>
+        <input matInput name="title" [(ngModel)]="form.title" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Album</mat-label>
+        <input matInput name="album" [(ngModel)]="form.album" />
+      </mat-form-field>
+      @if (form.type === 'VIDEO') {
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="cms-gallery-item-url-field">
+          <mat-label>Video URL</mat-label>
+          <input matInput name="mediaPathOrUrl" [(ngModel)]="form.mediaPathOrUrl" placeholder="https://youtube.com/watch?v=..." required />
+        </mat-form-field>
+      } @else {
+        <p class="cms-gallery-item-photo-hint">Upload the photo from the table below after adding.</p>
+      }
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        [disabled]="saving() || (form.type === 'VIDEO' && !form.mediaPathOrUrl?.trim())"
+      >
+        <mat-icon aria-hidden="true">{{ editingId() !== null ? 'save' : 'add' }}</mat-icon>
+        {{ editingId() !== null ? 'Update' : 'Add' }}
+      </button>
+      @if (editingId() !== null) {
+        <button mat-stroked-button type="button" (click)="clear()">Clear</button>
+      }
+    </form>
+  </section>
+
+  <section class="hms-card-surface cms-gallery-item-section">
+    <h2 class="cms-gallery-item-section-title">Active Gallery Items</h2>
+    @if (loadingActive()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+    @if (!loadingActive() && activeItems().length === 0) {
+      <app-empty-state icon="photo_library" title="No gallery items yet" message="Add the first item above." />
+    } @else if (activeItems().length > 0) {
+      <div class="cms-gallery-item-table-wrap">
+        <table mat-table [dataSource]="activeItems()" class="cms-gallery-item-table">
+          <ng-container matColumnDef="media">
+            <th mat-header-cell *matHeaderCellDef>Media</th>
+            <td mat-cell *matCellDef="let item">
+              @if (item.type === 'PHOTO') {
+                @if (item.mediaPathOrUrl) {
+                  <img [src]="item.mediaPathOrUrl" alt="" class="cms-gallery-item-thumb" />
+                } @else {
+                  <mat-icon aria-hidden="true" class="cms-gallery-item-thumb-fallback">image</mat-icon>
+                }
+                <button
+                  mat-icon-button
+                  type="button"
+                  [attr.aria-label]="'Upload image for ' + (item.title ?? 'gallery item')"
+                  [disabled]="uploadingId() === item.id"
+                  (click)="rowFileInput.click()"
+                >
+                  <mat-icon aria-hidden="true">upload</mat-icon>
+                </button>
+                <input #rowFileInput type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="onImageSelected(item, $event)" />
+              } @else {
+                <a [href]="item.mediaPathOrUrl" target="_blank" rel="noopener" class="cms-gallery-item-video-link">
+                  <mat-icon aria-hidden="true">smart_display</mat-icon>
+                  Watch
+                </a>
+              }
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let item">{{ item.type === 'PHOTO' ? 'Photo' : 'Video' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef>Title</th>
+            <td mat-cell *matCellDef="let item">{{ item.title }}</td>
+          </ng-container>
+          <ng-container matColumnDef="album">
+            <th mat-header-cell *matHeaderCellDef>Album</th>
+            <td mat-cell *matCellDef="let item">{{ item.album }}</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="cms-gallery-item-actions-header"></th>
+            <td mat-cell *matCellDef="let item" class="cms-gallery-item-actions-cell">
+              <div class="cms-gallery-item-actions-row">
+                <button mat-icon-button type="button" [attr.aria-label]="'Edit ' + (item.title ?? 'gallery item')" (click)="edit(item)">
+                  <mat-icon aria-hidden="true">edit</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  type="button"
+                  color="warn"
+                  [attr.aria-label]="'Deactivate ' + (item.title ?? 'gallery item')"
+                  (click)="deactivate(item)"
+                >
+                  <mat-icon aria-hidden="true">delete</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="activeColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: activeColumns"></tr>
+        </table>
+      </div>
+    }
+  </section>
+
+  <section class="hms-card-surface cms-gallery-item-section">
+    <h2 class="cms-gallery-item-section-title">Deactivated Gallery Items</h2>
+    @if (loadingInactive()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+    @if (!loadingInactive() && inactiveItems().length === 0) {
+      <app-empty-state icon="inbox" title="No deactivated gallery items" message="Deactivated items will appear here." />
+    } @else if (inactiveItems().length > 0) {
+      <div class="cms-gallery-item-table-wrap">
+        <table mat-table [dataSource]="inactiveItems()" class="cms-gallery-item-table">
+          <ng-container matColumnDef="media">
+            <th mat-header-cell *matHeaderCellDef>Media</th>
+            <td mat-cell *matCellDef="let item">
+              @if (item.type === 'PHOTO') {
+                @if (item.mediaPathOrUrl) {
+                  <img [src]="item.mediaPathOrUrl" alt="" class="cms-gallery-item-thumb" />
+                } @else {
+                  <mat-icon aria-hidden="true" class="cms-gallery-item-thumb-fallback">image</mat-icon>
+                }
+              } @else {
+                <a [href]="item.mediaPathOrUrl" target="_blank" rel="noopener" class="cms-gallery-item-video-link">
+                  <mat-icon aria-hidden="true">smart_display</mat-icon>
+                  Watch
+                </a>
+              }
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let item">{{ item.type === 'PHOTO' ? 'Photo' : 'Video' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef>Title</th>
+            <td mat-cell *matCellDef="let item">{{ item.title }}</td>
+          </ng-container>
+          <ng-container matColumnDef="album">
+            <th mat-header-cell *matHeaderCellDef>Album</th>
+            <td mat-cell *matCellDef="let item">{{ item.album }}</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="cms-gallery-item-actions-header"></th>
+            <td mat-cell *matCellDef="let item" class="cms-gallery-item-actions-cell">
+              <button mat-stroked-button color="primary" type="button" (click)="restore(item)">Activate</button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="inactiveColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: inactiveColumns"></tr>
+        </table>
+      </div>
+    }
+  </section>
+</div>

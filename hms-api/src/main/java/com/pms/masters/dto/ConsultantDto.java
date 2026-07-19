@@ -23,6 +23,7 @@ public record ConsultantDto(
         Boolean acceptingAppointments,
         String imageUrl,
         Boolean active,
+        Boolean publishedToWeb,
         Instant createdAt,
         String createdBy,
         Instant updatedAt,

@@ -57,6 +57,18 @@ public class ConsultantController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/{id}/publish")
+    public ResponseEntity<Void> publish(@PathVariable Long id) {
+        service.publish(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/unpublish")
+    public ResponseEntity<Void> unpublish(@PathVariable Long id) {
+        service.unpublish(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/{id}/image")
     public ConsultantDto uploadImage(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
         return service.uploadImage(id, file);

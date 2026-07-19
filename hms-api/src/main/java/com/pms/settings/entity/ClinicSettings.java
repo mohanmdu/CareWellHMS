@@ -45,4 +45,36 @@ public class ClinicSettings {
 
     @Column(name = "dl_no", length = 50)
     private String dlNo;
+
+    @Column(name = "website_enabled", nullable = false)
+    private boolean websiteEnabled = false;
+
+    private String domain;
+
+    @Column(name = "theme_primary_color", length = 9)
+    private String themePrimaryColor;
+
+    @Column(name = "theme_secondary_color", length = 9)
+    private String themeSecondaryColor;
+
+    @Column(name = "favicon_path")
+    private String faviconPath;
+
+    @Column(name = "seo_default_title")
+    private String seoDefaultTitle;
+
+    @Column(name = "seo_default_description", length = 500)
+    private String seoDefaultDescription;
+
+    @Column(name = "social_facebook_url")
+    private String socialFacebookUrl;
+
+    @Column(name = "social_instagram_url")
+    private String socialInstagramUrl;
+
+    @Column(name = "social_youtube_url")
+    private String socialYoutubeUrl;
+
+    @Column(name = "whatsapp_number", length = 20)
+    private String whatsappNumber;
 }

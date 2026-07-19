@@ -4,7 +4,25 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ClinicSettings } from './clinic-settings.model';
 
-export type ClinicSettingsInput = Pick<ClinicSettings, 'name' | 'address' | 'phone' | 'email' | 'tinNo' | 'dlNo'>;
+export type ClinicSettingsInput = Pick<
+  ClinicSettings,
+  | 'name'
+  | 'address'
+  | 'phone'
+  | 'email'
+  | 'tinNo'
+  | 'dlNo'
+  | 'websiteEnabled'
+  | 'domain'
+  | 'themePrimaryColor'
+  | 'themeSecondaryColor'
+  | 'seoDefaultTitle'
+  | 'seoDefaultDescription'
+  | 'socialFacebookUrl'
+  | 'socialInstagramUrl'
+  | 'socialYoutubeUrl'
+  | 'whatsappNumber'
+>;
 
 /**
  * Hospital branding shown on printed receipts - this product deploys to
@@ -28,5 +46,11 @@ export class ClinicSettingsService {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<ClinicSettings>(`${this.baseUrl}/logo`, formData);
+  }
+
+  uploadFavicon(file: File): Observable<ClinicSettings> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<ClinicSettings>(`${this.baseUrl}/favicon`, formData);
   }
 }

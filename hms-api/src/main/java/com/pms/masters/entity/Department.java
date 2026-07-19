@@ -33,4 +33,7 @@ public class Department extends Auditable {
 
     @Column(nullable = false)
     private boolean active = true;
+
+    @Column(name = "published_to_web", nullable = false)
+    private boolean publishedToWeb = false;
 }

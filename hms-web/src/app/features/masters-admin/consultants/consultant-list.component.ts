@@ -58,7 +58,7 @@ export class ConsultantListComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
-  readonly activeColumns = ['name', 'department', 'fee', 'timings', 'edit', 'deactivate', 'createdBy', 'updatedBy'];
+  readonly activeColumns = ['name', 'department', 'fee', 'website', 'timings', 'edit', 'deactivate', 'createdBy', 'updatedBy'];
   readonly inactiveColumns = ['name', 'department', 'deactivatedAt', 'deactivatedBy', 'actions'];
 
   activeConsultants = signal<Consultant[]>([]);
@@ -259,6 +259,22 @@ export class ConsultantListComponent {
         this.refreshInactive();
       },
       error: () => this.notification.error('Failed to restore consultant.')
+    });
+  }
+
+  togglePublish(consultant: Consultant): void {
+    if (consultant.id === null) {
+      return;
+    }
+    const request = consultant.publishedToWeb ? this.service.unpublish(consultant.id) : this.service.publish(consultant.id);
+    request.subscribe({
+      next: () => {
+        this.notification.success(
+          consultant.publishedToWeb ? 'Consultant removed from website.' : 'Consultant published to website.'
+        );
+        this.refreshActive();
+      },
+      error: () => this.notification.error('Failed to update website visibility.')
     });
   }
 }
