@@ -1,0 +1,18 @@
+<app-page-header title="Frequently Asked Questions" />
+
+<div class="container section faq-section">
+  @if (loaded() && faqs().length === 0) {
+    <p class="empty-state">No FAQs have been published yet.</p>
+  }
+  @for (faq of faqs(); track faq.id) {
+    <div class="faq-item">
+      <button type="button" class="faq-question" (click)="toggle(faq.id)" [attr.aria-expanded]="openId() === faq.id">
+        <span>{{ faq.question }}</span>
+        <span class="faq-icon">{{ openId() === faq.id ? '−' : '+' }}</span>
+      </button>
+      @if (openId() === faq.id) {
+        <p class="faq-answer">{{ faq.answer }}</p>
+      }
+    </div>
+  }
+</div>

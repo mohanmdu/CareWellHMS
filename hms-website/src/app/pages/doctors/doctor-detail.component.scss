@@ -1,0 +1,44 @@
+.doctor-detail-header {
+  display: flex;
+  gap: var(--space-5);
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin-bottom: var(--space-5);
+}
+
+.doctor-detail-photo {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.doctor-detail-photo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--theme-primary);
+  color: #fff;
+  font-size: 3rem;
+  font-weight: 700;
+}
+
+.doctor-detail-specialization {
+  color: var(--theme-primary);
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+}
+
+.doctor-detail-department {
+  color: var(--color-text-muted);
+}
+
+.doctor-detail-fee {
+  font-weight: 600;
+}
+
+.doctor-detail-profile {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-4);
+}

@@ -1,0 +1,26 @@
+<app-page-header title="Patient Testimonials" subtitle="What our patients say about us." />
+
+<div class="container section">
+  @if (loaded() && testimonials().length === 0) {
+    <p class="empty-state">No testimonials have been published yet.</p>
+  } @else {
+    <div class="grid grid-3">
+      @for (testimonial of testimonials(); track testimonial.id) {
+        <div class="card testimonial-card">
+          @if (testimonial.imageUrl) {
+            <img [src]="testimonial.imageUrl" [alt]="testimonial.patientName" class="testimonial-photo" />
+          }
+          @if (testimonial.rating) {
+            <div class="testimonial-rating" aria-hidden="true">
+              @for (star of stars(testimonial.rating); track $index) {
+                <span>&#9733;</span>
+              }
+            </div>
+          }
+          <p class="testimonial-quote">&ldquo;{{ testimonial.quote }}&rdquo;</p>
+          <p class="testimonial-name">{{ testimonial.patientName }}</p>
+        </div>
+      }
+    </div>
+  }
+</div>

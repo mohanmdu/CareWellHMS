@@ -1,0 +1,49 @@
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div>
+      <h3 class="footer-heading">{{ config()?.name ?? 'Hospital' }}</h3>
+      @if (config()?.address) {
+        <p>{{ config()?.address }}</p>
+      }
+      @if (config()?.phone) {
+        <p><a [href]="'tel:' + config()?.phone">{{ config()?.phone }}</a></p>
+      }
+      @if (config()?.email) {
+        <p><a [href]="'mailto:' + config()?.email">{{ config()?.email }}</a></p>
+      }
+    </div>
+
+    <div>
+      <h3 class="footer-heading">Quick Links</h3>
+      <ul class="footer-links">
+        <li><a routerLink="/departments">Departments</a></li>
+        <li><a routerLink="/doctors">Doctors</a></li>
+        <li><a routerLink="/health-packages">Health Packages</a></li>
+        <li><a routerLink="/careers">Careers</a></li>
+        <li><a routerLink="/faq">FAQ</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h3 class="footer-heading">Connect</h3>
+      <ul class="footer-links">
+        @if (config()?.whatsappNumber) {
+          <li><a [href]="whatsappLink(config()!.whatsappNumber!)" target="_blank" rel="noopener">WhatsApp</a></li>
+        }
+        @if (config()?.socialFacebookUrl) {
+          <li><a [href]="config()?.socialFacebookUrl" target="_blank" rel="noopener">Facebook</a></li>
+        }
+        @if (config()?.socialInstagramUrl) {
+          <li><a [href]="config()?.socialInstagramUrl" target="_blank" rel="noopener">Instagram</a></li>
+        }
+        @if (config()?.socialYoutubeUrl) {
+          <li><a [href]="config()?.socialYoutubeUrl" target="_blank" rel="noopener">YouTube</a></li>
+        }
+      </ul>
+    </div>
+  </div>
+
+  <div class="container footer-bottom">
+    <p>&copy; {{ currentYear }} {{ config()?.name ?? 'Hospital' }}. All rights reserved.</p>
+  </div>
+</footer>

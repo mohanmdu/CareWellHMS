@@ -1,0 +1,25 @@
+.testimonial-card {
+  text-align: center;
+}
+
+.testimonial-photo {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto var(--space-3);
+}
+
+.testimonial-rating {
+  color: #f5a623;
+  margin-bottom: var(--space-2);
+}
+
+.testimonial-quote {
+  font-style: italic;
+}
+
+.testimonial-name {
+  font-weight: 600;
+  margin: 0;
+}

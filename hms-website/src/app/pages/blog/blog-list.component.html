@@ -1,0 +1,21 @@
+<app-page-header title="Blog" subtitle="Health tips and articles from our medical team." />
+
+<div class="container section">
+  @if (loaded() && posts().length === 0) {
+    <p class="empty-state">No blog posts have been published yet.</p>
+  } @else {
+    <div class="grid grid-3">
+      @for (post of posts(); track post.id) {
+        <a class="card blog-card" [routerLink]="['/blog', post.slug]">
+          @if (post.imageUrl) {
+            <img [src]="post.imageUrl" [alt]="post.title" class="blog-image" />
+          }
+          @if (post.publishedAt) {
+            <p class="blog-date">{{ post.publishedAt | date: 'longDate' }}</p>
+          }
+          <h3>{{ post.title }}</h3>
+        </a>
+      }
+    </div>
+  }
+</div>

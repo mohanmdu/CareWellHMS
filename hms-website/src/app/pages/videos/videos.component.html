@@ -1,0 +1,16 @@
+<app-page-header title="Videos" subtitle="Hospital tours, patient stories and health awareness videos." />
+
+<div class="container section">
+  @if (loaded() && items().length === 0) {
+    <p class="empty-state">No videos have been published yet.</p>
+  } @else {
+    <div class="grid grid-3">
+      @for (item of items(); track item.id) {
+        <a class="card video-card" [href]="item.mediaUrl" target="_blank" rel="noopener">
+          <span class="video-play" aria-hidden="true">&#9658;</span>
+          <h3>{{ item.title ?? 'Watch video' }}</h3>
+        </a>
+      }
+    </div>
+  }
+</div>

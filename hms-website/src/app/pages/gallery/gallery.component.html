@@ -1,0 +1,20 @@
+<app-page-header title="Gallery" subtitle="A look inside our hospital and facilities." />
+
+<div class="container section">
+  @if (loaded() && items().length === 0) {
+    <p class="empty-state">No photos have been published yet.</p>
+  } @else {
+    <div class="gallery-grid">
+      @for (item of items(); track item.id) {
+        <figure class="gallery-item">
+          @if (item.mediaUrl) {
+            <img [src]="item.mediaUrl" [alt]="item.title ?? 'Gallery photo'" />
+          }
+          @if (item.title) {
+            <figcaption>{{ item.title }}</figcaption>
+          }
+        </figure>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,27 @@
+<app-page-header title="About Us" subtitle="Our story, mission and vision." />
+
+<div class="container section">
+  @if (content(); as c) {
+    @if (c.aboutUsBody) {
+      <section class="about-block">
+        <h2>Who We Are</h2>
+        <p>{{ c.aboutUsBody }}</p>
+      </section>
+    }
+
+    <div class="grid grid-2 about-mission-vision">
+      @if (c.missionBody) {
+        <div class="card">
+          <h2>Our Mission</h2>
+          <p>{{ c.missionBody }}</p>
+        </div>
+      }
+      @if (c.visionBody) {
+        <div class="card">
+          <h2>Our Vision</h2>
+          <p>{{ c.visionBody }}</p>
+        </div>
+      }
+    </div>
+  }
+</div>

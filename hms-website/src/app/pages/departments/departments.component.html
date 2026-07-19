@@ -1,0 +1,16 @@
+<app-page-header title="Departments" subtitle="Explore our clinical departments." />
+
+<div class="container section">
+  @if (loaded() && departments().length === 0) {
+    <p class="empty-state">Department information will be available here soon.</p>
+  } @else {
+    <div class="grid grid-3">
+      @for (department of departments(); track department.id) {
+        <a class="card department-card" [routerLink]="['/doctors']" [queryParams]="{ departmentId: department.id }">
+          <h3>{{ department.name }}</h3>
+          <span class="department-card-link">View doctors &rarr;</span>
+        </a>
+      }
+    </div>
+  }
+</div>

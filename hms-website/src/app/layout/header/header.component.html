@@ -1,0 +1,27 @@
+<a class="skip-link" href="#main-content">Skip to content</a>
+
+<header class="site-header">
+  <div class="container site-header-bar">
+    <a routerLink="/" class="site-brand" (click)="closeNav()">
+      @if (config()?.logoUrl) {
+        <img [src]="config()!.logoUrl" [alt]="config()?.name ?? 'Hospital logo'" class="site-brand-logo" />
+      }
+      <span class="site-brand-name">{{ config()?.name ?? 'Hospital' }}</span>
+    </a>
+
+    <button type="button" class="nav-toggle" [attr.aria-expanded]="navOpen()" aria-label="Toggle navigation" (click)="toggleNav()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <nav class="site-nav" [class.site-nav-open]="navOpen()">
+      @for (link of navLinks; track link.path) {
+        <a [routerLink]="link.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: link.path === '/' }" (click)="closeNav()">{{
+          link.label
+        }}</a>
+      }
+      <a routerLink="/book-appointment" class="btn btn-primary nav-cta" (click)="closeNav()">Book Appointment</a>
+    </nav>
+  </div>
+</header>

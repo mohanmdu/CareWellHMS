@@ -1,0 +1,102 @@
+@if (slides().length > 0) {
+  <section class="hero">
+    @for (slide of slides(); track slide.id; let i = $index) {
+      <div class="hero-slide" [class.hero-slide-active]="i === activeSlide()">
+        @if (slide.imageUrl) {
+          <img [src]="slide.imageUrl" [alt]="slide.title" class="hero-image" />
+        }
+        <div class="hero-caption container">
+          <h1>{{ slide.title }}</h1>
+          @if (slide.subtitle) {
+            <p>{{ slide.subtitle }}</p>
+          }
+          @if (slide.linkUrl) {
+            <a [href]="slide.linkUrl" class="btn btn-primary">Learn More</a>
+          }
+        </div>
+      </div>
+    }
+
+    @if (slides().length > 1) {
+      <button type="button" class="hero-nav hero-nav-prev" aria-label="Previous slide" (click)="previous()">&#8249;</button>
+      <button type="button" class="hero-nav hero-nav-next" aria-label="Next slide" (click)="next()">&#8250;</button>
+      <div class="hero-dots">
+        @for (slide of slides(); track slide.id; let i = $index) {
+          <button
+            type="button"
+            class="hero-dot"
+            [class.hero-dot-active]="i === activeSlide()"
+            [attr.aria-label]="'Go to slide ' + (i + 1)"
+            (click)="goTo(i)"
+          ></button>
+        }
+      </div>
+    }
+  </section>
+}
+
+@if (siteContent(); as content) {
+  @if (content.homeIntroTitle || content.homeIntroBody) {
+    <section class="section container home-intro">
+      @if (content.homeIntroTitle) {
+        <h2 class="section-title">{{ content.homeIntroTitle }}</h2>
+      }
+      @if (content.homeIntroBody) {
+        <p class="section-subtitle">{{ content.homeIntroBody }}</p>
+      }
+    </section>
+  }
+}
+
+<section class="section container">
+  <div class="grid grid-4 quick-links">
+    <a routerLink="/departments" class="card quick-link-card">
+      <h3>Departments</h3>
+      <p>Explore our clinical departments</p>
+    </a>
+    <a routerLink="/doctors" class="card quick-link-card">
+      <h3>Our Doctors</h3>
+      <p>Meet our specialists</p>
+    </a>
+    <a routerLink="/health-packages" class="card quick-link-card">
+      <h3>Health Packages</h3>
+      <p>Preventive checkup packages</p>
+    </a>
+    <a routerLink="/book-appointment" class="card quick-link-card quick-link-cta">
+      <h3>Book Appointment</h3>
+      <p>Schedule a visit with us</p>
+    </a>
+  </div>
+</section>
+
+@if (news().length > 0) {
+  <section class="section container">
+    <h2 class="section-title">News & Events</h2>
+    <div class="grid grid-3">
+      @for (item of news(); track item.id) {
+        <article class="card">
+          @if (item.imageUrl) {
+            <img [src]="item.imageUrl" [alt]="item.title" class="home-news-image" />
+          }
+          <h3>{{ item.title }}</h3>
+        </article>
+      }
+    </div>
+    <p class="home-view-all"><a routerLink="/news-events">View all news & events &rarr;</a></p>
+  </section>
+}
+
+@if (testimonials().length > 0) {
+  <section class="section container">
+    <h2 class="section-title">What Our Patients Say</h2>
+    <div class="grid grid-3">
+      @for (testimonial of testimonials(); track testimonial.id) {
+        <div class="card">
+          <p class="home-testimonial-quote">&ldquo;{{ testimonial.quote }}&rdquo;</p>
+          <p class="home-testimonial-name">{{ testimonial.patientName }}</p>
+        </div>
+      }
+    </div>
+    <p class="home-view-all"><a routerLink="/testimonials">View all testimonials &rarr;</a></p>
+  </section>
+}

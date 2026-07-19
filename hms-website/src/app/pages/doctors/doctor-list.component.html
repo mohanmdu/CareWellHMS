@@ -1,0 +1,34 @@
+<app-page-header title="Our Doctors" subtitle="Meet our specialists across every department." />
+
+<div class="container section">
+  <div class="doctor-filter">
+    <label for="department-filter">Filter by department</label>
+    <select id="department-filter" [value]="selectedDepartmentId() ?? ''" (change)="onDepartmentChange($any($event.target).value)">
+      <option value="">All Departments</option>
+      @for (department of departments(); track department.id) {
+        <option [value]="department.id">{{ department.name }}</option>
+      }
+    </select>
+  </div>
+
+  @if (loaded() && doctors().length === 0) {
+    <p class="empty-state">No doctors match this filter yet.</p>
+  } @else {
+    <div class="grid grid-3">
+      @for (doctor of doctors(); track doctor.id) {
+        <a class="card doctor-card" [routerLink]="['/doctors', doctor.id]">
+          @if (doctor.imageUrl) {
+            <img [src]="doctor.imageUrl" [alt]="doctor.name" class="doctor-photo" />
+          } @else {
+            <div class="doctor-photo doctor-photo-placeholder" aria-hidden="true">{{ doctor.name.charAt(0) }}</div>
+          }
+          <h3>{{ doctor.name }}</h3>
+          @if (doctor.specializationName) {
+            <p class="doctor-specialization">{{ doctor.specializationName }}</p>
+          }
+          <p class="doctor-department">{{ doctor.departmentName }}</p>
+        </a>
+      }
+    </div>
+  }
+</div>

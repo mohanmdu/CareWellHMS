@@ -1,0 +1,36 @@
+@if (notFound()) {
+  <div class="container section" style="text-align: center;">
+    <h1>Doctor not found</h1>
+    <a routerLink="/doctors" class="btn btn-primary">Back to Doctors</a>
+  </div>
+} @else {
+  @if (doctor(); as d) {
+    <div class="container section doctor-detail">
+      <div class="doctor-detail-header">
+        @if (d.imageUrl) {
+          <img [src]="d.imageUrl" [alt]="d.name" class="doctor-detail-photo" />
+        } @else {
+          <div class="doctor-detail-photo doctor-detail-photo-placeholder" aria-hidden="true">{{ d.name.charAt(0) }}</div>
+        }
+        <div>
+          <h1>{{ d.name }}</h1>
+          @if (d.specializationName) {
+            <p class="doctor-detail-specialization">{{ d.specializationName }}</p>
+          }
+          <p class="doctor-detail-department">{{ d.departmentName }}</p>
+          @if (d.consultationFee) {
+            <p class="doctor-detail-fee">Consultation Fee: {{ d.consultationFee | number: '1.0-2' }}</p>
+          }
+          <a routerLink="/book-appointment" class="btn btn-primary">Book Appointment</a>
+        </div>
+      </div>
+
+      @if (d.profile) {
+        <div class="doctor-detail-profile">
+          <h2>About {{ d.name }}</h2>
+          <p>{{ d.profile }}</p>
+        </div>
+      }
+    </div>
+  }
+}

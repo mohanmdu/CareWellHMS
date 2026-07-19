@@ -1,0 +1,26 @@
+<app-page-header title="News & Events" subtitle="Latest updates and upcoming events from our hospital." />
+
+<div class="container section">
+  @if (loaded() && items().length === 0) {
+    <p class="empty-state">No news or events have been published yet.</p>
+  } @else {
+    <div class="grid grid-3">
+      @for (item of items(); track item.id) {
+        <article class="card news-card">
+          @if (item.imageUrl) {
+            <img [src]="item.imageUrl" [alt]="item.title" class="news-image" />
+          }
+          @if (item.eventDate) {
+            <p class="news-date">{{ item.eventDate | date: 'longDate' }}</p>
+          } @else if (item.publishedAt) {
+            <p class="news-date">{{ item.publishedAt | date: 'longDate' }}</p>
+          }
+          <h3>{{ item.title }}</h3>
+          @if (item.body) {
+            <p>{{ item.body }}</p>
+          }
+        </article>
+      }
+    </div>
+  }
+</div>

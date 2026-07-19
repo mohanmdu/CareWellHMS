@@ -1,0 +1,22 @@
+.careers-section {
+  max-width: 800px;
+}
+
+.career-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-3);
+  flex-wrap: wrap;
+
+  .btn {
+    flex-shrink: 0;
+  }
+}
+
+.career-department {
+  color: var(--theme-primary);
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+}

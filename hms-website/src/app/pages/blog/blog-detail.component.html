@@ -1,0 +1,24 @@
+@if (notFound()) {
+  <div class="container section" style="text-align: center;">
+    <h1>Post not found</h1>
+    <a routerLink="/blog" class="btn btn-primary">Back to Blog</a>
+  </div>
+} @else {
+  @if (post(); as p) {
+    <article class="container section blog-detail">
+      <p class="blog-detail-back"><a routerLink="/blog">&larr; Back to Blog</a></p>
+      <h1>{{ p.title }}</h1>
+      @if (p.publishedAt) {
+        <p class="blog-detail-date">{{ p.publishedAt | date: 'longDate' }}</p>
+      }
+      @if (p.imageUrl) {
+        <img [src]="p.imageUrl" [alt]="p.title" class="blog-detail-image" />
+      }
+      @if (p.body) {
+        <div class="blog-detail-body">
+          <p>{{ p.body }}</p>
+        </div>
+      }
+    </article>
+  }
+}

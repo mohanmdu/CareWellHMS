@@ -1,0 +1,23 @@
+<app-page-header title="Careers" subtitle="Join our team of healthcare professionals." />
+
+<div class="container section careers-section">
+  @if (loaded() && openings().length === 0) {
+    <p class="empty-state">There are no open positions right now. Please check back soon.</p>
+  }
+  @for (opening of openings(); track opening.id) {
+    <div class="card career-item">
+      <div>
+        <h3>{{ opening.title }}</h3>
+        @if (opening.departmentName) {
+          <p class="career-department">{{ opening.departmentName }}</p>
+        }
+        @if (opening.description) {
+          <p>{{ opening.description }}</p>
+        }
+      </div>
+      @if (opening.applyEmail) {
+        <a [href]="'mailto:' + opening.applyEmail + '?subject=Application for ' + opening.title" class="btn btn-outline">Apply Now</a>
+      }
+    </div>
+  }
+</div>

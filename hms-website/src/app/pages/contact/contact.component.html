@@ -1,0 +1,32 @@
+<app-page-header title="Contact Us" subtitle="We'd love to hear from you." />
+
+<div class="container section">
+  @if (config(); as c) {
+    <div class="grid grid-3 contact-grid">
+      @if (c.address) {
+        <div class="card">
+          <h3>Address</h3>
+          <p>{{ c.address }}</p>
+        </div>
+      }
+      @if (c.phone) {
+        <div class="card">
+          <h3>Phone</h3>
+          <p><a [href]="'tel:' + c.phone">{{ c.phone }}</a></p>
+        </div>
+      }
+      @if (c.email) {
+        <div class="card">
+          <h3>Email</h3>
+          <p><a [href]="'mailto:' + c.email">{{ c.email }}</a></p>
+        </div>
+      }
+      @if (c.whatsappNumber) {
+        <div class="card">
+          <h3>WhatsApp</h3>
+          <p><a [href]="whatsappLink(c.whatsappNumber)" target="_blank" rel="noopener">Chat with us</a></p>
+        </div>
+      }
+    </div>
+  }
+</div>
