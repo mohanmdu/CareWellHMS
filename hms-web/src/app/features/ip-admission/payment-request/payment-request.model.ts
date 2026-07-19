@@ -46,3 +46,16 @@ export interface PaymentRequest {
 export function requestTypeLabel(type: PaymentRequestType): string {
   return PAYMENT_REQUEST_TYPE_OPTIONS.find((option) => option.value === type)?.label ?? type;
 }
+
+export interface AdvanceReportRow {
+  patientUhid: string | null;
+  patientName: string | null;
+  patientGender: string | null;
+  admissionNumber: string | null;
+  approvedBy: string | null;
+  approvedAt: string | null;
+  advanceAmount: number;
+  finalSettlementAmount: number;
+  dueAmountPaid: number;
+  total: number;
+}

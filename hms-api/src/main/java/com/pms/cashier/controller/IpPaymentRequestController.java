@@ -1,10 +1,13 @@
 package com.pms.cashier.controller;
 
+import com.pms.cashier.dto.AdvanceReportRowDto;
 import com.pms.cashier.dto.IpPaymentRequestDto;
 import com.pms.cashier.entity.PaymentRequestType;
 import com.pms.cashier.service.IpPaymentRequestService;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,5 +50,12 @@ public class IpPaymentRequestController {
     @PatchMapping("/{id}/approve")
     public IpPaymentRequestDto approve(@PathVariable Long id, @RequestBody Map<String, String> body) {
         return service.approve(id, body.get("paymentMode"));
+    }
+
+    @GetMapping("/advance-report")
+    public List<AdvanceReportRowDto> advanceReport(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
+        return service.getAdvanceReport(fromDate, toDate);
     }
 }

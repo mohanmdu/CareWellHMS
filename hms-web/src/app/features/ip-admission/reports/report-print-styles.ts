@@ -31,8 +31,36 @@ export const REPORT_PRINT_STYLES = `
     background: #14707a;
     color: #fff;
   }
-  .cwr-total-row {
+  .cwr-total-row,
+  tfoot tr {
     font-weight: 700;
     background: #f0f0f0;
+  }
+  .ar2-letterhead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: 2px solid #ccc;
+  }
+  .ar2-logo {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .ar2-title {
+    flex: 1;
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: 700;
+  }
+  .ar2-contact {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+    font-size: 0.8rem;
   }
 `;

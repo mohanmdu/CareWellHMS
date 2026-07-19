@@ -144,6 +144,11 @@ export const routes: Routes = [
           import('./features/ip-admission/reports/provisional-bill.component').then((m) => m.ProvisionalBillComponent)
       },
       {
+        path: 'ip/reports/advance',
+        loadComponent: () =>
+          import('./features/ip-admission/reports/advance-report.component').then((m) => m.AdvanceReportComponent)
+      },
+      {
         path: 'masters/cms/site-content',
         loadComponent: () =>
           import('./features/masters-admin/website-cms/site-content/cms-site-content.component').then(

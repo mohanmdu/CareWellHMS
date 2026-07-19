@@ -1,5 +1,6 @@
 package com.pms.cashier.service;
 
+import com.pms.cashier.dto.AdvanceReportRowDto;
 import com.pms.cashier.dto.IpPaymentRequestDto;
 import com.pms.cashier.entity.IpPaymentRequest;
 import com.pms.cashier.entity.PaymentRequestStatus;
@@ -12,6 +13,8 @@ import com.pms.ipadmission.service.AdmissionService;
 import com.pms.ipbilling.entity.IpPayment;
 import com.pms.registration.entity.Patient;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -89,6 +92,32 @@ public class IpPaymentRequestService {
         request.setIpPayment(payment);
 
         return toDto(repository.save(request));
+    }
+
+    /** Advance Report: every approved cashier request in a date range, one row per request. */
+    public List<AdvanceReportRowDto> getAdvanceReport(LocalDate fromDate, LocalDate toDate) {
+        Instant fromInstant = fromDate != null ? fromDate.atStartOfDay(ZoneId.systemDefault()).toInstant() : null;
+        Instant toInstant = toDate != null ? toDate.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant() : null;
+        return repository.findApprovedForReport(fromInstant, toInstant).stream().map(this::toAdvanceReportRow).toList();
+    }
+
+    private AdvanceReportRowDto toAdvanceReportRow(IpPaymentRequest request) {
+        Admission admission = request.getAdmission();
+        Patient patient = admission.getPatient();
+        double advance = request.getRequestType() == PaymentRequestType.ADVANCE ? request.getAmount() : 0;
+        double finalSettlement = request.getRequestType() == PaymentRequestType.FINAL_SETTLEMENT ? request.getAmount() : 0;
+        double dueAmount = request.getRequestType() == PaymentRequestType.DUE_AMOUNT ? request.getAmount() : 0;
+        return new AdvanceReportRowDto(
+                patient.getRegistrationNumber(),
+                (patient.getFirstName() + " " + (patient.getLastName() != null ? patient.getLastName() : "")).trim(),
+                patient.getGender(),
+                admission.getAdmissionNumber(),
+                request.getApprovedBy(),
+                request.getApprovedAt(),
+                advance,
+                finalSettlement,
+                dueAmount,
+                request.getAmount());
     }
 
     private String requestTypeLabel(PaymentRequestType type) {

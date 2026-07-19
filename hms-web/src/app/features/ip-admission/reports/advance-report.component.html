@@ -1,0 +1,109 @@
+<div class="hms-page">
+  <section class="hms-card-surface ar2-section">
+    <div class="ar2-toolbar">
+      <button mat-icon-button type="button" aria-label="Print report" [disabled]="rows().length === 0" (click)="print()">
+        <mat-icon aria-hidden="true">print</mat-icon>
+      </button>
+      <button mat-icon-button type="button" aria-label="Export as spreadsheet" [disabled]="rows().length === 0" (click)="exportCsv()">
+        <mat-icon aria-hidden="true">grid_on</mat-icon>
+      </button>
+    </div>
+
+    <div #reportContent>
+      <header class="ar2-letterhead">
+        @if (clinicSettings()?.logoUrl; as logo) {
+          <img [src]="logo" alt="" class="ar2-logo" />
+        } @else {
+          <div class="ar2-logo ar2-logo-placeholder" aria-hidden="true">{{ (clinicSettings()?.name ?? 'H').charAt(0) }}</div>
+        }
+        <h1 class="ar2-title">Advance Report</h1>
+        <div class="ar2-contact">
+          <strong>{{ clinicSettings()?.name ?? 'Hospital' }}</strong>
+          @if (clinicSettings()?.address) {
+            <span>{{ clinicSettings()?.address }}</span>
+          }
+          @if (clinicSettings()?.phone) {
+            <span>Ph: {{ clinicSettings()?.phone }}</span>
+          }
+          @if (clinicSettings()?.domain) {
+            <span>Web: {{ clinicSettings()?.domain }}</span>
+          }
+          @if (clinicSettings()?.email) {
+            <span>{{ clinicSettings()?.email }}</span>
+          }
+        </div>
+      </header>
+
+      <div class="ar2-filter-bar">
+        <span class="ar2-filter-title">Advance Report</span>
+        <span class="ar2-filter-label">From :</span>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="ar2-filter-field">
+          <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" />
+          <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+          <mat-datepicker #fromPicker />
+        </mat-form-field>
+        <span class="ar2-filter-label">To :</span>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="ar2-filter-field">
+          <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" />
+          <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+          <mat-datepicker #toPicker />
+        </mat-form-field>
+        <button mat-flat-button color="primary" type="button" (click)="search()">Submit</button>
+      </div>
+
+      @if (loading()) {
+        <mat-progress-bar mode="indeterminate" />
+      }
+
+      @if (!loading() && searched() && rows().length === 0) {
+        <app-empty-state icon="receipt_long" title="No approved requests" message="No advance/settlement/due-amount collections match these filters." />
+      } @else if (rows().length > 0) {
+        <div class="ar2-table-wrap">
+          <table class="ar2-table">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Patient UHID</th>
+                <th>Patient Name</th>
+                <th>Gender</th>
+                <th>IPID</th>
+                <th>Approved By</th>
+                <th>Approved Date</th>
+                <th>Advance Amount</th>
+                <th>Final Settlement</th>
+                <th>Due Amount Paid</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of rows(); track $index; let i = $index) {
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ row.patientUhid ?? '—' }}</td>
+                  <td>{{ row.patientName }}</td>
+                  <td>{{ row.patientGender ?? '—' }}</td>
+                  <td>{{ row.admissionNumber }}</td>
+                  <td>{{ row.approvedBy ?? '—' }}</td>
+                  <td>{{ row.approvedAt | date: 'dd-MM-yyyy\nHH:mm' }}</td>
+                  <td>{{ row.advanceAmount | number: '1.0-2' }}</td>
+                  <td>{{ row.finalSettlementAmount | number: '1.0-2' }}</td>
+                  <td>{{ row.dueAmountPaid | number: '1.0-2' }}</td>
+                  <td>{{ row.total | number: '1.0-2' }}</td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr class="ar2-total-row">
+                <td colspan="7">Total</td>
+                <td>Rs. {{ totals().advanceAmount | number: '1.0-2' }}</td>
+                <td>Rs. {{ totals().finalSettlementAmount | number: '1.0-2' }}</td>
+                <td>Rs. {{ totals().dueAmountPaid | number: '1.0-2' }}</td>
+                <td>Rs. {{ totals().total | number: '1.0-2' }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      }
+    </div>
+  </section>
+</div>
