@@ -182,6 +182,42 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'icd/search',
+        loadComponent: () =>
+          import('./features/icd/icd-patient-search.component').then((m) => m.IcdPatientSearchComponent)
+      },
+      {
+        path: 'icd/patients/:patientId',
+        loadComponent: () =>
+          import('./features/icd/icd-patient-diagnosis.component').then((m) => m.IcdPatientDiagnosisComponent)
+      },
+      {
+        path: 'icd/master',
+        loadComponent: () =>
+          import('./features/icd/icd-code-master-list.component').then((m) => m.IcdCodeMasterListComponent)
+      },
+      {
+        path: 'ip/discharge-summary',
+        loadComponent: () =>
+          import('./features/ip-admission/discharge-summary/discharge-summary-list.component').then(
+            (m) => m.DischargeSummaryListComponent
+          )
+      },
+      {
+        path: 'ip/discharge-summary/:admissionId/edit',
+        loadComponent: () =>
+          import('./features/ip-admission/discharge-summary/discharge-summary-form.component').then(
+            (m) => m.DischargeSummaryFormComponent
+          )
+      },
+      {
+        path: 'ip/discharge-summary/:admissionId/print',
+        loadComponent: () =>
+          import('./features/ip-admission/discharge-summary/discharge-summary-print.component').then(
+            (m) => m.DischargeSummaryPrintComponent
+          )
+      },
+      {
         path: 'masters/cms/site-content',
         loadComponent: () =>
           import('./features/masters-admin/website-cms/site-content/cms-site-content.component').then(

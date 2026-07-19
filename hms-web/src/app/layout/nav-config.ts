@@ -90,6 +90,17 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [{ label: 'Approvals/Refund', route: '/cashier/dashboard', icon: 'fact_check' }]
   },
   {
+    label: 'Discharge Summary Module',
+    items: [{ label: 'Discharge List', route: '/ip/discharge-summary', icon: 'assignment' }]
+  },
+  {
+    label: 'ICD Codes Module',
+    items: [
+      { label: 'ICD Code Search', route: '/icd/search', icon: 'travel_explore' },
+      { label: 'ICD Code Master', route: '/icd/master', icon: 'menu_book' }
+    ]
+  },
+  {
     label: 'IP Billing Master',
     items: [
       { label: 'IP Billing Categories', route: '/masters/ip-billing-categories', icon: 'category' },

@@ -1,0 +1,139 @@
+<div class="hms-page dsp-page">
+  <div class="dsp-toolbar">
+    <button mat-icon-button type="button" aria-label="Print" (click)="print()">
+      <mat-icon aria-hidden="true">print</mat-icon>
+    </button>
+    <button mat-flat-button color="primary" type="button" (click)="back()">
+      <mat-icon aria-hidden="true">arrow_back</mat-icon>
+      Back
+    </button>
+  </div>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading() && summary(); as s) {
+    <section class="hms-card-surface dsp-sheet" #reportContent>
+      <h1 class="dsp-title">Discharge Summary</h1>
+
+      <div class="dsp-grid-2">
+        <div>
+          <div class="dsp-row"><span>Name</span><strong>{{ s.patientName }}</strong></div>
+          <div class="dsp-row"><span>Age / Gender</span><strong>{{ s.age ?? '—' }} / {{ s.gender ?? '—' }}</strong></div>
+          <div class="dsp-row"><span>Phone No</span><strong>{{ s.mobileNumber ?? '—' }}</strong></div>
+          <div class="dsp-row"><span>Address</span><strong>{{ s.address ?? '—' }}</strong></div>
+        </div>
+        <div>
+          <div class="dsp-row"><span>UHID</span><strong>{{ s.patientUhid }}</strong></div>
+          <div class="dsp-row"><span>IP No</span><strong>{{ s.admissionNumber }}</strong></div>
+          <div class="dsp-row"><span>Room No</span><strong>{{ s.roomNumber ?? '—' }}</strong></div>
+        </div>
+      </div>
+
+      <div class="dsp-grid-2 dsp-consultant-row">
+        <div>
+          <div class="dsp-row"><span>Consultant</span><strong>{{ s.primaryConsultant ?? '—' }}</strong></div>
+          <div class="dsp-row"><span>D.O.A</span><strong>{{ s.admissionDate | date: 'dd/MM/yyyy hh:mm a' }}</strong></div>
+          <div class="dsp-row"><span>D.O.D</span><strong>{{ s.dischargeDate ? (s.dischargeDate | date: 'dd/MM/yyyy hh:mm a') : '—' }}</strong></div>
+        </div>
+        @if (s.consultants.length > 0) {
+          <div>
+            <span class="dsp-label">Consultants:</span>
+            @for (c of s.consultants; track $index) {
+              <div>{{ c }}</div>
+            }
+          </div>
+        }
+      </div>
+
+      @if (s.diagnosis.length > 0) {
+        <div class="dsp-block">
+          <span class="dsp-label">Diagnosis</span>
+          @for (d of s.diagnosis; track $index) {
+            <div>{{ d }}</div>
+          }
+        </div>
+      }
+
+      @if (s.procedures.length > 0) {
+        <div class="dsp-block">
+          <span class="dsp-label">Procedures</span>
+          @for (p of s.procedures; track $index) {
+            <div>{{ p }}</div>
+          }
+        </div>
+      }
+
+      <div class="dsp-row"><span class="dsp-label">Personal History</span><span>{{ s.personalHistory ?? '—' }}</span></div>
+      <div class="dsp-row"><span class="dsp-label">Surgical History</span><span>{{ s.surgicalHistory ?? '—' }}</span></div>
+      <div class="dsp-row"><span class="dsp-label">Family History</span><span>{{ s.familyHistory ?? '—' }}</span></div>
+      <div class="dsp-row"><span class="dsp-label">Intolerance</span><span>{{ s.intolerance ?? '—' }}</span></div>
+
+      <h2 class="dsp-section-title">Clinical Examination</h2>
+      <div class="dsp-row"><span class="dsp-label">General Examination</span></div>
+      <p>{{ s.generalExamination ?? '—' }}</p>
+
+      <h3 class="dsp-subsection-title">Systematic Examination</h3>
+      <div class="dsp-row"><span>CVS</span><span>{{ s.cvs ?? '—' }}</span></div>
+      <div class="dsp-row"><span>RS</span><span>{{ s.rs ?? '—' }}</span></div>
+      <div class="dsp-row"><span>Abdomen</span><span>{{ s.abdomen ?? '—' }}</span></div>
+      <div class="dsp-row"><span>CNS</span><span>{{ s.cns ?? '—' }}</span></div>
+
+      <div class="dsp-row"><span class="dsp-label">Investigations</span><span>{{ s.orEnclosed ?? 'Reports Enclosed' }}</span></div>
+
+      @if (s.adviseDrugs.length > 0) {
+        <table class="dsp-drug-table">
+          <thead>
+            <tr>
+              <th>Medicines</th>
+              <th>Dosages</th>
+              <th>Mor</th>
+              <th>Noon</th>
+              <th>Eve</th>
+              <th>Night</th>
+              <th>Route</th>
+              <th>Relationship With Meal</th>
+              <th>Duration</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (d of s.adviseDrugs; track $index) {
+              <tr>
+                <td>{{ d.drugName }}</td>
+                <td>{{ d.dose }}</td>
+                <td>{{ d.morning }}</td>
+                <td>{{ d.afternoon }}</td>
+                <td>{{ d.evening }}</td>
+                <td>{{ d.night }}</td>
+                <td>{{ d.route }}</td>
+                <td>{{ d.relationshipWithMeal }}</td>
+                <td>{{ d.duration }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+
+      @if (s.reviewDescription) {
+        <p>{{ s.reviewDescription }}</p>
+      }
+
+      @if (s.emergencyContactNumbers) {
+        <div class="dsp-emergency">
+          <strong>Please call emergency contact no: {{ s.emergencyContactNumbers }}</strong>
+          <ul>
+            @for (symptom of s.emergencySymptoms; track $index) {
+              <li>{{ symptom }}</li>
+            }
+          </ul>
+        </div>
+      }
+
+      <div class="dsp-signoff">
+        <span>Checked By: {{ s.checkedBy ?? '—' }}</span>
+        <span>Consultant: {{ s.consultantSignOff ?? '—' }}</span>
+      </div>
+    </section>
+  }
+</div>

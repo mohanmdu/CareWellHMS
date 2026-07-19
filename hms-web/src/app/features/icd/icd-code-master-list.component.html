@@ -1,0 +1,148 @@
+<div class="hms-page">
+  <div class="icd-master-header">
+    <div>
+      <h1>ICD Code Master</h1>
+      <p>Manage the ICD-10/ICD-11 diagnosis code reference list.</p>
+    </div>
+    <div class="icd-master-actions">
+      <input #importInput type="file" accept=".csv" class="icd-hidden-input" (change)="onImportFileSelected($event)" />
+      <button mat-stroked-button type="button" (click)="triggerImport()">
+        <mat-icon aria-hidden="true">upload_file</mat-icon>
+        Import (CSV)
+      </button>
+      <button mat-stroked-button type="button" (click)="exportCsv()">
+        <mat-icon aria-hidden="true">download</mat-icon>
+        Export (CSV)
+      </button>
+      <button mat-stroked-button type="button" (click)="print()">
+        <mat-icon aria-hidden="true">print</mat-icon>
+        Print
+      </button>
+      <button mat-flat-button color="primary" type="button" (click)="openAddDialog()">
+        <mat-icon aria-hidden="true">add</mat-icon>
+        Add ICD Code
+      </button>
+    </div>
+  </div>
+
+  <section class="hms-card-surface icd-master-tabs">
+    <app-table-search placeholder="Search by code, disease, chapter, category, WHO version..." [value]="searchTerm()" (valueChange)="onSearch($event)" />
+
+    <mat-tab-group (selectedIndexChange)="onTabChange($event)">
+      <mat-tab label="Active Codes">
+        <div class="icd-master-tab-body">
+          @if (loadingActive()) {
+            <mat-progress-bar mode="indeterminate" />
+          }
+
+          @if (!loadingActive() && activeCodes().length === 0) {
+            <app-empty-state icon="medical_information" title="No ICD codes yet" message="Add the first ICD code above, or import a CSV file." />
+          } @else if (filteredActiveCodes().length === 0) {
+            <app-empty-state icon="search_off" title="No matches" message="No ICD codes match your search." />
+          } @else {
+            <div #reportContent class="icd-table-wrapper">
+              <table class="icd-table">
+                <thead>
+                  <tr>
+                    <th>ICD Code</th>
+                    <th>Disease Name</th>
+                    <th>Chapter</th>
+                    <th>Category</th>
+                    <th>WHO Version</th>
+                    <th>Short Description</th>
+                    <th>Status</th>
+                    <th>Created By</th>
+                    <th>Last Updated</th>
+                    <th class="icd-no-print">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (c of activePagination.page(); track c.id) {
+                    <tr>
+                      <td>{{ c.code }}</td>
+                      <td>{{ c.diseaseName }}</td>
+                      <td>{{ c.chapter ?? '—' }}</td>
+                      <td>{{ c.category ?? '—' }}</td>
+                      <td>{{ c.whoVersion ?? '—' }}</td>
+                      <td class="icd-desc-cell">{{ c.shortDescription ?? '—' }}</td>
+                      <td>Active</td>
+                      <td>{{ c.createdBy ?? '—' }}</td>
+                      <td>{{ c.updatedAt ? (c.updatedAt | date: 'dd/MM/yyyy') : '—' }}</td>
+                      <td class="icd-no-print">
+                        <button mat-icon-button type="button" [attr.aria-label]="'Edit ' + c.code" (click)="openEditDialog(c)">
+                          <mat-icon aria-hidden="true">edit</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn" type="button" [attr.aria-label]="'Deactivate ' + c.code" (click)="deactivate(c)">
+                          <mat-icon aria-hidden="true">cancel</mat-icon>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            <mat-paginator
+              [length]="activePagination.length()"
+              [pageIndex]="activePagination.pageIndex()"
+              [pageSize]="activePagination.pageSize()"
+              [pageSizeOptions]="[10, 25, 50]"
+              (page)="activePagination.onPage($event)"
+            />
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab label="De-Activated Codes">
+        <div class="icd-master-tab-body">
+          @if (loadingInactive()) {
+            <mat-progress-bar mode="indeterminate" />
+          }
+
+          @if (!loadingInactive() && inactiveCodes().length === 0) {
+            <app-empty-state icon="inbox" title="No de-activated codes" message="Deactivated ICD codes will appear here." />
+          } @else if (filteredInactiveCodes().length === 0) {
+            <app-empty-state icon="search_off" title="No matches" message="No ICD codes match your search." />
+          } @else {
+            <div class="icd-table-wrapper">
+              <table class="icd-table">
+                <thead>
+                  <tr>
+                    <th>ICD Code</th>
+                    <th>Disease Name</th>
+                    <th>Chapter</th>
+                    <th>Category</th>
+                    <th>Last Updated</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (c of inactivePagination.page(); track c.id) {
+                    <tr>
+                      <td>{{ c.code }}</td>
+                      <td>{{ c.diseaseName }}</td>
+                      <td>{{ c.chapter ?? '—' }}</td>
+                      <td>{{ c.category ?? '—' }}</td>
+                      <td>{{ c.updatedAt ? (c.updatedAt | date: 'dd/MM/yyyy') : '—' }}</td>
+                      <td>
+                        <button mat-icon-button color="primary" type="button" [attr.aria-label]="'Activate ' + c.code" (click)="restore(c)">
+                          <mat-icon aria-hidden="true">power_settings_new</mat-icon>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            <mat-paginator
+              [length]="inactivePagination.length()"
+              [pageIndex]="inactivePagination.pageIndex()"
+              [pageSize]="inactivePagination.pageSize()"
+              [pageSizeOptions]="[10, 25, 50]"
+              (page)="inactivePagination.onPage($event)"
+            />
+          }
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </section>
+</div>

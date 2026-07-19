@@ -1,0 +1,329 @@
+<div class="hms-page dsf-page">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading() && summary) {
+    <section class="hms-card-surface dsf-section">
+      <header class="dsf-header">
+        <h1>Discharge Summary</h1>
+        <div class="dsf-header-actions">
+          <button mat-flat-button color="primary" type="button" [disabled]="saving()" (click)="save()">
+            <mat-icon aria-hidden="true">save</mat-icon>
+            Save
+          </button>
+          <button mat-stroked-button type="button" (click)="cancel()">Cancel</button>
+        </div>
+      </header>
+
+      <div class="dsf-demographics">
+        <div class="dsf-field"><span>UHID</span><strong>{{ summary.patientUhid }}</strong></div>
+        <div class="dsf-field"><span>IPID</span><strong>{{ summary.admissionNumber }}</strong></div>
+        <div class="dsf-field"><span>Patient Name</span><strong>{{ summary.patientName }}</strong></div>
+        <div class="dsf-field"><span>Gender</span><strong>{{ summary.gender ?? '—' }}</strong></div>
+        <div class="dsf-field"><span>Age</span><strong>{{ summary.age ?? '—' }}</strong></div>
+        <div class="dsf-field"><span>Mobile No</span><strong>{{ summary.mobileNumber ?? '—' }}</strong></div>
+        <div class="dsf-field"><span>Room No</span><strong>{{ summary.roomNumber ?? '—' }}</strong></div>
+        <div class="dsf-field"><span>Marital Status</span><strong>{{ summary.maritalStatus ?? '—' }}</strong></div>
+        <div class="dsf-field"><span>Occupation</span><strong>{{ summary.occupation ?? '—' }}</strong></div>
+        <div class="dsf-field"><span>Primary Consultant</span><strong>{{ summary.primaryConsultant ?? '—' }}</strong></div>
+      </div>
+
+      <!-- Consultants -->
+      <div class="dsf-block">
+        <label>Consultants</label>
+        @for (item of summary.consultants; track $index; let i = $index) {
+          <div class="dsf-dynamic-row">
+            <input class="dsf-input" [(ngModel)]="summary.consultants[i]" [name]="'consultant-' + i" />
+            <button mat-icon-button color="warn" type="button" aria-label="Remove consultant" (click)="removeListItem(summary.consultants, i)">
+              <mat-icon aria-hidden="true">close</mat-icon>
+            </button>
+          </div>
+        }
+        <button mat-icon-button color="primary" type="button" aria-label="Add consultant" (click)="addListItem(summary.consultants)">
+          <mat-icon aria-hidden="true">add_circle</mat-icon>
+        </button>
+      </div>
+
+      <div class="dsf-grid">
+        <div class="dsf-field"><label>Referred By</label><input class="dsf-input" [(ngModel)]="summary.referredBy" name="referredBy" /></div>
+        <div class="dsf-field"><label>Weight (Kg)</label><input class="dsf-input" type="number" [(ngModel)]="summary.weightKg" name="weightKg" /></div>
+        <div class="dsf-field"><label>RCN No</label><input class="dsf-input" [(ngModel)]="summary.rcnNo" name="rcnNo" /></div>
+        <div class="dsf-field"><label>Title</label><input class="dsf-input" [(ngModel)]="summary.title" name="title" /></div>
+        <div class="dsf-field"><label>Blood Group</label><input class="dsf-input" [(ngModel)]="summary.bloodGroup" name="bloodGroup" /></div>
+      </div>
+
+      <!-- Diagnosis -->
+      <div class="dsf-block">
+        <label>Diagnosis</label>
+        @for (item of summary.diagnosis; track $index; let i = $index) {
+          <div class="dsf-dynamic-row">
+            <input class="dsf-input" [(ngModel)]="summary.diagnosis[i]" [name]="'diagnosis-' + i" />
+            <button mat-icon-button color="warn" type="button" aria-label="Remove diagnosis" (click)="removeListItem(summary.diagnosis, i)">
+              <mat-icon aria-hidden="true">close</mat-icon>
+            </button>
+          </div>
+        }
+        <button mat-icon-button color="primary" type="button" aria-label="Add diagnosis" (click)="addListItem(summary.diagnosis)">
+          <mat-icon aria-hidden="true">add_circle</mat-icon>
+        </button>
+      </div>
+
+      <!-- Procedures -->
+      <div class="dsf-block">
+        <label>Procedures</label>
+        @for (item of summary.procedures; track $index; let i = $index) {
+          <div class="dsf-dynamic-row">
+            <input class="dsf-input" [(ngModel)]="summary.procedures[i]" [name]="'procedure-' + i" />
+            <button mat-icon-button color="warn" type="button" aria-label="Remove procedure" (click)="removeListItem(summary.procedures, i)">
+              <mat-icon aria-hidden="true">close</mat-icon>
+            </button>
+          </div>
+        }
+        <button mat-icon-button color="primary" type="button" aria-label="Add procedure" (click)="addListItem(summary.procedures)">
+          <mat-icon aria-hidden="true">add_circle</mat-icon>
+        </button>
+      </div>
+
+      <div class="dsf-field dsf-full"><label>Brief History</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.briefHistory" name="briefHistory"></textarea></div>
+      <div class="dsf-field dsf-full"><label>Past History</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.pastHistory" name="pastHistory"></textarea></div>
+      <div class="dsf-field dsf-full"><label>Personal History</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.personalHistory" name="personalHistory"></textarea></div>
+      <div class="dsf-field dsf-full"><label>Surgical History</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.surgicalHistory" name="surgicalHistory"></textarea></div>
+      <div class="dsf-field dsf-full"><label>Family History</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.familyHistory" name="familyHistory"></textarea></div>
+      <div class="dsf-field dsf-full"><label>Intolerance</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.intolerance" name="intolerance"></textarea></div>
+      <div class="dsf-field dsf-full"><label>Immunization</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.immunization" name="immunization"></textarea></div>
+      <div class="dsf-field dsf-full"><label>Menstrual History</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.menstrualHistory" name="menstrualHistory"></textarea></div>
+      <div class="dsf-field dsf-full"><label>Marital History</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.maritalHistory" name="dsfMaritalHistory"></textarea></div>
+      <div class="dsf-field dsf-full"><label>Obstetric History</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.obstetricHistory" name="obstetricHistory"></textarea></div>
+
+      <h2 class="dsf-section-title">Clinical Examination</h2>
+      <div class="dsf-field dsf-full"><label>General Examination</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.generalExamination" name="generalExamination"></textarea></div>
+
+      <h3 class="dsf-subsection-title">Vital Signs</h3>
+      <div class="dsf-grid">
+        <div class="dsf-field"><label>Temp (°F)</label><input class="dsf-input" [(ngModel)]="summary.tempF" name="tempF" /></div>
+        <div class="dsf-field"><label>PR (/min)</label><input class="dsf-input" [(ngModel)]="summary.pr" name="pr" /></div>
+        <div class="dsf-field"><label>BP (mm Hg)</label><input class="dsf-input" [(ngModel)]="summary.bp" name="bp" /></div>
+        <div class="dsf-field"><label>RR (/min)</label><input class="dsf-input" [(ngModel)]="summary.rr" name="rr" /></div>
+        <div class="dsf-field"><label>SPO2 (%)</label><input class="dsf-input" [(ngModel)]="summary.spo2" name="spo2" /></div>
+        <div class="dsf-field"><label>CBG</label><input class="dsf-input" [(ngModel)]="summary.cbg" name="cbg" /></div>
+      </div>
+
+      <h3 class="dsf-subsection-title">Systematic Examination</h3>
+      <div class="dsf-grid">
+        <div class="dsf-field"><label>CVS</label><input class="dsf-input" [(ngModel)]="summary.cvs" name="cvs" /></div>
+        <div class="dsf-field"><label>RS</label><input class="dsf-input" [(ngModel)]="summary.rs" name="rs" /></div>
+        <div class="dsf-field"><label>Abdomen</label><input class="dsf-input" [(ngModel)]="summary.abdomen" name="abdomen" /></div>
+        <div class="dsf-field"><label>CNS</label><input class="dsf-input" [(ngModel)]="summary.cns" name="cns" /></div>
+      </div>
+      <div class="dsf-field dsf-full"><label>Local Examination</label><input class="dsf-input" [(ngModel)]="summary.localExamination" name="localExamination" /></div>
+
+      <h2 class="dsf-section-title">Investigations</h2>
+      <div class="dsf-grid">
+        <div class="dsf-field"><label>X-Ray</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.investigationXray" name="investigationXray"></textarea></div>
+        <div class="dsf-field"><label>ECG</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.investigationEcg" name="investigationEcg"></textarea></div>
+        <div class="dsf-field"><label>ECHO</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.investigationEcho" name="investigationEcho"></textarea></div>
+        <div class="dsf-field"><label>TMT</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.investigationTmt" name="investigationTmt"></textarea></div>
+        <div class="dsf-field"><label>USG Abdomen</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.investigationUsgAbdomen" name="investigationUsgAbdomen"></textarea></div>
+        <div class="dsf-field"><label>USG Pelvis</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.investigationUsgPelvis" name="investigationUsgPelvis"></textarea></div>
+        <div class="dsf-field"><label>Endoscopy</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.investigationEndoscopy" name="investigationEndoscopy"></textarea></div>
+        <div class="dsf-field"><label>Colonoscopy</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.investigationColonoscopy" name="investigationColonoscopy"></textarea></div>
+        <div class="dsf-field"><label>Sigmoidoscopy</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.investigationSigmoidoscopy" name="investigationSigmoidoscopy"></textarea></div>
+        <div class="dsf-field"><label>MRI-Scan</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.investigationMriScan" name="investigationMriScan"></textarea></div>
+        <div class="dsf-field"><label>Doppler Study</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.investigationDopplerStudy" name="investigationDopplerStudy"></textarea></div>
+        <div class="dsf-field"><label>Nerve Conduction</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.investigationNerveConduction" name="investigationNerveConduction"></textarea></div>
+      </div>
+
+      <h3 class="dsf-subsection-title">Blood Investigations</h3>
+      <div class="dsf-grid">
+        <div class="dsf-field">
+          <label>Date</label>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <input matInput [matDatepicker]="bloodDatePicker" [(ngModel)]="summary.bloodInvestigationDate" name="bloodInvestigationDate" />
+            <mat-datepicker-toggle matIconSuffix [for]="bloodDatePicker" />
+            <mat-datepicker #bloodDatePicker />
+          </mat-form-field>
+        </div>
+        <div class="dsf-field"><label>Hemoglobin</label><input class="dsf-input" [(ngModel)]="summary.hemoglobin" name="hemoglobin" /></div>
+        <div class="dsf-field"><label>Bl Urea</label><input class="dsf-input" [(ngModel)]="summary.bloodUrea" name="bloodUrea" /></div>
+        <div class="dsf-field"><label>Sr Creatinine</label><input class="dsf-input" [(ngModel)]="summary.srCreatinine" name="srCreatinine" /></div>
+        <div class="dsf-field"><label>Sodium</label><input class="dsf-input" [(ngModel)]="summary.sodium" name="sodium" /></div>
+        <div class="dsf-field"><label>Potassium</label><input class="dsf-input" [(ngModel)]="summary.potassium" name="potassium" /></div>
+        <div class="dsf-field"><label>HbA1c</label><input class="dsf-input" [(ngModel)]="summary.hba1c" name="hba1c" /></div>
+        <div class="dsf-field"><label>(OR) Enclosed</label><input class="dsf-input" [(ngModel)]="summary.orEnclosed" name="orEnclosed" /></div>
+      </div>
+
+      <h3 class="dsf-subsection-title">Coronary Angiogram</h3>
+      <div class="dsf-grid">
+        <div class="dsf-field">
+          <label>Date</label>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <input matInput [matDatepicker]="angioDatePicker" [(ngModel)]="summary.angiogramDate" name="angiogramDate" />
+            <mat-datepicker-toggle matIconSuffix [for]="angioDatePicker" />
+            <mat-datepicker #angioDatePicker />
+          </mat-form-field>
+        </div>
+        <div class="dsf-field"><label>Site</label><input class="dsf-input" [(ngModel)]="summary.angiogramSite" name="angiogramSite" /></div>
+        <div class="dsf-field"><label>Artery</label><input class="dsf-input" [(ngModel)]="summary.angiogramArtery" name="angiogramArtery" /></div>
+      </div>
+      <div class="dsf-field dsf-full"><label>Procedure</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.angiogramProcedure" name="angiogramProcedure"></textarea></div>
+      <div class="dsf-grid">
+        <div class="dsf-field"><label>LMCA</label><input class="dsf-input" [(ngModel)]="summary.lmca" name="lmca" /></div>
+        <div class="dsf-field"><label>LAD</label><input class="dsf-input" [(ngModel)]="summary.lad" name="lad" /></div>
+        <div class="dsf-field"><label>LCX</label><input class="dsf-input" [(ngModel)]="summary.lcx" name="lcx" /></div>
+        <div class="dsf-field"><label>RCA</label><input class="dsf-input" [(ngModel)]="summary.rca" name="rca" /></div>
+      </div>
+
+      <div class="dsf-block">
+        <label>Impression</label>
+        @for (item of summary.impression; track $index; let i = $index) {
+          <div class="dsf-dynamic-row">
+            <input class="dsf-input" [(ngModel)]="summary.impression[i]" [name]="'impression-' + i" />
+            <button mat-icon-button color="warn" type="button" aria-label="Remove impression" (click)="removeListItem(summary.impression, i)">
+              <mat-icon aria-hidden="true">close</mat-icon>
+            </button>
+          </div>
+        }
+        <button mat-icon-button color="primary" type="button" aria-label="Add impression" (click)="addListItem(summary.impression)">
+          <mat-icon aria-hidden="true">add_circle</mat-icon>
+        </button>
+      </div>
+
+      <div class="dsf-field dsf-full"><label>Recommendation</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.recommendation" name="recommendation"></textarea></div>
+      <div class="dsf-field dsf-full"><label>Treatment Given</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.treatmentGiven" name="treatmentGiven"></textarea></div>
+
+      <h2 class="dsf-section-title">Surgery Notes</h2>
+      @for (proc of summary.surgeryProcedures; track $index; let i = $index) {
+        <div class="dsf-procedure-card">
+          <div class="dsf-procedure-header">
+            <strong>Procedure {{ i + 1 }}</strong>
+            <button mat-icon-button color="warn" type="button" aria-label="Remove procedure" (click)="removeProcedure(i)">
+              <mat-icon aria-hidden="true">close</mat-icon>
+            </button>
+          </div>
+          <div class="dsf-grid">
+            <div class="dsf-field dsf-full"><label>Procedure Name</label><input class="dsf-input" [(ngModel)]="proc.procedureName" [name]="'procName-' + i" /></div>
+            <div class="dsf-field"><label>Surgeon Name</label><input class="dsf-input" [(ngModel)]="proc.surgeonName" [name]="'surgeon-' + i" /></div>
+            <div class="dsf-field"><label>Assistant Surgeon Name</label><input class="dsf-input" [(ngModel)]="proc.assistantSurgeonName" [name]="'assistantSurgeon-' + i" /></div>
+            <div class="dsf-field"><label>Anaesthetist Name</label><input class="dsf-input" [(ngModel)]="proc.anaesthetistName" [name]="'anaesthetist-' + i" /></div>
+            <div class="dsf-field">
+              <label>Date of Surgery</label>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <input matInput [matDatepicker]="procDatePicker" [(ngModel)]="proc.dateOfSurgery" [name]="'surgeryDate-' + i" />
+                <mat-datepicker-toggle matIconSuffix [for]="procDatePicker" />
+                <mat-datepicker #procDatePicker />
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+      }
+      <button mat-stroked-button color="primary" type="button" (click)="addProcedure()">
+        <mat-icon aria-hidden="true">add</mat-icon>
+        Add Procedure
+      </button>
+
+      <div class="dsf-field dsf-full"><label>Course In The Hospital</label><textarea class="dsf-input" rows="3" [(ngModel)]="summary.courseInHospital" name="courseInHospital"></textarea></div>
+
+      <h2 class="dsf-section-title dsf-advise-title">Advise Drug</h2>
+      <div class="dsf-table-wrap">
+        <table class="dsf-drug-table">
+          <thead>
+            <tr>
+              <th>Drug Name</th>
+              <th>Advise Type</th>
+              <th>Dose</th>
+              <th>Mor</th>
+              <th>Aft</th>
+              <th>Eve</th>
+              <th>Night</th>
+              <th>Route</th>
+              <th>Relationship With Meal</th>
+              <th>Duration</th>
+              <th>Add</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="dsf-drug-new-row">
+              <td><input class="dsf-input" [(ngModel)]="newDrug.drugName" name="newDrugName" placeholder="Drug name" /></td>
+              <td>
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                  <mat-select [(ngModel)]="newDrug.adviseType" name="newDrugAdviseType">
+                    @for (t of adviseTypes; track t) {
+                      <mat-option [value]="t">{{ t === 'REGULAR' ? 'Regular' : 'SOS' }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </td>
+              <td><input class="dsf-input dsf-input-narrow" [(ngModel)]="newDrug.dose" name="newDrugDose" /></td>
+              <td><input class="dsf-input dsf-input-narrow" [(ngModel)]="newDrug.morning" name="newDrugMorning" /></td>
+              <td><input class="dsf-input dsf-input-narrow" [(ngModel)]="newDrug.afternoon" name="newDrugAfternoon" /></td>
+              <td><input class="dsf-input dsf-input-narrow" [(ngModel)]="newDrug.evening" name="newDrugEvening" /></td>
+              <td><input class="dsf-input dsf-input-narrow" [(ngModel)]="newDrug.night" name="newDrugNight" /></td>
+              <td><input class="dsf-input" [(ngModel)]="newDrug.route" name="newDrugRoute" /></td>
+              <td><input class="dsf-input" [(ngModel)]="newDrug.relationshipWithMeal" name="newDrugRelationship" /></td>
+              <td><input class="dsf-input" [(ngModel)]="newDrug.duration" name="newDrugDuration" /></td>
+              <td>
+                <button mat-flat-button color="primary" type="button" (click)="addDrug()">Add</button>
+              </td>
+            </tr>
+            @for (drug of summary.adviseDrugs; track $index; let i = $index) {
+              <tr>
+                <td>{{ drug.drugName }}</td>
+                <td>{{ drug.adviseType === 'REGULAR' ? 'Regular' : 'SOS' }}</td>
+                <td>{{ drug.dose }}</td>
+                <td>{{ drug.morning }}</td>
+                <td>{{ drug.afternoon }}</td>
+                <td>{{ drug.evening }}</td>
+                <td>{{ drug.night }}</td>
+                <td>{{ drug.route }}</td>
+                <td>{{ drug.relationshipWithMeal }}</td>
+                <td>{{ drug.duration }}</td>
+                <td>
+                  <button mat-icon-button color="warn" type="button" aria-label="Remove drug" (click)="removeDrug(i)">
+                    <mat-icon aria-hidden="true">delete</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="dsf-field dsf-full"><label>Review</label><input class="dsf-input" [(ngModel)]="summary.review" name="review" /></div>
+      <div class="dsf-field dsf-full"><label>Diet Advice</label><input class="dsf-input" [(ngModel)]="summary.dietAdvice" name="dietAdvice" /></div>
+      <div class="dsf-field dsf-full"><label>Physiotherapy</label><input class="dsf-input" [(ngModel)]="summary.physiotherapy" name="physiotherapy" /></div>
+      <div class="dsf-field dsf-full"><label>Physical Activity</label><input class="dsf-input" [(ngModel)]="summary.physicalActivity" name="physicalActivity" /></div>
+      <div class="dsf-field dsf-full"><label>Advice</label><input class="dsf-input" [(ngModel)]="summary.advice" name="advice" /></div>
+      <div class="dsf-field dsf-full"><label>Description</label><textarea class="dsf-input" rows="2" [(ngModel)]="summary.reviewDescription" name="reviewDescription"></textarea></div>
+      <div class="dsf-field dsf-full"><label>Condition At Discharge</label><input class="dsf-input" [(ngModel)]="summary.conditionAtDischarge" name="conditionAtDischarge" /></div>
+      <div class="dsf-field dsf-full"><label>Emergency Contact No</label><input class="dsf-input" [(ngModel)]="summary.emergencyContactNumbers" name="emergencyContactNumbers" /></div>
+
+      <div class="dsf-block">
+        <label>Please call emergency contact if you have any of the following symptoms:</label>
+        @for (item of summary.emergencySymptoms; track $index; let i = $index) {
+          <div class="dsf-dynamic-row">
+            <input class="dsf-input" [(ngModel)]="summary.emergencySymptoms[i]" [name]="'symptom-' + i" />
+            <button mat-icon-button color="warn" type="button" aria-label="Remove symptom" (click)="removeListItem(summary.emergencySymptoms, i)">
+              <mat-icon aria-hidden="true">close</mat-icon>
+            </button>
+          </div>
+        }
+        <button mat-icon-button color="primary" type="button" aria-label="Add symptom" (click)="addListItem(summary.emergencySymptoms)">
+          <mat-icon aria-hidden="true">add_circle</mat-icon>
+        </button>
+      </div>
+
+      <div class="dsf-grid">
+        <div class="dsf-field"><label>Checked By</label><input class="dsf-input" [(ngModel)]="summary.checkedBy" name="checkedBy" /></div>
+        <div class="dsf-field"><label>Consultant</label><input class="dsf-input" [(ngModel)]="summary.consultantSignOff" name="consultantSignOff" /></div>
+      </div>
+
+      <div class="dsf-footer-actions">
+        <button mat-flat-button color="primary" type="button" [disabled]="saving()" (click)="save()">
+          <mat-icon aria-hidden="true">save</mat-icon>
+          Save
+        </button>
+      </div>
+    </section>
+  }
+</div>

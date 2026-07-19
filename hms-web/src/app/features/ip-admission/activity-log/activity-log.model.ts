@@ -39,7 +39,8 @@ export const ACTIVITY_LOG_MODULES = [
   'Radiology',
   'Insurance',
   'Advance Payment',
-  'Refund'
+  'Refund',
+  'ICD Diagnosis'
 ];
 
 export const ACTIVITY_LOG_OPERATIONS = [

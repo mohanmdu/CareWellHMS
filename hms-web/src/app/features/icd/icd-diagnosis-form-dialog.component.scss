@@ -1,0 +1,18 @@
+.icd-diagnosis-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 0 var(--hms-space-3);
+  min-width: 560px;
+  max-width: 100%;
+}
+
+.icd-full-width {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 640px) {
+  .icd-diagnosis-form {
+    grid-template-columns: 1fr;
+    min-width: 0;
+  }
+}

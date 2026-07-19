@@ -1,0 +1,103 @@
+<div class="hms-page icd-diagnosis-page">
+  <div class="icd-diagnosis-toolbar">
+    <button mat-button type="button" (click)="back()">
+      <mat-icon aria-hidden="true">arrow_back</mat-icon>
+      Back to Search
+    </button>
+  </div>
+
+  @if (patient(); as p) {
+    <section class="hms-card-surface icd-summary-card">
+      <h2>Patient Summary</h2>
+      <div class="icd-info-grid">
+        <div class="icd-info-item"><span>UHID</span><strong>{{ p.registrationNumber }}</strong></div>
+        <div class="icd-info-item"><span>Patient Name</span><strong>{{ p.firstName }} {{ p.lastName }}</strong></div>
+        <div class="icd-info-item"><span>Age</span><strong>{{ p.age ?? '—' }}</strong></div>
+        <div class="icd-info-item"><span>Gender</span><strong>{{ p.gender ?? '—' }}</strong></div>
+        <div class="icd-info-item"><span>Mobile Number</span><strong>{{ p.mobileNumber }}</strong></div>
+        <div class="icd-info-item"><span>Department</span><strong>{{ visitSummary()?.department ?? '—' }}</strong></div>
+        <div class="icd-info-item"><span>Consultant</span><strong>{{ visitSummary()?.consultant ?? '—' }}</strong></div>
+        <div class="icd-info-item">
+          <span>{{ visitSummary()?.patientType === 'IP' ? 'IP Number' : 'OP Number' }}</span>
+          <strong>{{ visitSummary()?.visitNumber ?? '—' }}</strong>
+        </div>
+        <div class="icd-info-item">
+          <span>{{ visitSummary()?.patientType === 'IP' ? 'Admission Date' : 'Visit Date' }}</span>
+          <strong>{{ visitSummary()?.lastVisitDate ?? '—' }}</strong>
+        </div>
+        <div class="icd-info-item"><span>Current Diagnosis Count</span><strong>{{ diagnosisCount() }}</strong></div>
+      </div>
+    </section>
+  }
+
+  <section class="hms-card-surface icd-diagnosis-section">
+    <div class="icd-diagnosis-header">
+      <h2>Assigned ICD Codes</h2>
+      <button mat-flat-button color="primary" type="button" (click)="assignIcdCode()">
+        <mat-icon aria-hidden="true">add</mat-icon>
+        Assign ICD Code
+      </button>
+    </div>
+
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    @if (!loading() && diagnoses().length === 0) {
+      <app-empty-state icon="medical_information" title="No ICD Codes Assigned" message="Assign the first ICD diagnosis for this patient.">
+        <button mat-flat-button color="primary" type="button" (click)="assignIcdCode()">Assign ICD Code</button>
+      </app-empty-state>
+    } @else if (diagnoses().length > 0) {
+      <div class="icd-table-wrapper">
+        <table class="icd-table">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>ICD Code</th>
+              <th>Disease Name</th>
+              <th>Diagnosis Type</th>
+              <th>Diagnosis Status</th>
+              <th>Diagnosis Date</th>
+              <th>Added By</th>
+              <th>Comments</th>
+              <th>View</th>
+              <th>Edit</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (d of diagnoses(); track d.id; let i = $index) {
+              <tr>
+                <td>{{ i + 1 }}</td>
+                <td>{{ d.icdCode }}</td>
+                <td>{{ d.diseaseName }}</td>
+                <td>{{ d.diagnosisType }}</td>
+                <td>
+                  <span class="icd-status-badge" [class]="'icd-status-' + d.status.toLowerCase()">{{ d.status }}</span>
+                </td>
+                <td>{{ d.diagnosisDate }}</td>
+                <td>{{ d.addedBy ?? '—' }}</td>
+                <td class="icd-comments-cell">{{ d.comments || '—' }}</td>
+                <td>
+                  <button mat-icon-button type="button" [attr.aria-label]="'View ' + d.icdCode" (click)="viewDiagnosis(d)">
+                    <mat-icon aria-hidden="true">visibility</mat-icon>
+                  </button>
+                </td>
+                <td>
+                  <button mat-icon-button type="button" [attr.aria-label]="'Edit ' + d.icdCode" (click)="editDiagnosis(d)">
+                    <mat-icon aria-hidden="true">edit</mat-icon>
+                  </button>
+                </td>
+                <td>
+                  <button mat-icon-button color="warn" type="button" [attr.aria-label]="'Delete ' + d.icdCode" (click)="deleteDiagnosis(d)">
+                    <mat-icon aria-hidden="true">delete</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</div>

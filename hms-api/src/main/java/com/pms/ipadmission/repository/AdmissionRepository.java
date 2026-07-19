@@ -11,6 +11,9 @@ import org.springframework.data.repository.query.Param;
 public interface AdmissionRepository extends JpaRepository<Admission, Long> {
     long countByStatus(AdmissionStatus status);
 
+    // ICD Code Search's patient-visit-summary column (most recent IP visit).
+    java.util.Optional<Admission> findFirstByPatientIdOrderByAdmissionDateDesc(Long patientId);
+
     @Query("""
             SELECT a FROM Admission a
             WHERE (:fromDate IS NULL OR a.admissionDate >= :fromDate)

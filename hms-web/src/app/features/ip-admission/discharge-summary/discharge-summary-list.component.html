@@ -1,0 +1,115 @@
+<div class="hms-page">
+  <section class="hms-card-surface dsl-section">
+    <div class="dsl-toolbar">
+      <button mat-icon-button type="button" aria-label="Print report" [disabled]="rows().length === 0" (click)="print()">
+        <mat-icon aria-hidden="true">print</mat-icon>
+      </button>
+    </div>
+
+    <div #reportContent>
+      <header class="dsl-letterhead">
+        @if (clinicSettings()?.logoUrl; as logo) {
+          <img [src]="logo" alt="" class="dsl-logo" />
+        } @else {
+          <div class="dsl-logo dsl-logo-placeholder" aria-hidden="true">{{ (clinicSettings()?.name ?? 'H').charAt(0) }}</div>
+        }
+        <h1 class="dsl-title">Discharge List</h1>
+        <div class="dsl-contact">
+          <strong>{{ clinicSettings()?.name ?? 'Hospital' }}</strong>
+          @if (clinicSettings()?.address) {
+            <span>{{ clinicSettings()?.address }}</span>
+          }
+          @if (clinicSettings()?.phone) {
+            <span>Ph: {{ clinicSettings()?.phone }}</span>
+          }
+          @if (clinicSettings()?.domain) {
+            <span>Web: {{ clinicSettings()?.domain }}</span>
+          }
+          @if (clinicSettings()?.email) {
+            <span>{{ clinicSettings()?.email }}</span>
+          }
+        </div>
+      </header>
+
+      <div class="dsl-filter-bar">
+        <span class="dsl-filter-title">Discharge List</span>
+        <span class="dsl-filter-label">From :</span>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="dsl-filter-field">
+          <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" />
+          <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+          <mat-datepicker #fromPicker />
+        </mat-form-field>
+        <span class="dsl-filter-label">To :</span>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="dsl-filter-field">
+          <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" />
+          <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+          <mat-datepicker #toPicker />
+        </mat-form-field>
+        <span class="dsl-filter-label">Billing Type :</span>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="dsl-filter-field dsl-filter-select">
+          <mat-select [(ngModel)]="billingType">
+            <mat-option value="ALL">All</mat-option>
+            <mat-option value="CASH">Cash</mat-option>
+            <mat-option value="CLAIM">Claim</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <button mat-flat-button color="primary" type="button" (click)="search()">Submit</button>
+      </div>
+
+      @if (loading()) {
+        <mat-progress-bar mode="indeterminate" />
+      }
+
+      @if (!loading() && searched() && rows().length === 0) {
+        <app-empty-state icon="assignment_turned_in" title="No discharged patients" message="No discharged admissions match these filters." />
+      } @else if (rows().length > 0) {
+        <div class="dsl-table-wrap">
+          <table class="dsl-table">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Patient UHID</th>
+                <th>PatientName</th>
+                <th>Gender</th>
+                <th>IPID</th>
+                <th>Surgery</th>
+                <th>Discharge Date</th>
+                <th>Admission Date</th>
+                <th>Insurance</th>
+                <th>Discharge Summary</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of rows(); track row.admissionId; let i = $index) {
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ row.patientUhid ?? '—' }}</td>
+                  <td>{{ row.patientName }}</td>
+                  <td>{{ row.patientGender ?? '—' }}</td>
+                  <td>{{ row.admissionNumber }}</td>
+                  <td>{{ row.surgery ?? '—' }}</td>
+                  <td>{{ row.dischargeDate ? (row.dischargeDate | date: 'dd/MM/yyyy HH:mm') : '—' }}</td>
+                  <td>{{ row.admissionDate | date: 'dd/MM/yyyy HH:mm' }}</td>
+                  <td>{{ row.insuranceType ?? '—' }}</td>
+                  <td class="dsl-actions-cell">
+                    <button mat-flat-button color="primary" type="button" (click)="editSummary(row)">Edit</button>
+                    <button
+                      mat-flat-button
+                      class="dsl-view-btn"
+                      type="button"
+                      [disabled]="!row.dischargeSummaryId"
+                      [attr.title]="row.dischargeSummaryId ? 'View the saved discharge summary' : 'Save a discharge summary first'"
+                      (click)="viewSummary(row)"
+                    >
+                      View
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </section>
+</div>

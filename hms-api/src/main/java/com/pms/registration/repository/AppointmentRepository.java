@@ -17,6 +17,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     // Payment Refund's search-by-invoice-number step.
     Optional<Appointment> findByInvoiceNumber(Long invoiceNumber);
 
+    // ICD Code Search's patient-visit-summary column (most recent OP visit).
+    Optional<Appointment> findFirstByPatientIdOrderByAppointmentDateDescSlotTimeDesc(Long patientId);
+
     // Excludes CANCELLED so a cancelled appointment doesn't permanently block
     // re-booking the same slot (book()'s collision guard).
     List<Appointment> findByConsultantIdAndAppointmentDateAndSlotTimeAndStatusNot(

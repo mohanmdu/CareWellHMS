@@ -1,0 +1,100 @@
+<div class="hms-page icd-search-page">
+  <h1 class="icd-header">ICD CODE MANAGEMENT</h1>
+
+  <section class="hms-card-surface icd-search-bar">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="icd-search-field">
+      <mat-label>Patient Name / Mobile Number / UHID</mat-label>
+      <input matInput [(ngModel)]="searchQuery" (keyup.enter)="search()" placeholder="Enter patient name, mobile number, or UHID" />
+    </mat-form-field>
+    <button mat-flat-button color="primary" type="button" (click)="search()">
+      <mat-icon aria-hidden="true">search</mat-icon>
+      Search
+    </button>
+  </section>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (selectedPatient(); as patient) {
+    <section class="hms-card-surface icd-info-panel">
+      <h2>Selected Patient</h2>
+      <div class="icd-info-grid">
+        <div class="icd-info-item"><span>UHID</span><strong>{{ patient.uhid }}</strong></div>
+        <div class="icd-info-item"><span>Patient Name</span><strong>{{ patient.patientName }}</strong></div>
+        <div class="icd-info-item"><span>Age</span><strong>{{ patient.age ?? '—' }}</strong></div>
+        <div class="icd-info-item"><span>Gender</span><strong>{{ patient.gender ?? '—' }}</strong></div>
+        <div class="icd-info-item"><span>Mobile Number</span><strong>{{ patient.mobileNumber }}</strong></div>
+        <div class="icd-info-item"><span>Department</span><strong>{{ patient.department ?? '—' }}</strong></div>
+        <div class="icd-info-item"><span>Consultant</span><strong>{{ patient.consultant ?? '—' }}</strong></div>
+        <div class="icd-info-item">
+          <span>Visit Number (OP/IP)</span>
+          <strong>{{ patient.visitNumber ?? '—' }}@if (patient.patientType) { &nbsp;({{ patient.patientType }}) }</strong>
+        </div>
+        <div class="icd-info-item"><span>Visit Date</span><strong>{{ patient.lastVisitDate ? (patient.lastVisitDate | date: 'dd/MM/yyyy') : '—' }}</strong></div>
+      </div>
+      <button mat-flat-button color="primary" type="button" (click)="manageIcdCodes()">
+        <mat-icon aria-hidden="true">medical_information</mat-icon>
+        Manage ICD Codes
+      </button>
+    </section>
+  }
+
+  @if (searched()) {
+    <section class="hms-card-surface icd-results">
+      @if (results().length === 0) {
+        <app-empty-state icon="search_off" title="No Patients Found" message="Try a different name, mobile number, or UHID." />
+      } @else {
+        <div class="icd-table-wrapper">
+          <table class="icd-table">
+            <thead>
+              <tr>
+                <th>UHID</th>
+                <th>Patient Name</th>
+                <th>Gender</th>
+                <th>Age</th>
+                <th>Mobile Number</th>
+                <th>Department</th>
+                <th>Consultant</th>
+                <th>Patient Type</th>
+                <th>Last Visit Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of pagination.page(); track row.patientId) {
+                <tr [class.icd-row-selected]="selectedPatient()?.patientId === row.patientId">
+                  <td>{{ row.uhid }}</td>
+                  <td>{{ row.patientName }}</td>
+                  <td>{{ row.gender ?? '—' }}</td>
+                  <td>{{ row.age ?? '—' }}</td>
+                  <td>{{ row.mobileNumber }}</td>
+                  <td>{{ row.department ?? '—' }}</td>
+                  <td>{{ row.consultant ?? '—' }}</td>
+                  <td>
+                    @if (row.patientType) {
+                      <span class="icd-patient-type" [class.icd-type-op]="row.patientType === 'OP'" [class.icd-type-ip]="row.patientType === 'IP'">{{ row.patientType }}</span>
+                    } @else {
+                      —
+                    }
+                  </td>
+                  <td>{{ row.lastVisitDate ? (row.lastVisitDate | date: 'dd/MM/yyyy') : '—' }}</td>
+                  <td>
+                    <button mat-flat-button color="primary" type="button" (click)="selectPatient(row)">Select Patient</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <mat-paginator
+          [length]="pagination.length()"
+          [pageIndex]="pagination.pageIndex()"
+          [pageSize]="pagination.pageSize()"
+          [pageSizeOptions]="[10, 25, 50]"
+          (page)="pagination.onPage($event)"
+        />
+      }
+    </section>
+  }
+</div>

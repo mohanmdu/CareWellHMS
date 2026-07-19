@@ -1,0 +1,116 @@
+<h2 mat-dialog-title>{{ readonlyMode ? 'View ICD Diagnosis' : isEdit ? 'Edit ICD Diagnosis' : 'Assign ICD Code' }}</h2>
+<mat-dialog-content class="icd-diagnosis-form">
+  <mat-form-field appearance="outline">
+    <mat-label>ICD Version</mat-label>
+    <mat-select [ngModel]="version()" (ngModelChange)="onVersionChange($event)" [disabled]="readonlyMode || isEdit">
+      @for (v of icdVersions; track v) {
+        <mat-option [value]="v">{{ v === 'ICD_10' ? 'ICD-10' : 'ICD-11' }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="icd-full-width">
+    <mat-label>ICD Code</mat-label>
+    <input
+      matInput
+      [ngModel]="codeQuery()"
+      (ngModelChange)="onCodeQueryChange($event)"
+      [matAutocomplete]="codeAuto"
+      [disabled]="readonlyMode"
+      placeholder="Search by code or disease name"
+    />
+    <mat-autocomplete #codeAuto="matAutocomplete" (optionSelected)="selectCode($event.option.value)">
+      @for (code of codeResults(); track code.id) {
+        <mat-option [value]="code">{{ code.code }} - {{ code.diseaseName }}</mat-option>
+      } @empty {
+        <mat-option disabled>No matching ICD codes</mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="icd-full-width">
+    <mat-label>Disease Name</mat-label>
+    <input matInput [value]="diseaseName()" disabled />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Chapter</mat-label>
+    <input matInput [value]="chapter()" disabled />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Category</mat-label>
+    <input matInput [value]="category()" disabled />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Diagnosis Type</mat-label>
+    <mat-select [(ngModel)]="form.diagnosisType" [disabled]="readonlyMode">
+      @for (t of diagnosisTypes; track t) {
+        <mat-option [value]="t">{{ t }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Department</mat-label>
+    <mat-select [(ngModel)]="form.departmentId" [disabled]="readonlyMode">
+      <mat-option [value]="null">—</mat-option>
+      @for (d of departments; track d.id) {
+        <mat-option [value]="d.id">{{ d.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Consultant</mat-label>
+    <mat-select [(ngModel)]="form.consultantId" [disabled]="readonlyMode">
+      <mat-option [value]="null">—</mat-option>
+      @for (c of consultants; track c.id) {
+        <mat-option [value]="c.id">{{ c.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Diagnosis Date</mat-label>
+    <input matInput type="date" [(ngModel)]="form.diagnosisDate" [disabled]="readonlyMode" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Diagnosis Status</mat-label>
+    <mat-select [(ngModel)]="form.status" [disabled]="readonlyMode">
+      @for (s of diagnosisStatuses; track s) {
+        <mat-option [value]="s">{{ s }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Severity</mat-label>
+    <mat-select [(ngModel)]="form.severity" [disabled]="readonlyMode">
+      <mat-option [value]="null">—</mat-option>
+      @for (s of diagnosisSeverities; track s) {
+        <mat-option [value]="s">{{ s }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="icd-full-width">
+    <mat-label>Comments</mat-label>
+    <textarea matInput rows="2" [(ngModel)]="form.comments" [disabled]="readonlyMode"></textarea>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="icd-full-width">
+    <mat-label>Clinical Notes</mat-label>
+    <textarea matInput rows="3" [(ngModel)]="form.clinicalNotes" [disabled]="readonlyMode"></textarea>
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  @if (readonlyMode) {
+    <button mat-flat-button color="primary" mat-dialog-close>Close</button>
+  } @else {
+    <button mat-button mat-dialog-close>Cancel</button>
+    <button mat-flat-button color="primary" type="button" [disabled]="!isValid" (click)="submit()">Save</button>
+  }
+</mat-dialog-actions>
