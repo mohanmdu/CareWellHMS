@@ -5,6 +5,7 @@ import com.pms.activitylog.service.ActivityLogService;
 import com.pms.common.EntityNotFoundException;
 import com.pms.ipadmission.repository.AdmissionRepository;
 import com.pms.lab.dto.LabCategoryTestGroupDto;
+import com.pms.lab.dto.LabRequisitionAdHocItemDto;
 import com.pms.lab.dto.LabRequisitionApproveDto;
 import com.pms.lab.dto.LabRequisitionCreateDto;
 import com.pms.lab.dto.LabRequisitionDto;
@@ -18,7 +19,9 @@ import com.pms.lab.entity.LabSubCategory;
 import com.pms.lab.repository.LabRequisitionRepository;
 import com.pms.lab.repository.LabSubCategoryRepository;
 import com.pms.masters.entity.Consultant;
+import com.pms.masters.entity.OpBillingComponent;
 import com.pms.masters.repository.ConsultantRepository;
+import com.pms.masters.repository.OpBillingComponentRepository;
 import com.pms.registration.entity.Appointment;
 import com.pms.registration.entity.Patient;
 import com.pms.registration.repository.AppointmentRepository;
@@ -53,6 +56,7 @@ public class LabRequisitionService {
     private final InvoiceNumberService invoiceNumberService;
     private final ActivityLogService activityLogService;
     private final LabTestEntryService labTestEntryService;
+    private final OpBillingComponentRepository opBillingComponentRepository;
 
     public LabRequisitionService(
             LabRequisitionRepository repository,
@@ -63,7 +67,8 @@ public class LabRequisitionService {
             AdmissionRepository admissionRepository,
             InvoiceNumberService invoiceNumberService,
             ActivityLogService activityLogService,
-            LabTestEntryService labTestEntryService) {
+            LabTestEntryService labTestEntryService,
+            OpBillingComponentRepository opBillingComponentRepository) {
         this.repository = repository;
         this.subCategoryRepository = subCategoryRepository;
         this.patientRepository = patientRepository;
@@ -73,6 +78,7 @@ public class LabRequisitionService {
         this.invoiceNumberService = invoiceNumberService;
         this.activityLogService = activityLogService;
         this.labTestEntryService = labTestEntryService;
+        this.opBillingComponentRepository = opBillingComponentRepository;
     }
 
     /** The requisition form's checkbox groups: every active Sub-Category, grouped by its Category. */
@@ -94,6 +100,12 @@ public class LabRequisitionService {
 
     @Transactional
     public LabRequisitionDto create(LabRequisitionCreateDto dto) {
+        List<Long> subCategoryIds = dto.subCategoryIds() != null ? dto.subCategoryIds() : List.of();
+        List<LabRequisitionAdHocItemDto> adHocItems = dto.adHocItems() != null ? dto.adHocItems() : List.of();
+        if (subCategoryIds.isEmpty() && adHocItems.isEmpty()) {
+            throw new IllegalArgumentException("A requisition needs at least one test or billing line item");
+        }
+
         Patient patient = patientRepository.findById(dto.patientId())
                 .orElseThrow(() -> new EntityNotFoundException("Patient not found: " + dto.patientId()));
         Consultant consultant = dto.consultantId() != null
@@ -104,6 +116,8 @@ public class LabRequisitionService {
 
         LabRequisition requisition = new LabRequisition();
         requisition.setRequisitionNumber(nextRequisitionNumber());
+        // "Billing" mirrors the Investigations flow's ad-hoc OP Billing Catalog items; "Labtest" is the Lab Sub-Category flow's default.
+        requisition.setRequisitionType(adHocItems.isEmpty() ? "Labtest" : "Billing");
         requisition.setPatient(patient);
         requisition.setConsultant(consultant);
         requisition.setPatientType(patientType);
@@ -113,7 +127,7 @@ public class LabRequisitionService {
         requisition.setCreatedBy(currentUsername());
 
         double total = 0;
-        for (Long subCategoryId : dto.subCategoryIds()) {
+        for (Long subCategoryId : subCategoryIds) {
             LabSubCategory subCategory = subCategoryRepository.findById(subCategoryId)
                     .orElseThrow(() -> new EntityNotFoundException("Lab sub-category not found: " + subCategoryId));
             double amount = "IP".equals(patientType) ? subCategory.getIpAmount() : subCategory.getOpAmount();
@@ -126,14 +140,27 @@ public class LabRequisitionService {
             requisition.getItems().add(item);
             total += amount;
         }
+        for (LabRequisitionAdHocItemDto adHocItem : adHocItems) {
+            OpBillingComponent component = opBillingComponentRepository.findById(adHocItem.componentId())
+                    .orElseThrow(() -> new EntityNotFoundException("Billing component not found: " + adHocItem.componentId()));
+            double discount = adHocItem.discount() != null ? adHocItem.discount() : 0;
+            double amount = component.getAmount() * adHocItem.quantity() - discount;
+            LabRequisitionItem item = new LabRequisitionItem();
+            item.setRequisition(requisition);
+            item.setCategoryName(component.getCategory().getName());
+            item.setSubCategoryName(component.getName());
+            item.setAmount(amount);
+            requisition.getItems().add(item);
+            total += amount;
+        }
         requisition.setTotalAmount(total);
 
         LabRequisition saved = repository.save(requisition);
         activityLogService.log(new ActivityLogEntry("Laboratory", "Create")
-                .content("Lab requisition " + saved.getRequisitionNumber() + " for " + total)
+                .content((adHocItems.isEmpty() ? "Lab requisition " : "Investigations billing advice ") + saved.getRequisitionNumber() + " for " + total)
                 .status("Pending")
                 .patient(patient.getRegistrationNumber(), patientDisplayName(patient))
-                .screenName("Lab Requisition"));
+                .screenName(adHocItems.isEmpty() ? "Lab Requisition" : "Patient Billing Advice"));
         return toDto(saved);
     }
 
@@ -240,7 +267,12 @@ public class LabRequisitionService {
         Patient patient = r.getPatient();
         Consultant consultant = r.getConsultant();
         List<LabRequisitionItemDto> items = r.getItems().stream()
-                .map(i -> new LabRequisitionItemDto(i.getSubCategory().getId(), i.getCategoryName(), i.getSubCategoryName(), i.getAmount()))
+                .map(i -> new LabRequisitionItemDto(
+                        i.getId(),
+                        i.getSubCategory() != null ? i.getSubCategory().getId() : null,
+                        i.getCategoryName(),
+                        i.getSubCategoryName(),
+                        i.getAmount()))
                 .toList();
         return new LabRequisitionDto(
                 r.getId(),

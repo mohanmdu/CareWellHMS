@@ -1,0 +1,143 @@
+<div class="hms-page pba-page">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading() && patient(); as p) {
+    <section class="hms-card-surface pba-header-card">
+      <h1 class="pba-title">Patient Billing Advice</h1>
+      <div class="pba-demographics">
+        <div class="pba-field"><span>Patient Name</span><strong>{{ p.firstName }} {{ p.lastName }}</strong></div>
+        <div class="pba-field"><span>Patient ID</span><strong>{{ p.registrationNumber ?? '—' }}</strong></div>
+        <div class="pba-field"><span>Gender</span><strong>{{ p.gender ?? '—' }}</strong></div>
+        <div class="pba-field"><span>Age</span><strong>{{ p.age ?? '—' }}</strong></div>
+        <div class="pba-field"><span>Occupation</span><strong>—</strong></div>
+        <div class="pba-field"><span>Address</span><strong>{{ p.address ?? '—' }}</strong></div>
+        <div class="pba-field">
+          <span>Payment Mode</span>
+          <select class="pba-select" [(ngModel)]="billingType" name="billingType">
+            <option value="CASH">Cash</option>
+            <option value="CREDIT">Credit</option>
+          </select>
+        </div>
+        <div class="pba-field"><span>Patient Type</span><strong>{{ patientType() }}</strong></div>
+        <div class="pba-field pba-consultant-field">
+          <span>Consultant:</span>
+          <input
+            class="pba-input"
+            [ngModel]="consultantQuery()"
+            (ngModelChange)="onConsultantQueryChange($event)"
+            [matAutocomplete]="consultantAuto"
+            placeholder="Type to search consultants..."
+          />
+          <mat-autocomplete #consultantAuto="matAutocomplete" (optionSelected)="selectConsultant($event.option.value)">
+            @for (c of consultantResults(); track c.id) {
+              <mat-option [value]="c">{{ c.name }}</mat-option>
+            } @empty {
+              <mat-option disabled>No matching consultants</mat-option>
+            }
+          </mat-autocomplete>
+        </div>
+      </div>
+    </section>
+
+    <section class="hms-card-surface pba-advice-card">
+      <h2 class="pba-advice-title">Patient Billing Advice</h2>
+
+      <div class="pba-entry-row">
+        <div class="pba-field">
+          <span>Category</span>
+          <select class="pba-select" [ngModel]="selectedCategoryId()" (ngModelChange)="onCategoryChange($event)" name="category">
+            <option [ngValue]="null">All Categories</option>
+            @for (cat of categories(); track cat.id) {
+              <option [ngValue]="cat.id">{{ cat.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="pba-field pba-component-field">
+          <span>Component &amp; Remarks</span>
+          <input
+            class="pba-input"
+            [ngModel]="componentQuery()"
+            (ngModelChange)="onComponentQueryChange($event)"
+            [matAutocomplete]="componentAuto"
+            placeholder="Type to search billing components..."
+          />
+          <mat-autocomplete #componentAuto="matAutocomplete" (optionSelected)="selectComponent($event.option.value)">
+            @for (comp of componentResults(); track comp.id) {
+              <mat-option [value]="comp">{{ comp.name }} ({{ comp.categoryName }})</mat-option>
+            } @empty {
+              <mat-option disabled>No matching components</mat-option>
+            }
+          </mat-autocomplete>
+        </div>
+
+        <div class="pba-field">
+          <span>Amount</span>
+          <input class="pba-input" type="text" [value]="(selectedComponent()?.amount ?? 0) | number: '1.0-2'" readonly />
+        </div>
+
+        <div class="pba-field">
+          <span>Quantity</span>
+          <input class="pba-input" type="number" min="1" [ngModel]="quantity()" (ngModelChange)="quantity.set($event)" name="quantity" />
+        </div>
+
+        <div class="pba-field">
+          <span>Discount</span>
+          <input class="pba-input" type="number" min="0" [ngModel]="discount()" (ngModelChange)="discount.set($event)" name="discount" />
+        </div>
+
+        <div class="pba-field">
+          <span>Net Amount</span>
+          <input class="pba-input" type="text" [value]="currentNetAmount() | number: '1.0-2'" readonly />
+        </div>
+
+        <button mat-flat-button class="pba-add-btn" type="button" [disabled]="!canAddLine" (click)="addLine()">Add</button>
+      </div>
+
+      @if (lineItems().length > 0) {
+        <div class="pba-table-wrap">
+          <table class="pba-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Component</th>
+                <th>Amount</th>
+                <th>Quantity</th>
+                <th>Discount</th>
+                <th>Net Amount</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of lineItems(); track $index) {
+                <tr>
+                  <td>{{ item.categoryName }}</td>
+                  <td>{{ item.componentName }}</td>
+                  <td>{{ item.amount | number: '1.0-2' }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td>{{ item.discount | number: '1.0-2' }}</td>
+                  <td>{{ item.netAmount | number: '1.0-2' }}</td>
+                  <td>
+                    <button mat-icon-button type="button" (click)="removeLine($index)" aria-label="Remove line item">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      <div class="pba-total-row">
+        <span class="pba-total-label">Total Amount:</span>
+        <span class="pba-total-value">{{ totalAmount() | number: '1.0-2' }}</span>
+        <button mat-flat-button class="pba-submit-btn" type="button" [disabled]="!isValid || saving()" (click)="submit()">
+          SUBMIT
+        </button>
+      </div>
+    </section>
+  }
+</div>

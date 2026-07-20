@@ -11,6 +11,8 @@ import com.pms.lab.dto.LabTestResultDto;
 import com.pms.lab.dto.LabTestResultInputDto;
 import com.pms.lab.entity.LabComponent;
 import com.pms.lab.entity.LabRequisition;
+import com.pms.lab.entity.LabRequisitionItem;
+import com.pms.lab.entity.LabSubCategory;
 import com.pms.lab.entity.LabTestEntry;
 import com.pms.lab.entity.LabTestEntryStatus;
 import com.pms.lab.entity.LabTestResult;
@@ -49,11 +51,24 @@ public class LabTestEntryService {
         this.activityLogService = activityLogService;
     }
 
+    /**
+     * Only requisition items that reference a real Lab Sub-Category produce
+     * result rows here - ad-hoc/Investigations items (see
+     * LabRequisitionService.create()) have no LabComponent to record a
+     * result against, so a requisition made up entirely of those (a pure
+     * "Billing" requisitionType) skips lab-entry creation altogether rather
+     * than leaving an empty, nothing-to-do row in the technician's queue.
+     */
     @Transactional
     public void createFromRequisition(LabRequisition requisition) {
         List<Long> subCategoryIds = requisition.getItems().stream()
-                .map(item -> item.getSubCategory().getId())
+                .map(LabRequisitionItem::getSubCategory)
+                .filter(java.util.Objects::nonNull)
+                .map(LabSubCategory::getId)
                 .toList();
+        if (subCategoryIds.isEmpty()) {
+            return;
+        }
         List<LabComponent> components = componentRepository.findBySubCategoryIdInOrderByOrderingNoAsc(subCategoryIds);
 
         LabTestEntry entry = new LabTestEntry();

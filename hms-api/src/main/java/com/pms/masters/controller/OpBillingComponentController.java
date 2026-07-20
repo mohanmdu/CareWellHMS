@@ -28,6 +28,11 @@ public class OpBillingComponentController {
         return service.findInactive();
     }
 
+    @GetMapping("/search")
+    public List<OpBillingComponentDto> search(@RequestParam("q") String query, @RequestParam(required = false) Long categoryId) {
+        return service.search(query, categoryId);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public OpBillingComponentDto create(@Valid @RequestBody OpBillingComponentDto dto) {

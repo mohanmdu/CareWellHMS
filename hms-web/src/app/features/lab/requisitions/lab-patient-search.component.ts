@@ -10,10 +10,13 @@ import { EmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.
 import { Patient } from '../../registration/patients/patient.model';
 import { PatientService } from '../../registration/patients/patient.service';
 
+type SearchMode = 'lab' | 'investigations';
+
 /**
- * Lab/Investigations patient search (screen 1 of 6). "Investigations" isn't
- * a separately built flow yet - both buttons run the same patient search and
- * lead into the same Lab Requisition workflow, since only Lab was specified.
+ * Lab/Investigations patient search - shared entry point for both flows.
+ * Both buttons run the identical patient search; which one was clicked only
+ * decides where selecting a result routes next (the Lab Requisition test-picker
+ * vs the Investigations Patient Billing Advice screen).
  */
 @Component({
   selector: 'app-lab-patient-search',
@@ -31,12 +34,14 @@ export class LabPatientSearchComponent {
   loading = signal(false);
   searched = signal(false);
   results = signal<Patient[]>([]);
+  private mode: SearchMode = 'lab';
 
-  search(): void {
+  search(mode: SearchMode = this.mode): void {
     const query = this.searchQuery.trim();
     if (!query) {
       return;
     }
+    this.mode = mode;
     this.loading.set(true);
     this.patientService.search(query).subscribe({
       next: (patients) => {
@@ -55,6 +60,7 @@ export class LabPatientSearchComponent {
     if (patient.id === null) {
       return;
     }
-    this.router.navigate(['/lab/requisitions/new', patient.id]);
+    const path = this.mode === 'investigations' ? '/lab/investigations/new' : '/lab/requisitions/new';
+    this.router.navigate([path, patient.id]);
   }
 }

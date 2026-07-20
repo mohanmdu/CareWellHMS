@@ -31,6 +31,14 @@ public class OpBillingComponentService {
         return repository.findByActiveFalseOrderByUpdatedAtDesc().stream().map(this::toDto).toList();
     }
 
+    public List<OpBillingComponentDto> search(String query, Long categoryId) {
+        String trimmed = query == null ? "" : query.trim();
+        if (trimmed.isEmpty()) {
+            return List.of();
+        }
+        return repository.search(trimmed, categoryId).stream().limit(20).map(this::toDto).toList();
+    }
+
     @Transactional
     public OpBillingComponentDto create(OpBillingComponentDto dto) {
         OpBillingComponent component = new OpBillingComponent();

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
@@ -13,6 +13,14 @@ export class OpBillingComponentService {
 
   list(): Observable<OpBillingComponent[]> {
     return this.http.get<OpBillingComponent[]>(this.baseUrl);
+  }
+
+  search(query: string, categoryId: number | null): Observable<OpBillingComponent[]> {
+    let params = new HttpParams().set('q', query);
+    if (categoryId !== null) {
+      params = params.set('categoryId', categoryId);
+    }
+    return this.http.get<OpBillingComponent[]>(`${this.baseUrl}/search`, { params });
   }
 
   listInactive(): Observable<OpBillingComponent[]> {

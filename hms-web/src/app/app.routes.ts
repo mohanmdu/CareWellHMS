@@ -377,6 +377,13 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'lab/investigations/new/:patientId',
+        loadComponent: () =>
+          import('./features/lab/requisitions/lab-investigation-billing.component').then(
+            (m) => m.LabInvestigationBillingComponent
+          )
+      },
+      {
         path: 'lab/billing',
         loadComponent: () =>
           import('./features/lab/requisitions/lab-billing-worklist.component').then((m) => m.LabBillingWorklistComponent)

@@ -27,7 +27,8 @@ export interface LabCategoryTestGroup {
 }
 
 export interface LabRequisitionItem {
-  subCategoryId: number;
+  id: number;
+  subCategoryId: number | null;
   categoryName: string;
   subCategoryName: string;
   amount: number;
@@ -59,11 +60,18 @@ export interface LabRequisition {
   items: LabRequisitionItem[];
 }
 
+export interface LabRequisitionAdHocItemInput {
+  componentId: number;
+  quantity: number;
+  discount: number | null;
+}
+
 export interface LabRequisitionCreateInput {
   patientId: number;
   consultantId: number | null;
   billingType: LabBillingType;
-  subCategoryIds: number[];
+  subCategoryIds?: number[];
+  adHocItems?: LabRequisitionAdHocItemInput[];
 }
 
 export interface LabRequisitionListRow {

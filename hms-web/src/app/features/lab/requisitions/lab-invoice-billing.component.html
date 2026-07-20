@@ -19,7 +19,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (item of r.items; track item.subCategoryId; let i = $index) {
+            @for (item of r.items; track item.id; let i = $index) {
               <tr>
                 <td>{{ i + 1 }}</td>
                 <td>{{ r.patientUhid }}</td>

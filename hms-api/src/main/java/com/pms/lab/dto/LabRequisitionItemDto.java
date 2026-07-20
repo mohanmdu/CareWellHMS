@@ -1,4 +1,4 @@
 package com.pms.lab.dto;
 
-public record LabRequisitionItemDto(Long subCategoryId, String categoryName, String subCategoryName, double amount) {
+public record LabRequisitionItemDto(Long id, Long subCategoryId, String categoryName, String subCategoryName, double amount) {
 }

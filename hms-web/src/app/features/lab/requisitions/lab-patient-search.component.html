@@ -3,11 +3,11 @@
     <h1 class="lps-title">Lab/Investigations</h1>
     <mat-form-field appearance="outline" subscriptSizing="dynamic" class="lps-search-field">
       <mat-label>Patient UHID</mat-label>
-      <input matInput [(ngModel)]="searchQuery" (keyup.enter)="search()" placeholder="Enter the UHID, name, or mobile number" />
+      <input matInput [(ngModel)]="searchQuery" (keyup.enter)="search('lab')" placeholder="Enter the UHID, name, or mobile number" />
     </mat-form-field>
     <div class="lps-buttons">
-      <button mat-flat-button color="primary" class="lps-lab-btn" type="button" (click)="search()">Lab</button>
-      <button mat-flat-button class="lps-investigations-btn" type="button" (click)="search()">Investigations</button>
+      <button mat-flat-button color="primary" class="lps-lab-btn" type="button" (click)="search('lab')">Lab</button>
+      <button mat-flat-button class="lps-investigations-btn" type="button" (click)="search('investigations')">Investigations</button>
     </div>
   </section>
 

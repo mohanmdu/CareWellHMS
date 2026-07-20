@@ -14,9 +14,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * One selected test (a LabSubCategory) on a requisition. Category/sub-category
- * names and the amount are snapshotted at requisition time so the receipt
- * stays accurate even if the master's price or name changes later.
+ * One line item on a requisition - either a selected Lab test (a
+ * LabSubCategory, the "Labtest" flow) or an ad-hoc billing line sourced from
+ * the existing OP Billing Catalog (the "Billing"/Investigations flow, which
+ * has no Lab sub-category to reference - see LabRequisitionService.create()).
+ * Category/sub-category names and the amount are always snapshotted at
+ * requisition time so the receipt stays accurate even if the source
+ * master's price or name changes later.
  */
 @Entity
 @Table(name = "lab_requisition_item")
@@ -34,7 +38,7 @@ public class LabRequisitionItem {
     private LabRequisition requisition;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sub_category_id", nullable = false)
+    @JoinColumn(name = "sub_category_id")
     private LabSubCategory subCategory;
 
     @Column(name = "category_name", nullable = false)
