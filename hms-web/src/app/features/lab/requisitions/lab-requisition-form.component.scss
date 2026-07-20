@@ -1,0 +1,113 @@
+.lrf-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-4);
+  padding: var(--hms-space-4);
+  max-width: 1100px;
+}
+
+.lrf-header-card {
+  padding: var(--hms-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+}
+
+.lrf-title {
+  margin: 0;
+  padding: var(--hms-space-2) var(--hms-space-3);
+  background: #e65100;
+  color: #fff;
+  text-align: center;
+  border-radius: var(--hms-radius-sm, 2px);
+  font-size: var(--hms-font-size-lg);
+}
+
+.lrf-demographics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--hms-space-3);
+  align-items: end;
+}
+
+.lrf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+
+  span {
+    font-size: var(--hms-font-size-sm);
+    color: var(--hms-color-text-muted);
+    font-weight: 600;
+  }
+}
+
+.lrf-consultant-field {
+  grid-column: span 2;
+}
+
+.lrf-input,
+.lrf-select {
+  box-sizing: border-box;
+  padding: var(--hms-space-2);
+  border: 1px solid var(--hms-color-border, #bcd0e5);
+  border-radius: var(--hms-radius-sm, 2px);
+  font: inherit;
+  min-width: 0;
+}
+
+.lrf-total-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-3);
+  background: #fff3e0;
+  border-radius: var(--hms-radius-md, 4px);
+}
+
+.lrf-total-label {
+  font-weight: 700;
+}
+
+.lrf-total-value {
+  font-size: var(--hms-font-size-lg);
+  font-weight: 700;
+  color: #e65100;
+}
+
+.lrf-submit-btn {
+  background: #6a1b9a;
+  color: #fff;
+  margin-left: var(--hms-space-3);
+}
+
+.lrf-tests-card {
+  padding: var(--hms-space-4);
+}
+
+.lrf-test-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--hms-space-4);
+}
+
+.lrf-test-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-1);
+}
+
+.lrf-group-title {
+  margin: 0 0 var(--hms-space-2);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--hms-color-primary, #1565c0);
+  border-bottom: 2px solid var(--hms-color-border, #e0e0e0);
+  padding-bottom: 4px;
+}
+
+.lrf-test-checkbox {
+  font-size: var(--hms-font-size-sm);
+}

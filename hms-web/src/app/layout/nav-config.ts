@@ -49,10 +49,16 @@ export const NAV_GROUPS: NavGroup[] = [
     ]
   },
   {
-    label: 'Lab & Radiology',
+    label: 'Lab & Investigations',
     items: [
-      { label: 'New Requisition', route: '/lab/requisitions/new', icon: 'add_box' },
-      { label: 'Lab Worklist', route: '/lab/requisitions', icon: 'biotech' }
+      { label: 'Lab Requisition', route: '/lab/requisitions', icon: 'assignment_add' },
+      { label: 'Lab & X-Ray/Scan Billing', route: '/lab/billing', icon: 'point_of_sale' },
+      { label: 'Lab Entry Queue & Report', route: '/lab/test-entries', icon: 'fact_check' },
+      { label: 'Lab Draft Report', route: '/lab/test-entries/draft', icon: 'drafts' },
+      { label: 'Lab Approved Report/Reports Share to WhatsApp', route: '/lab/test-entries/approved', icon: 'verified' },
+      { label: 'Lab Category', route: '/lab/masters/categories', icon: 'category' },
+      { label: 'Lab Sub-Category', route: '/lab/masters/sub-categories', icon: 'list_alt' },
+      { label: 'Lab Component', route: '/lab/masters/components', icon: 'science' }
     ]
   },
   {

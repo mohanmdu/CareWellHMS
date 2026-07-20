@@ -1,0 +1,107 @@
+<div class="hms-page lcat-page">
+  <section class="hms-card-surface lcat-form-card">
+    <h1 class="lcat-form-header">Category</h1>
+    <div class="lcat-form-grid">
+      <label>
+        <span>Category Name:</span>
+        <input class="lcat-input" [(ngModel)]="form.name" name="categoryName" placeholder="e.g. HAEMATOLOGY" />
+      </label>
+      <label>
+        <span>OP Amount:</span>
+        <input class="lcat-input" type="number" [(ngModel)]="form.opAmount" name="opAmount" />
+      </label>
+      <label>
+        <span>IP Amount:</span>
+        <input class="lcat-input" type="number" [(ngModel)]="form.ipAmount" name="ipAmount" />
+      </label>
+      <label>
+        <span>Category Ordering No:</span>
+        <input class="lcat-input" type="number" [(ngModel)]="form.orderingNo" name="orderingNo" />
+      </label>
+    </div>
+    <div class="lcat-form-actions">
+      <button mat-flat-button color="primary" type="button" [disabled]="!isValid" (click)="submit()">
+        {{ editingId ? 'Update' : 'Add' }}
+      </button>
+      @if (editingId) {
+        <button mat-button type="button" (click)="cancelEdit()">Cancel</button>
+      }
+    </div>
+  </section>
+
+  <section class="hms-card-surface lcat-table-card">
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    <div class="lcat-toolbar">
+      <div class="lcat-entries">
+        <span>Show</span>
+        <select class="lcat-entries-select" [ngModel]="pagination.pageSize()" (ngModelChange)="onPageSizeChange($event)">
+          <option [ngValue]="10">10</option>
+          <option [ngValue]="25">25</option>
+          <option [ngValue]="50">50</option>
+        </select>
+        <span>entries</span>
+      </div>
+      <label class="lcat-search">
+        <span>Search:</span>
+        <input class="lcat-input" [ngModel]="searchTerm()" (ngModelChange)="onSearch($event)" />
+      </label>
+    </div>
+
+    @if (!loading() && categories().length === 0) {
+      <app-empty-state icon="category" title="No lab categories yet" message="Add the first category above." />
+    } @else if (filteredCategories().length === 0) {
+      <app-empty-state icon="search_off" title="No matches" message="No categories match your search." />
+    } @else {
+      <div class="lcat-table-wrap">
+        <table class="lcat-table">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Category Name</th>
+              <th>Sub-Category Count</th>
+              <th>Component Count</th>
+              <th>OP Amount</th>
+              <th>IP Amount</th>
+              <th>Ordering No</th>
+              <th>Edit</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of pagination.page(); track c.id; let i = $index) {
+              <tr [class.lcat-row-editing]="editingId === c.id">
+                <td>{{ i + 1 }}</td>
+                <td>{{ c.name }}</td>
+                <td>{{ c.subCategoryCount }}</td>
+                <td>{{ c.componentCount }}</td>
+                <td>{{ c.opAmount }}</td>
+                <td>{{ c.ipAmount }}</td>
+                <td>{{ c.orderingNo }}</td>
+                <td>
+                  <button mat-icon-button color="primary" type="button" [attr.aria-label]="'Edit ' + c.name" (click)="edit(c)">
+                    <mat-icon aria-hidden="true">edit</mat-icon>
+                  </button>
+                </td>
+                <td>
+                  <button mat-icon-button color="warn" type="button" [attr.aria-label]="'Delete ' + c.name" (click)="remove(c)">
+                    <mat-icon aria-hidden="true">cancel</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <mat-paginator
+        [length]="pagination.length()"
+        [pageIndex]="pagination.pageIndex()"
+        [pageSize]="pagination.pageSize()"
+        [hidePageSize]="true"
+        (page)="pagination.onPage($event)"
+      />
+    }
+  </section>
+</div>

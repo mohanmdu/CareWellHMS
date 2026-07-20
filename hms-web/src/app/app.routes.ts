@@ -347,18 +347,72 @@ export const routes: Routes = [
           import('./features/billing-receipts/invoices/invoice-list.component').then((m) => m.InvoiceListComponent)
       },
       {
-        path: 'lab/requisitions/new',
+        path: 'lab/masters/categories',
+        loadComponent: () => import('./features/lab/lab-category-list.component').then((m) => m.LabCategoryListComponent)
+      },
+      {
+        path: 'lab/masters/sub-categories',
         loadComponent: () =>
-          import('./features/lab-radiology/requisitions/requisition-create.component').then(
-            (m) => m.RequisitionCreateComponent
-          )
+          import('./features/lab/lab-sub-category-list.component').then((m) => m.LabSubCategoryListComponent)
+      },
+      {
+        path: 'lab/masters/components',
+        loadComponent: () => import('./features/lab/lab-component-list.component').then((m) => m.LabComponentListComponent)
       },
       {
         path: 'lab/requisitions',
         loadComponent: () =>
-          import('./features/lab-radiology/requisitions/requisition-worklist.component').then(
-            (m) => m.RequisitionWorklistComponent
+          import('./features/lab/requisitions/lab-patient-search.component').then((m) => m.LabPatientSearchComponent)
+      },
+      {
+        path: 'lab/requisitions/new/:patientId',
+        loadComponent: () =>
+          import('./features/lab/requisitions/lab-requisition-form.component').then((m) => m.LabRequisitionFormComponent)
+      },
+      {
+        path: 'lab/requisitions/:id/success',
+        loadComponent: () =>
+          import('./features/lab/requisitions/lab-requisition-success.component').then(
+            (m) => m.LabRequisitionSuccessComponent
           )
+      },
+      {
+        path: 'lab/billing',
+        loadComponent: () =>
+          import('./features/lab/requisitions/lab-billing-worklist.component').then((m) => m.LabBillingWorklistComponent)
+      },
+      {
+        path: 'lab/billing/:id/invoice',
+        loadComponent: () =>
+          import('./features/lab/requisitions/lab-invoice-billing.component').then((m) => m.LabInvoiceBillingComponent)
+      },
+      {
+        path: 'lab/billing/:id/receipt',
+        loadComponent: () => import('./features/lab/requisitions/lab-receipt.component').then((m) => m.LabReceiptComponent)
+      },
+      {
+        path: 'lab/test-entries',
+        data: { statuses: ['NEW', 'DRAFT'], title: 'Lab Entry Queue & Report' },
+        loadComponent: () => import('./features/lab/test-entries/lab-entry-queue.component').then((m) => m.LabEntryQueueComponent)
+      },
+      {
+        path: 'lab/test-entries/draft',
+        data: { statuses: ['DRAFT'], title: 'Lab Draft Report' },
+        loadComponent: () => import('./features/lab/test-entries/lab-entry-queue.component').then((m) => m.LabEntryQueueComponent)
+      },
+      {
+        path: 'lab/test-entries/approved',
+        loadComponent: () =>
+          import('./features/lab/test-entries/lab-approved-reports.component').then((m) => m.LabApprovedReportsComponent)
+      },
+      {
+        path: 'lab/test-entries/:id',
+        loadComponent: () => import('./features/lab/test-entries/lab-test-entry.component').then((m) => m.LabTestEntryComponent)
+      },
+      {
+        path: 'lab/test-entries/:id/print',
+        loadComponent: () =>
+          import('./features/lab/test-entries/lab-test-report-print.component').then((m) => m.LabTestReportPrintComponent)
       },
       {
         path: 'pharmacy/inventory-master',

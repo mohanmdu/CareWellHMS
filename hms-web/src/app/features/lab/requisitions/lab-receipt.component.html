@@ -1,0 +1,92 @@
+<div class="hms-page lrc-page">
+  <div class="lrc-toolbar">
+    <button mat-icon-button type="button" aria-label="Print" (click)="print()">
+      <mat-icon aria-hidden="true">print</mat-icon>
+    </button>
+    <button mat-flat-button color="primary" type="button" (click)="back()">
+      <mat-icon aria-hidden="true">arrow_back</mat-icon>
+      Back
+    </button>
+  </div>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading() && requisition(); as r) {
+    <section class="hms-card-surface">
+      <div class="receipt" #receiptContent>
+        <div class="receipt-header">
+          @if (clinicSettings()?.logoUrl; as logo) {
+            <img [src]="logo" alt="" class="receipt-logo" />
+          }
+          <div class="receipt-clinic-info">
+            <strong class="receipt-clinic-name">{{ clinicSettings()?.name ?? 'Hospital' }}</strong>
+            @if (clinicSettings()?.address) {
+              <span>{{ clinicSettings()?.address }}</span>
+            }
+            <span>
+              @if (clinicSettings()?.phone) {
+                Phone: {{ clinicSettings()?.phone }}
+              }
+              @if (clinicSettings()?.email) {
+                &nbsp;&middot; Email: {{ clinicSettings()?.email }}
+              }
+            </span>
+          </div>
+        </div>
+
+        <div class="receipt-meta">
+          <span>Invoice No: {{ r.invoiceNumber }}</span>
+          <span>Dated: {{ r.requisitionDate | date: 'dd-MM-yyyy' }}</span>
+        </div>
+        <div class="receipt-meta">
+          <span>Referred By: {{ r.consultantName ?? '—' }}</span>
+          <span>Patient ID: {{ r.patientUhid }}</span>
+        </div>
+        <div class="receipt-meta">
+          <span>Patient Name: {{ r.patientName }}</span>
+          <span>Gender: {{ r.gender ?? '—' }}, Age: {{ r.age ?? '—' }}</span>
+        </div>
+
+        <table class="receipt-items-table">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Description</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of r.items; track item.subCategoryId; let i = $index) {
+              <tr>
+                <td>{{ i + 1 }}</td>
+                <td>{{ item.categoryName }} - {{ item.subCategoryName }}</td>
+                <td>{{ item.amount | number: '1.0-2' }}</td>
+              </tr>
+            }
+            @if (r.discountAmount) {
+              <tr>
+                <td></td>
+                <td>Discount</td>
+                <td>-{{ r.discountAmount | number: '1.0-2' }}</td>
+              </tr>
+            }
+            <tr class="receipt-total-row">
+              <td></td>
+              <td>Amount Paid ({{ paymentModeLabel(r.paymentMode) }})</td>
+              <td>{{ r.paidAmount | number: '1.0-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="receipt-words">Received sum of Rupees <strong>{{ amountInWords }}</strong> Only</p>
+        @if (r.remarks) {
+          <p class="receipt-remarks">Remarks: {{ r.remarks }}</p>
+        }
+
+        <p class="receipt-signature">Cashier</p>
+      </div>
+    </section>
+  }
+</div>

@@ -1,0 +1,101 @@
+<div class="hms-page ltp-page">
+  <div class="ltp-toolbar">
+    <button mat-icon-button type="button" aria-label="Print" (click)="print()">
+      <mat-icon aria-hidden="true">print</mat-icon>
+    </button>
+    <button mat-flat-button color="primary" type="button" (click)="back()">
+      <mat-icon aria-hidden="true">arrow_back</mat-icon>
+      Back
+    </button>
+  </div>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading() && entry(); as e) {
+    <section class="hms-card-surface ltp-sheet" #reportContent>
+      <div class="ltp-letterhead">
+        @if (clinicSettings()?.logoUrl; as logo) {
+          <img [src]="logo" alt="" class="ltp-logo" />
+        }
+        <div class="ltp-clinic-info">
+          <strong>{{ clinicSettings()?.name ?? 'Hospital' }}</strong>
+          @if (clinicSettings()?.address) {
+            <span>{{ clinicSettings()?.address }}</span>
+          }
+          <span>
+            @if (clinicSettings()?.phone) {
+              Phone: {{ clinicSettings()?.phone }}
+            }
+            @if (clinicSettings()?.email) {
+              &nbsp;&middot; Email: {{ clinicSettings()?.email }}
+            }
+          </span>
+        </div>
+      </div>
+
+      <div class="ltp-meta">
+        <span>Patient Name: {{ e.patientName }}</span>
+        <span>Age: {{ e.age ?? '—' }}</span>
+        <span>Lab Ref No: {{ e.id }}</span>
+      </div>
+      <div class="ltp-meta">
+        <span>Ref Dr: {{ e.consultantName ?? '—' }}</span>
+        <span>Gender: {{ e.gender ?? '—' }}</span>
+        <span>Mobile: {{ e.mobileNumber }}</span>
+      </div>
+      <div class="ltp-meta">
+        <span>Patient ID: {{ e.patientUhid }}</span>
+        <span>Reported Date &amp; Time: {{ e.reportedDate ? (e.reportedDate | date: 'dd-MM-yyyy hh:mm a') : '—' }}</span>
+      </div>
+      <div class="ltp-specimen">Specimen: {{ e.specimenTypes || '—' }}</div>
+
+      <table class="ltp-table">
+        <thead>
+          <tr>
+            <th>Select All</th>
+            <th>Test Description</th>
+            <th>Result</th>
+            <th>Unit</th>
+            <th>Normal Range</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (result of e.results; track result.componentId; let i = $index) {
+            @if (i === 0 || e.results[i - 1].subCategoryName !== result.subCategoryName) {
+              <tr class="ltp-group-row">
+                <td colspan="5">{{ result.subCategoryName }}</td>
+              </tr>
+            }
+            <tr>
+              <td><input type="checkbox" disabled /></td>
+              <td>{{ result.componentName }} ({{ result.sampleType ?? '—' }}, {{ result.method ?? '—' }})</td>
+              <td [class.ltp-abnormal]="result.abnormal">
+                <u>{{ result.resultValue ?? '—' }}</u>
+              </td>
+              <td>{{ result.units ?? '—' }}</td>
+              <td>
+                @if (result.normalRange) {
+                  {{ result.normalRange }}
+                } @else {
+                  Male: {{ result.maleRangeFrom ?? '—' }}-{{ result.maleRangeTo ?? '—' }}<br />
+                  Female: {{ result.femaleRangeFrom ?? '—' }}-{{ result.femaleRangeTo ?? '—' }}
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (e.remarks) {
+        <p class="ltp-remarks">Remarks: {{ e.remarks }}</p>
+      }
+
+      <div class="ltp-signoff">
+        <span>Checked by</span>
+        <span>Sign of Technician</span>
+      </div>
+    </section>
+  }
+</div>

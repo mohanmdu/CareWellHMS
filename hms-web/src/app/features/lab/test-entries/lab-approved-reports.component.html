@@ -1,0 +1,58 @@
+<div class="hms-page lar-page">
+  <section class="hms-card-surface lar-card">
+    <h1 class="lar-title">Approved Lab Reports/Reports Share to WhatsApp</h1>
+
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    @if (!loading() && rows().length === 0) {
+      <app-empty-state icon="fact_check" title="No approved reports yet" message="Approved lab reports will appear here." />
+    } @else if (rows().length > 0) {
+      <div class="lar-table-wrap">
+        <table class="lar-table">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Lab Test ID</th>
+              <th>PID</th>
+              <th>Name</th>
+              <th>Mobile</th>
+              <th>Doctor Name</th>
+              <th>Type</th>
+              <th>Gender</th>
+              <th>Updated By</th>
+              <th>Requested Time</th>
+              <th>View</th>
+              <th>Share to WhatsApp</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows(); track row.id; let i = $index) {
+              <tr>
+                <td>{{ i + 1 }}</td>
+                <td>{{ row.id }}</td>
+                <td>{{ row.patientUhid }}</td>
+                <td>{{ row.patientName }}</td>
+                <td>{{ row.mobileNumber }}</td>
+                <td>{{ row.consultantName ?? '—' }}</td>
+                <td>{{ row.patientType }}</td>
+                <td>{{ row.gender ?? '—' }}</td>
+                <td>{{ row.updatedBy ?? '—' }}</td>
+                <td>{{ row.requestedTime | date: 'dd-MM-yyyy hh:mm a' }}</td>
+                <td>
+                  <button mat-flat-button color="primary" type="button" (click)="view(row)">View</button>
+                </td>
+                <td>
+                  <button mat-icon-button class="lar-whatsapp-btn" type="button" [attr.aria-label]="'Share ' + row.patientName + ' report to WhatsApp'" (click)="shareToWhatsApp(row)">
+                    <mat-icon aria-hidden="true">chat</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</div>

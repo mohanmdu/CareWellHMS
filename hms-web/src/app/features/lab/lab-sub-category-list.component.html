@@ -1,0 +1,135 @@
+<div class="hms-page lsub-page">
+  <section class="hms-card-surface lsub-form-card">
+    <h1 class="lsub-form-header">Sub-Category</h1>
+    <div class="lsub-form-grid">
+      <label>
+        <span>Category Name:</span>
+        <span class="lsub-autocomplete-wrap">
+          <input
+            class="lsub-input"
+            [ngModel]="categoryQuery()"
+            (ngModelChange)="onCategoryQueryChange($event)"
+            [matAutocomplete]="categoryAuto"
+            name="categoryQuery"
+            placeholder="Type to search categories..."
+          />
+          <mat-autocomplete #categoryAuto="matAutocomplete" (optionSelected)="selectCategory($event.option.value)">
+            @for (c of categoryResults(); track c.id) {
+              <mat-option [value]="c">{{ c.name }}</mat-option>
+            } @empty {
+              <mat-option disabled>No matching categories</mat-option>
+            }
+          </mat-autocomplete>
+        </span>
+      </label>
+      <label>
+        <span>Sub-Category Name:</span>
+        <input class="lsub-input" [(ngModel)]="form.name" name="subCategoryName" placeholder="e.g. Glucose fasting" />
+      </label>
+      <label>
+        <span>OP Amount:</span>
+        <input class="lsub-input" type="number" [(ngModel)]="form.opAmount" name="opAmount" />
+      </label>
+      <label>
+        <span>IP Amount:</span>
+        <input class="lsub-input" type="number" [(ngModel)]="form.ipAmount" name="ipAmount" />
+      </label>
+      <label class="lsub-full">
+        <span>Notes:</span>
+        <textarea class="lsub-input" rows="2" [(ngModel)]="form.notes" name="notes"></textarea>
+      </label>
+      <label>
+        <span>Sub-Category Ordering No:</span>
+        <input class="lsub-input" type="number" [(ngModel)]="form.orderingNo" name="orderingNo" />
+      </label>
+      <label>
+        <span>Sub-Category Heading (If Required):</span>
+        <input class="lsub-input" [(ngModel)]="form.heading" name="heading" />
+      </label>
+    </div>
+    <div class="lsub-form-actions">
+      <button mat-flat-button color="primary" type="button" [disabled]="!isValid" (click)="submit()">
+        {{ editingId ? 'Update' : 'Add' }}
+      </button>
+      @if (editingId) {
+        <button mat-button type="button" (click)="cancelEdit()">Cancel</button>
+      }
+    </div>
+  </section>
+
+  <section class="hms-card-surface lsub-table-card">
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    <div class="lsub-toolbar">
+      <div class="lsub-entries">
+        <span>Show</span>
+        <select class="lsub-entries-select" [ngModel]="pagination.pageSize()" (ngModelChange)="onPageSizeChange($event)">
+          <option [ngValue]="10">10</option>
+          <option [ngValue]="25">25</option>
+          <option [ngValue]="50">50</option>
+        </select>
+        <span>entries</span>
+      </div>
+      <label class="lsub-search">
+        <span>Search:</span>
+        <input class="lsub-input" [ngModel]="searchTerm()" (ngModelChange)="onSearch($event)" />
+      </label>
+    </div>
+
+    @if (!loading() && subCategories().length === 0) {
+      <app-empty-state icon="list_alt" title="No sub-categories yet" message="Add the first sub-category above." />
+    } @else if (filteredSubCategories().length === 0) {
+      <app-empty-state icon="search_off" title="No matches" message="No sub-categories match your search." />
+    } @else {
+      <div class="lsub-table-wrap">
+        <table class="lsub-table">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Category Name</th>
+              <th>Sub-Category Name</th>
+              <th>Component Count</th>
+              <th>OP Amount</th>
+              <th>IP Amount</th>
+              <th>Ordering No</th>
+              <th>Edit</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of pagination.page(); track s.id; let i = $index) {
+              <tr [class.lsub-row-editing]="editingId === s.id">
+                <td>{{ i + 1 }}</td>
+                <td>{{ s.categoryName }}</td>
+                <td>{{ s.name }}</td>
+                <td>{{ s.componentCount }}</td>
+                <td>{{ s.opAmount }}</td>
+                <td>{{ s.ipAmount }}</td>
+                <td>{{ s.orderingNo }}</td>
+                <td>
+                  <button mat-icon-button color="primary" type="button" [attr.aria-label]="'Edit ' + s.name" (click)="edit(s)">
+                    <mat-icon aria-hidden="true">edit</mat-icon>
+                  </button>
+                </td>
+                <td>
+                  <button mat-icon-button color="warn" type="button" [attr.aria-label]="'Delete ' + s.name" (click)="remove(s)">
+                    <mat-icon aria-hidden="true">cancel</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <mat-paginator
+        [length]="pagination.length()"
+        [pageIndex]="pagination.pageIndex()"
+        [pageSize]="pagination.pageSize()"
+        [hidePageSize]="true"
+        (page)="pagination.onPage($event)"
+      />
+    }
+  </section>
+</div>

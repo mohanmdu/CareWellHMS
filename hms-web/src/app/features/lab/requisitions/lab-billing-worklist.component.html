@@ -1,0 +1,52 @@
+<div class="hms-page lbw-page">
+  <section class="hms-card-surface lbw-card">
+    <h1 class="lbw-title">Lab &amp; X-Ray/Scan Billing</h1>
+
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    @if (!loading() && rows().length === 0) {
+      <app-empty-state icon="fact_check" title="Nothing pending" message="No lab requisitions are awaiting billing." />
+    } @else if (rows().length > 0) {
+      <div class="lbw-table-wrap">
+        <table class="lbw-table">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Patient ID</th>
+              <th>Patient Name</th>
+              <th>Patient Type</th>
+              <th>Requisition Type</th>
+              <th>Requisition On</th>
+              <th>Invoice Amount</th>
+              <th>Created By</th>
+              <th>Receive Payment</th>
+              <th>Cancel Payment</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows(); track row.id; let i = $index) {
+              <tr>
+                <td>{{ i + 1 }}</td>
+                <td>{{ row.patientUhid }}</td>
+                <td>{{ row.patientName }}</td>
+                <td>{{ row.patientType }}</td>
+                <td>{{ row.requisitionType }}</td>
+                <td>{{ row.requisitionDate | date: 'dd-MM-yyyy HH:mm' }}</td>
+                <td>{{ row.invoiceAmount | number: '1.0-2' }}</td>
+                <td>{{ row.createdBy ?? '—' }}</td>
+                <td>
+                  <button mat-flat-button color="primary" type="button" (click)="approve(row)">Approve</button>
+                </td>
+                <td>
+                  <button mat-flat-button class="lbw-cancel-btn" type="button" (click)="cancel(row)">Cancel</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</div>

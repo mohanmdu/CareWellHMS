@@ -1,0 +1,70 @@
+<div class="hms-page lrf-page">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading() && patient(); as p) {
+    <section class="hms-card-surface lrf-header-card">
+      <h1 class="lrf-title">Requisition Form</h1>
+      <div class="lrf-demographics">
+        <div class="lrf-field"><span>Patient Name</span><strong>{{ p.firstName }} {{ p.lastName }}</strong></div>
+        <div class="lrf-field"><span>Age</span><strong>{{ p.age ?? '—' }}</strong></div>
+        <div class="lrf-field"><span>Gender</span><strong>{{ p.gender ?? '—' }}</strong></div>
+        <div class="lrf-field"><span>Patient Reg.Type</span><strong>Normal</strong></div>
+        <div class="lrf-field"><span>Patient Type</span><strong>{{ patientType() }}</strong></div>
+        <div class="lrf-field">
+          <span>Patient Billing Type</span>
+          <select class="lrf-select" [(ngModel)]="billingType" name="billingType">
+            <option value="CASH">Cash</option>
+            <option value="CREDIT">Credit</option>
+          </select>
+        </div>
+        <div class="lrf-field lrf-consultant-field">
+          <span>Consultant:</span>
+          <input
+            class="lrf-input"
+            [ngModel]="consultantQuery()"
+            (ngModelChange)="onConsultantQueryChange($event)"
+            [matAutocomplete]="consultantAuto"
+            placeholder="Type to search consultants..."
+          />
+          <mat-autocomplete #consultantAuto="matAutocomplete" (optionSelected)="selectConsultant($event.option.value)">
+            @for (c of consultantResults(); track c.id) {
+              <mat-option [value]="c">{{ c.name }}</mat-option>
+            } @empty {
+              <mat-option disabled>No matching consultants</mat-option>
+            }
+          </mat-autocomplete>
+        </div>
+      </div>
+
+      <div class="lrf-total-row">
+        <span class="lrf-total-label">Total Amount:</span>
+        <span class="lrf-total-value">{{ totalAmount() | number: '1.0-2' }}</span>
+        <button mat-flat-button class="lrf-submit-btn" type="button" [disabled]="!isValid || saving()" (click)="submit()">
+          SUBMIT
+        </button>
+      </div>
+    </section>
+
+    <section class="hms-card-surface lrf-tests-card">
+      <div class="lrf-test-groups">
+        @for (group of testGroups(); track group.categoryId) {
+          <div class="lrf-test-group">
+            <h3 class="lrf-group-title">{{ group.categoryName }}</h3>
+            @for (test of group.tests; track test.subCategoryId) {
+              <label class="lrf-test-checkbox">
+                <mat-checkbox
+                  [checked]="isSelected(test.subCategoryId)"
+                  (change)="toggleTest(test.subCategoryId, $event.checked)"
+                >
+                  {{ test.subCategoryName }} - {{ (patientType() === 'IP' ? test.ipAmount : test.opAmount) | number: '1.0-2' }}
+                </mat-checkbox>
+              </label>
+            }
+          </div>
+        }
+      </div>
+    </section>
+  }
+</div>

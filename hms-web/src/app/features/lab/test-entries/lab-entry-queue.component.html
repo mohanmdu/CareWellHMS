@@ -1,0 +1,64 @@
+<div class="hms-page leq-page">
+  <section class="hms-card-surface leq-card">
+    <h1 class="leq-title">{{ title }}</h1>
+
+    <div class="leq-filter-bar">
+      <span>From:</span>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="leq-filter-field">
+        <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" />
+        <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+        <mat-datepicker #fromPicker />
+      </mat-form-field>
+      <span>To:</span>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="leq-filter-field">
+        <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" />
+        <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+        <mat-datepicker #toPicker />
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="button" (click)="search()">Submit</button>
+    </div>
+
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    @if (!loading() && rows().length === 0) {
+      <app-empty-state icon="biotech" title="Nothing here" message="No lab entries match this queue." />
+    } @else if (filteredRows().length > 0) {
+      <div class="leq-table-wrap">
+        <table class="leq-table">
+          <thead>
+            <tr>
+              <th>S.NO</th>
+              <th>PID</th>
+              <th>NAME</th>
+              <th>GENDER</th>
+              <th>STATUS</th>
+              <th>Mobile</th>
+              <th>Created By</th>
+              <th>REQUESTED TIME</th>
+              <th>VIEW</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of filteredRows(); track row.id; let i = $index) {
+              <tr>
+                <td>{{ i + 1 }}</td>
+                <td>{{ row.patientUhid }}</td>
+                <td>{{ row.patientName }}</td>
+                <td>{{ row.gender ?? '—' }}</td>
+                <td>{{ row.status === 'NEW' ? 'New' : 'Draft' }}</td>
+                <td>{{ row.mobileNumber }}</td>
+                <td>{{ row.createdBy ?? '—' }}</td>
+                <td>{{ row.requestedTime | date: 'dd-MM-yyyy hh:mm a' }} <em>({{ timeAgo(row.requestedTime) }})</em></td>
+                <td>
+                  <button mat-flat-button color="primary" type="button" (click)="view(row)">View</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</div>

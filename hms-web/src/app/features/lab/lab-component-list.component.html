@@ -1,0 +1,196 @@
+<div class="hms-page lcomp-page">
+  <section class="hms-card-surface lcomp-form-card">
+    <h1 class="lcomp-form-header">Component</h1>
+    <div class="lcomp-form-grid">
+      <label>
+        <span>Category Name:</span>
+        <span class="lcomp-autocomplete-wrap">
+          <input
+            class="lcomp-input"
+            [ngModel]="categoryQuery()"
+            (ngModelChange)="onCategoryQueryChange($event)"
+            [matAutocomplete]="categoryAuto"
+            name="categoryQuery"
+            placeholder="Type to search categories..."
+          />
+          <mat-autocomplete #categoryAuto="matAutocomplete" (optionSelected)="selectCategory($event.option.value)">
+            @for (c of categoryResults(); track c.id) {
+              <mat-option [value]="c">{{ c.name }}</mat-option>
+            } @empty {
+              <mat-option disabled>No matching categories</mat-option>
+            }
+          </mat-autocomplete>
+        </span>
+      </label>
+      <label>
+        <span>Sub-Category Name:</span>
+        <span class="lcomp-autocomplete-wrap">
+          <input
+            class="lcomp-input"
+            [ngModel]="subCategoryQuery()"
+            (ngModelChange)="onSubCategoryQueryChange($event)"
+            [matAutocomplete]="subCategoryAuto"
+            [disabled]="!selectedCategory()"
+            name="subCategoryQuery"
+            [placeholder]="selectedCategory() ? 'Type to search sub-categories...' : 'Select a category first'"
+          />
+          <mat-autocomplete #subCategoryAuto="matAutocomplete" (optionSelected)="selectSubCategory($event.option.value)">
+            @for (s of subCategoryResults(); track s.id) {
+              <mat-option [value]="s">{{ s.name }}</mat-option>
+            } @empty {
+              <mat-option disabled>No matching sub-categories</mat-option>
+            }
+          </mat-autocomplete>
+        </span>
+      </label>
+      <label>
+        <span>Component Name:</span>
+        <input class="lcomp-input" [(ngModel)]="form.name" name="componentName" placeholder="Test" />
+      </label>
+      <label>
+        <span>Field:</span>
+        <input class="lcomp-input" [(ngModel)]="form.fieldType" name="fieldType" placeholder="e.g. Text Box" />
+      </label>
+      <label>
+        <span>Sample Type:</span>
+        <input class="lcomp-input" [(ngModel)]="form.sampleType" name="sampleType" placeholder="Blood" />
+      </label>
+      <label>
+        <span>Method:</span>
+        <input class="lcomp-input" [(ngModel)]="form.method" name="method" />
+      </label>
+      <label>
+        <span>Male:</span>
+        <span class="lcomp-range-pair">
+          <span>From:</span>
+          <input class="lcomp-input" [(ngModel)]="form.maleRangeFrom" name="maleFrom" />
+          <span>to:</span>
+          <input class="lcomp-input" [(ngModel)]="form.maleRangeTo" name="maleTo" />
+        </span>
+      </label>
+      <label>
+        <span>Female:</span>
+        <span class="lcomp-range-pair">
+          <span>From:</span>
+          <input class="lcomp-input" [(ngModel)]="form.femaleRangeFrom" name="femaleFrom" />
+          <span>to:</span>
+          <input class="lcomp-input" [(ngModel)]="form.femaleRangeTo" name="femaleTo" />
+        </span>
+      </label>
+      <label class="lcomp-full">
+        <span>Normal Range:</span>
+        <textarea class="lcomp-input" rows="2" [(ngModel)]="form.normalRange" name="normalRange" placeholder="Use semi-colon(;) for next line"></textarea>
+      </label>
+      <label>
+        <span>Units:</span>
+        <input class="lcomp-input" [(ngModel)]="form.units" name="units" placeholder="mg/dl" />
+      </label>
+      <label>
+        <span>Component Ordering Number:</span>
+        <input class="lcomp-input" type="number" [(ngModel)]="form.orderingNo" name="orderingNo" />
+      </label>
+      <label>
+        <span>Component Heading:</span>
+        <input class="lcomp-input" [(ngModel)]="form.componentHeading" name="componentHeading" />
+      </label>
+      <label>
+        <span>Conventional Factor:</span>
+        <input class="lcomp-input" [(ngModel)]="form.conventionalFactor" name="conventionalFactor" />
+      </label>
+      <label>
+        <span>SI Unit:</span>
+        <input class="lcomp-input" [(ngModel)]="form.siUnit" name="siUnit" />
+      </label>
+    </div>
+    <div class="lcomp-form-actions">
+      <button mat-flat-button color="primary" type="button" [disabled]="!isValid" (click)="submit()">
+        {{ editingId ? 'Update' : 'Add' }}
+      </button>
+      @if (editingId) {
+        <button mat-button type="button" (click)="cancelEdit()">Cancel</button>
+      }
+    </div>
+  </section>
+
+  <section class="hms-card-surface lcomp-table-card">
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    <div class="lcomp-toolbar">
+      <div class="lcomp-entries">
+        <span>Show</span>
+        <select class="lcomp-entries-select" [ngModel]="pagination.pageSize()" (ngModelChange)="onPageSizeChange($event)">
+          <option [ngValue]="10">10</option>
+          <option [ngValue]="25">25</option>
+          <option [ngValue]="50">50</option>
+        </select>
+        <span>entries</span>
+      </div>
+      <label class="lcomp-search">
+        <span>Search:</span>
+        <input class="lcomp-input" [ngModel]="searchTerm()" (ngModelChange)="onSearch($event)" />
+      </label>
+    </div>
+
+    @if (!loading() && components().length === 0) {
+      <app-empty-state icon="science" title="No components yet" message="Add the first component above." />
+    } @else if (filteredComponents().length === 0) {
+      <app-empty-state icon="search_off" title="No matches" message="No components match your search." />
+    } @else {
+      <div class="lcomp-table-wrap">
+        <table class="lcomp-table">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Category Name</th>
+              <th>Sub-Category Name</th>
+              <th>Component Name</th>
+              <th>Male Range</th>
+              <th>Female Range</th>
+              <th>Units</th>
+              <th>Conventional Factor</th>
+              <th>SI Units</th>
+              <th>Order Number</th>
+              <th>Edit</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of pagination.page(); track c.id; let i = $index) {
+              <tr [class.lcomp-row-editing]="editingId === c.id">
+                <td>{{ i + 1 }}</td>
+                <td>{{ c.categoryName }}</td>
+                <td>{{ c.subCategoryName }}</td>
+                <td>{{ c.name }}</td>
+                <td>{{ c.maleRangeFrom ?? '—' }} - {{ c.maleRangeTo ?? '—' }}</td>
+                <td>{{ c.femaleRangeFrom ?? '—' }} - {{ c.femaleRangeTo ?? '—' }}</td>
+                <td>{{ c.units ?? '—' }}</td>
+                <td>{{ c.conventionalFactor ?? '—' }}</td>
+                <td>{{ c.siUnit ?? '—' }}</td>
+                <td>{{ c.orderingNo }}</td>
+                <td>
+                  <button mat-icon-button color="primary" type="button" [attr.aria-label]="'Edit ' + c.name" (click)="edit(c)">
+                    <mat-icon aria-hidden="true">edit</mat-icon>
+                  </button>
+                </td>
+                <td>
+                  <button mat-icon-button color="warn" type="button" [attr.aria-label]="'Delete ' + c.name" (click)="remove(c)">
+                    <mat-icon aria-hidden="true">cancel</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <mat-paginator
+        [length]="pagination.length()"
+        [pageIndex]="pagination.pageIndex()"
+        [pageSize]="pagination.pageSize()"
+        [hidePageSize]="true"
+        (page)="pagination.onPage($event)"
+      />
+    }
+  </section>
+</div>

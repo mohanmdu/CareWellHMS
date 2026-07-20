@@ -29,6 +29,11 @@ public class ConsultantController {
         return service.findInactive();
     }
 
+    @GetMapping("/search")
+    public List<ConsultantDto> search(@RequestParam("q") String query) {
+        return service.search(query);
+    }
+
     @GetMapping("/{id}")
     public ConsultantDto get(@PathVariable Long id) {
         return service.findById(id);

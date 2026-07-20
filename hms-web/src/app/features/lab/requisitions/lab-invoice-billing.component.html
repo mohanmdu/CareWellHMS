@@ -1,0 +1,66 @@
+<div class="hms-page lib-page">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading() && requisition(); as r) {
+    <section class="hms-card-surface lib-card">
+      <h1 class="lib-title">Invoice Details</h1>
+      <div class="lib-table-wrap">
+        <table class="lib-table">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Patient ID</th>
+              <th>Name</th>
+              <th>Patient Type</th>
+              <th>Category</th>
+              <th>Invoiced Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of r.items; track item.subCategoryId; let i = $index) {
+              <tr>
+                <td>{{ i + 1 }}</td>
+                <td>{{ r.patientUhid }}</td>
+                <td>{{ r.patientName }}</td>
+                <td>{{ r.patientType }}</td>
+                <td>{{ item.categoryName }} - {{ item.subCategoryName }}</td>
+                <td>{{ item.amount | number: '1.0-2' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="hms-card-surface lib-billing-card">
+      <h2 class="lib-billing-title">Billing Details</h2>
+      <div class="lib-form-grid">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Paying Amount</mat-label>
+          <input matInput type="number" min="0" [(ngModel)]="form.paidAmount" name="paidAmount" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Discount Amount</mat-label>
+          <input matInput type="number" min="0" [(ngModel)]="form.discountAmount" name="discountAmount" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Select Payment Mode</mat-label>
+          <mat-select [(ngModel)]="form.paymentMode" name="paymentMode">
+            @for (mode of paymentModes; track mode) {
+              <mat-option [value]="mode">{{ paymentModeLabels[mode] }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="lib-remarks-field">
+          <mat-label>Remarks</mat-label>
+          <input matInput [(ngModel)]="form.remarks" name="remarks" />
+        </mat-form-field>
+      </div>
+      <div class="lib-actions">
+        <button mat-flat-button color="primary" type="button" [disabled]="!isValid || saving()" (click)="submit()">Submit</button>
+      </div>
+    </section>
+  }
+</div>

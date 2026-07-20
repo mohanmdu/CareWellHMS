@@ -1,0 +1,55 @@
+<div class="hms-page lps-page">
+  <section class="hms-card-surface lps-search-card">
+    <h1 class="lps-title">Lab/Investigations</h1>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="lps-search-field">
+      <mat-label>Patient UHID</mat-label>
+      <input matInput [(ngModel)]="searchQuery" (keyup.enter)="search()" placeholder="Enter the UHID, name, or mobile number" />
+    </mat-form-field>
+    <div class="lps-buttons">
+      <button mat-flat-button color="primary" class="lps-lab-btn" type="button" (click)="search()">Lab</button>
+      <button mat-flat-button class="lps-investigations-btn" type="button" (click)="search()">Investigations</button>
+    </div>
+  </section>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (searched()) {
+    <section class="hms-card-surface lps-results-card">
+      <h2 class="lps-results-title">Search Results</h2>
+      @if (results().length === 0) {
+        <app-empty-state icon="search_off" title="No patients found" message="Try a different UHID, name, or mobile number." />
+      } @else {
+        <div class="lps-table-wrap">
+          <table class="lps-table">
+            <thead>
+              <tr>
+                <th>PID</th>
+                <th>Name</th>
+                <th>Gender</th>
+                <th>Mobile</th>
+                <th>Address</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (patient of results(); track patient.id) {
+                <tr>
+                  <td>
+                    <button mat-button color="primary" type="button" (click)="selectPatient(patient)">
+                      {{ patient.registrationNumber }}
+                    </button>
+                  </td>
+                  <td>{{ patient.firstName }} {{ patient.lastName }}</td>
+                  <td>{{ patient.gender ?? '—' }}</td>
+                  <td>{{ patient.mobileNumber }}</td>
+                  <td>{{ patient.address ?? '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</div>

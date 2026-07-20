@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
@@ -29,6 +29,10 @@ export class ConsultantService {
 
   listInactive(): Observable<Consultant[]> {
     return this.http.get<Consultant[]>(`${this.baseUrl}/inactive`);
+  }
+
+  search(query: string): Observable<Consultant[]> {
+    return this.http.get<Consultant[]>(`${this.baseUrl}/search`, { params: new HttpParams().set('q', query) });
   }
 
   create(consultant: ConsultantInput): Observable<Consultant> {

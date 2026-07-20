@@ -60,6 +60,14 @@ public class ConsultantService {
         return toDtos(repository.findByActiveFalseOrderByUpdatedAtDesc());
     }
 
+    public List<ConsultantDto> search(String query) {
+        String trimmed = query == null ? "" : query.trim();
+        if (trimmed.isEmpty()) {
+            return List.of();
+        }
+        return toDtos(repository.search(trimmed).stream().limit(20).toList());
+    }
+
     public ConsultantDto findById(Long id) {
         return toDto(getOrThrow(id), latestByConsultant(CREATE), latestByConsultant(UPDATE), latestByConsultant(DEACTIVATE));
     }

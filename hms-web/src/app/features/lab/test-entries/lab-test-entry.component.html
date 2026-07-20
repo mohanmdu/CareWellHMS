@@ -1,0 +1,120 @@
+<div class="hms-page lte-page">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading() && entry(); as e) {
+    <section class="hms-card-surface lte-card">
+      <h1 class="lte-title">Lab Test Entry</h1>
+
+      <div class="lte-demographics">
+        <div class="lte-field"><span>Patient Name:</span><strong>{{ e.patientName }}</strong></div>
+        <div class="lte-field"><span>Age:</span><strong>{{ e.age ?? '—' }}</strong></div>
+        <div class="lte-field"><span>Patient ID:</span><strong>{{ e.patientUhid }}</strong></div>
+        <div class="lte-field"><span>Ref Dr:</span><strong>{{ e.consultantName ?? '—' }}</strong></div>
+        <div class="lte-field"><span>Gender:</span><strong>{{ e.gender ?? '—' }}</strong></div>
+        <div class="lte-field"><span>Lab Id:</span><strong>{{ e.id }}</strong></div>
+        <div class="lte-field">
+          <span>Reported Date &amp; Time:</span>
+          <input class="lte-input" type="datetime-local" [(ngModel)]="reportedDate" name="reportedDate" />
+        </div>
+        <div class="lte-field"><span>Mobile No:</span><strong>{{ e.mobileNumber }}</strong></div>
+      </div>
+
+      <div class="lte-specimen-bar">
+        <span class="lte-specimen-label">SPECIMEN TYPES :</span>
+        @for (type of specimenTypeOptions; track type) {
+          <label class="lte-specimen-checkbox">
+            <input
+              type="checkbox"
+              [checked]="isSpecimenSelected(type)"
+              (change)="toggleSpecimen(type, $any($event.target).checked)"
+            />
+            {{ type }}
+          </label>
+        }
+      </div>
+
+      <table class="lte-summary-table">
+        <thead>
+          <tr>
+            <th>S.No</th>
+            <th>Lab Test Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (group of testGroups(); track group.subCategoryName; let i = $index) {
+            <tr>
+              <td>{{ i + 1 }}</td>
+              <td>{{ group.subCategoryName }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <div class="lte-results-wrap">
+        <table class="lte-results-table">
+          <thead>
+            <tr>
+              <th>SAMPLE TYPE</th>
+              <th>TESTS</th>
+              <th>METHOD</th>
+              <th>RESULT</th>
+              <th>ABNORMAL VALUE</th>
+              <th>UNITS</th>
+              <th>NORMAL RANGE</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (group of testGroups(); track group.subCategoryName) {
+              <tr class="lte-group-header-row">
+                <td colspan="7">{{ group.subCategoryName }}</td>
+              </tr>
+              @for (result of group.results; track result.componentId) {
+                <tr>
+                  <td>{{ result.sampleType ?? '—' }}</td>
+                  <td>{{ result.componentName }}</td>
+                  <td>{{ result.method ?? '—' }}</td>
+                  <td>
+                    <input
+                      class="lte-result-input"
+                      [class.lte-abnormal]="abnormalFlags.get(result.componentId)"
+                      [ngModel]="getResultValue(result.componentId)"
+                      (ngModelChange)="setResultValue(result.componentId, $event)"
+                      [name]="'result-' + result.componentId"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="checkbox"
+                      [checked]="abnormalFlags.get(result.componentId)"
+                      (change)="onAbnormalChange(result.componentId, $any($event.target).checked)"
+                    />
+                  </td>
+                  <td>{{ result.units ?? '—' }}</td>
+                  <td>
+                    @if (result.normalRange) {
+                      {{ result.normalRange }}
+                    } @else {
+                      Male: {{ result.maleRangeFrom ?? '—' }}-{{ result.maleRangeTo ?? '—' }}<br />
+                      Female: {{ result.femaleRangeFrom ?? '—' }}-{{ result.femaleRangeTo ?? '—' }}
+                    }
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="lte-actions">
+        <button mat-flat-button color="primary" type="button" [disabled]="saving()" (click)="save()">Save</button>
+        <button mat-flat-button color="primary" type="button" [disabled]="saving()" (click)="saveDraft()">Draft Copy</button>
+        <button mat-flat-button color="primary" type="button" [disabled]="saving()" (click)="approve()">Approve</button>
+      </div>
+      <p class="lte-note">
+        Note: Kindly confirm the report before submiting for Approval. Once approved you can't edit or undo changes.
+      </p>
+    </section>
+  }
+</div>
