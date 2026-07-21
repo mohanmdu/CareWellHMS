@@ -18,7 +18,13 @@ import { AdmissionService } from './admission.service';
 
 const MARITAL_STATUS_OPTIONS = ['Single', 'Married', 'Divorced', 'Widowed'];
 const DESCRIPTION_OF_CASE_OPTIONS = ['Non-Surgery', 'Surgery'];
-const INSURANCE_TYPE_OPTIONS = ['None', 'Government', 'Private', 'Corporate TPA'];
+const INSURANCE_TYPE_OPTIONS = ['None', 'Direct Insurance', 'Private TPA', 'Govt Insurance'];
+const INSURANCE_COMPANY_OPTIONS = [
+  'VIPUL MEDCORP TPA PVT LTD.',
+  'ERICTION INSURANCE TPA PVT LTD.',
+  'STAR HEALTH AND ALLIED INSURANCE CO.LTD.',
+  'TAMILNADU GOVERNMENT EMPLOYEES SCHEME'
+];
 const PATIENT_TYPE_OPTIONS = ['Normal', 'Senior Citizen', 'VIP'];
 const PAYMENT_TYPE_OPTIONS: { value: AdmissionPaymentType; label: string }[] = [
   { value: 'CASH', label: 'Cash' },
@@ -51,6 +57,9 @@ const EMPTY_FORM: Omit<AdmissionRegistrationInput, 'patientId'> = {
   weightKg: null,
   mlc: false,
   insuranceType: 'None',
+  corporateName: null,
+  tpaName: null,
+  insuranceCompany: null,
   patientType: 'Normal',
   remarks: null,
   aadhaarNumber: null,
@@ -86,6 +95,7 @@ export class AdmissionRegistrationFormComponent {
   readonly maritalStatusOptions = MARITAL_STATUS_OPTIONS;
   readonly descriptionOfCaseOptions = DESCRIPTION_OF_CASE_OPTIONS;
   readonly insuranceTypeOptions = INSURANCE_TYPE_OPTIONS;
+  readonly insuranceCompanyOptions = INSURANCE_COMPANY_OPTIONS;
   readonly patientTypeOptions = PATIENT_TYPE_OPTIONS;
   readonly paymentTypeOptions = PAYMENT_TYPE_OPTIONS;
 
@@ -98,6 +108,14 @@ export class AdmissionRegistrationFormComponent {
   private photoFile: File | null = null;
 
   form: Omit<AdmissionRegistrationInput, 'patientId'> = { ...EMPTY_FORM, admissionDate: nowAsDatetimeLocal() };
+
+  get showInsuranceFields(): boolean {
+    return this.form.insuranceType !== 'None';
+  }
+
+  get showInsuranceCompany(): boolean {
+    return this.form.insuranceType === 'Private TPA' || this.form.insuranceType === 'Govt Insurance';
+  }
 
   constructor() {
     const patientId = Number(this.route.snapshot.paramMap.get('patientId'));

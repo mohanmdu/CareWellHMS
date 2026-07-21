@@ -1,0 +1,139 @@
+<div class="hms-page">
+  <app-page-header
+    title="Pre Authorization Requests"
+    subtitle="Raise requests directly, or complete ones auto-seeded from an IP Admission's insurance details."
+  />
+
+  <section class="hms-card-surface insurance-raise-section">
+    <h2 class="insurance-section-title">Raise New Request</h2>
+
+    @if (!selectedPatient()) {
+      <app-patient-search (patientSelected)="selectPatient($event)" />
+    } @else {
+      <div class="insurance-selected-patient">
+        <mat-icon aria-hidden="true">person</mat-icon>
+        <strong>{{ selectedPatient()?.firstName }} {{ selectedPatient()?.lastName }}</strong>
+        <button mat-button type="button" (click)="changePatient()">Change patient</button>
+      </div>
+
+      <form class="hms-form-grid insurance-claim-form" (ngSubmit)="submit()">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Policy number</mat-label>
+          <input matInput name="policyNumber" [(ngModel)]="form.policyNumber" required />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Insurer name</mat-label>
+          <input matInput name="insurerName" [(ngModel)]="form.insurerName" required />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>TPA name</mat-label>
+          <input matInput name="tpaName" [(ngModel)]="form.tpaName" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Corporate name</mat-label>
+          <input matInput name="corporateName" [(ngModel)]="form.corporateName" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Requested amount</mat-label>
+          <input matInput name="requestedAmount" type="number" min="0" [(ngModel)]="form.requestedAmount" />
+        </mat-form-field>
+
+        <div class="insurance-claim-submit">
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="submitting() || !form.policyNumber.trim() || !form.insurerName.trim()"
+          >
+            Raise Request
+          </button>
+        </div>
+      </form>
+    }
+  </section>
+
+  <section class="hms-card-surface insurance-queue-section">
+    <h2 class="insurance-section-title">Pre Authorization Requests</h2>
+
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    @if (!loading() && requests().length === 0) {
+      <app-empty-state icon="health_and_safety" title="No requests yet" message="Requests raised above, or auto-seeded from an admission, will appear here." />
+    } @else if (requests().length > 0) {
+      <table mat-table [dataSource]="requests()" class="insurance-claims-table">
+        <ng-container matColumnDef="requestNumber">
+          <th mat-header-cell *matHeaderCellDef>Request #</th>
+          <td mat-cell *matCellDef="let request">{{ request.requestNumber }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="patient">
+          <th mat-header-cell *matHeaderCellDef>Patient</th>
+          <td mat-cell *matCellDef="let request">{{ request.patientName }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="admission">
+          <th mat-header-cell *matHeaderCellDef>Admission</th>
+          <td mat-cell *matCellDef="let request">{{ request.admissionNumber ?? '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="policyNumber">
+          <th mat-header-cell *matHeaderCellDef>Policy Number</th>
+          <td mat-cell *matCellDef="let request">{{ request.policyNumber ?? '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="insurer">
+          <th mat-header-cell *matHeaderCellDef>Insurer</th>
+          <td mat-cell *matCellDef="let request">{{ request.insurerName ?? '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="tpaCorporate">
+          <th mat-header-cell *matHeaderCellDef>TPA / Corporate</th>
+          <td mat-cell *matCellDef="let request">{{ request.tpaName ?? request.corporateName ?? '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="requested">
+          <th mat-header-cell *matHeaderCellDef>Requested</th>
+          <td mat-cell *matCellDef="let request">{{ request.requestedAmount | number: '1.0-2' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="approved">
+          <th mat-header-cell *matHeaderCellDef>Approved</th>
+          <td mat-cell *matCellDef="let request">{{ request.approvedAmount ?? '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let request">
+            <app-status-badge [label]="statusLabels[request.status]" [tone]="statusTone[request.status]" />
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="insurance-actions-header"></th>
+          <td mat-cell *matCellDef="let request" class="insurance-actions-cell">
+            <div class="insurance-actions-row">
+              @if (request.status === 'YET_TO_BE_RAISED') {
+                <button mat-stroked-button color="primary" type="button" (click)="raise(request)">Raise</button>
+                <button mat-stroked-button type="button" (click)="cancel(request)">Cancel</button>
+              }
+              @if (request.status === 'PENDING') {
+                <button mat-stroked-button color="primary" type="button" (click)="approve(request)">Approve</button>
+                <button mat-stroked-button color="warn" type="button" (click)="reject(request)">Reject</button>
+                <button mat-stroked-button type="button" (click)="cancel(request)">Cancel</button>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    }
+  </section>
+</div>

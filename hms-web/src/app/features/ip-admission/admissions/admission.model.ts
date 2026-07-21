@@ -42,6 +42,9 @@ export interface Admission {
   weightKg: number | null;
   mlc: boolean;
   insuranceType: string | null;
+  corporateName: string | null;
+  tpaName: string | null;
+  insuranceCompany: string | null;
   patientType: string | null;
   remarks: string | null;
   aadhaarNumber: string | null;
@@ -75,6 +78,9 @@ export type AdmissionRegistrationInput = Pick<
   | 'weightKg'
   | 'mlc'
   | 'insuranceType'
+  | 'corporateName'
+  | 'tpaName'
+  | 'insuranceCompany'
   | 'patientType'
   | 'remarks'
   | 'aadhaarNumber'
@@ -104,6 +110,9 @@ export type AdmissionAdmitInput = Pick<
   | 'weightKg'
   | 'mlc'
   | 'insuranceType'
+  | 'corporateName'
+  | 'tpaName'
+  | 'insuranceCompany'
   | 'patientType'
   | 'remarks'
   | 'aadhaarNumber'

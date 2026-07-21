@@ -3,5 +3,5 @@ export interface Dashboard {
   activeAdmissions: number;
   todaysAppointments: number;
   totalOpRevenue: number;
-  pendingInsuranceClaims: number;
+  pendingPreAuthorizationRequests: number;
 }

@@ -20,7 +20,7 @@ import { AdmissionService } from './admission.service';
 
 const MARITAL_STATUS_OPTIONS = ['Single', 'Married', 'Divorced', 'Widowed'];
 const DESCRIPTION_OF_CASE_OPTIONS = ['Non-Surgery', 'Surgery'];
-const INSURANCE_TYPE_OPTIONS = ['None', 'Government', 'Private', 'Corporate TPA'];
+const INSURANCE_TYPE_OPTIONS = ['None', 'Direct Insurance', 'Private TPA', 'Govt Insurance'];
 const PATIENT_TYPE_OPTIONS = ['Normal', 'Senior Citizen', 'VIP'];
 const PAYMENT_TYPE_OPTIONS: { value: AdmissionPaymentType; label: string }[] = [
   { value: 'CASH', label: 'Cash' },
@@ -111,6 +111,9 @@ export class AdmissionWardAllocationComponent {
           weightKg: admission.weightKg,
           mlc: admission.mlc,
           insuranceType: admission.insuranceType,
+          corporateName: admission.corporateName,
+          tpaName: admission.tpaName,
+          insuranceCompany: admission.insuranceCompany,
           patientType: admission.patientType,
           remarks: admission.remarks,
           aadhaarNumber: admission.aadhaarNumber,

@@ -45,7 +45,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: 'Billing Catalog', route: '/billing/catalog', icon: 'sell' },
       { label: 'New Invoice', route: '/billing/invoices/new', icon: 'receipt_long' },
       { label: 'Invoices', route: '/billing/invoices', icon: 'request_quote' },
-      { label: 'Insurance Claims', route: '/insurance/claims', icon: 'health_and_safety' }
+      { label: 'Pre Authorization Requests', route: '/insurance/pre-authorization', icon: 'health_and_safety' }
     ]
   },
   {

@@ -678,10 +678,10 @@ export const routes: Routes = [
           import('./features/cashier/advance-receipt.component').then((m) => m.AdvanceReceiptComponent)
       },
       {
-        path: 'insurance/claims',
+        path: 'insurance/pre-authorization',
         loadComponent: () =>
-          import('./features/insurance/claims/insurance-claim-worklist.component').then(
-            (m) => m.InsuranceClaimWorklistComponent
+          import('./features/insurance/pre-authorization/pre-authorization-worklist.component').then(
+            (m) => m.PreAuthorizationWorklistComponent
           )
       }
       // All Phase 2 modules from the migration plan (§7) now have a working

@@ -158,6 +158,18 @@ public class Admission extends Auditable {
     @Column(name = "insurance_type")
     private String insuranceType;
 
+    /** Only set when insuranceType is "Direct Insurance" - the employer/corporate paying directly, with no TPA/insurer involved. */
+    @Column(name = "corporate_name")
+    private String corporateName;
+
+    /** Third-party administrator name - collected regardless of insuranceType (Direct/Private TPA/Govt all show it in the reference form). */
+    @Column(name = "tpa_name")
+    private String tpaName;
+
+    /** Only set when insuranceType is "Private TPA" or "Govt Insurance" - the selected provider from the Insurance Company master list. */
+    @Column(name = "insurance_company")
+    private String insuranceCompany;
+
     @Column(name = "patient_type")
     private String patientType;
 

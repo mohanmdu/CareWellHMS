@@ -15,6 +15,7 @@ import com.pms.ipadmission.repository.AdmissionRepository;
 import com.pms.ipadmission.repository.AdmissionRoomHistoryRepository;
 import com.pms.ipadmission.repository.RoomRepository;
 import com.pms.ipadmission.repository.RoomTypeRepository;
+import com.pms.insurance.service.PreAuthorizationRequestService;
 import com.pms.ipbilling.entity.IpPayment;
 import com.pms.ipbilling.repository.IpPaymentRepository;
 import com.pms.registration.entity.Patient;
@@ -57,6 +58,7 @@ public class AdmissionService {
     private final IpPaymentRepository paymentRepository;
     private final AdmissionRoomHistoryRepository roomHistoryRepository;
     private final ActivityLogService activityLogService;
+    private final PreAuthorizationRequestService preAuthorizationRequestService;
     private final AtomicInteger sequence = new AtomicInteger(0);
     private final AtomicInteger receiptSequence = new AtomicInteger(0);
     private final AtomicInteger dischargeSequence = new AtomicInteger(0);
@@ -69,7 +71,8 @@ public class AdmissionService {
             FileStorageService fileStorageService,
             IpPaymentRepository paymentRepository,
             AdmissionRoomHistoryRepository roomHistoryRepository,
-            ActivityLogService activityLogService) {
+            ActivityLogService activityLogService,
+            PreAuthorizationRequestService preAuthorizationRequestService) {
         this.repository = repository;
         this.patientRepository = patientRepository;
         this.roomRepository = roomRepository;
@@ -78,6 +81,7 @@ public class AdmissionService {
         this.paymentRepository = paymentRepository;
         this.roomHistoryRepository = roomHistoryRepository;
         this.activityLogService = activityLogService;
+        this.preAuthorizationRequestService = preAuthorizationRequestService;
         this.sequence.set((int) repository.count());
         this.receiptSequence.set((int) paymentRepository.count());
         this.dischargeSequence.set((int) repository.findAll().stream().filter(a -> a.getDischargeNumber() != null).count());
@@ -191,6 +195,7 @@ public class AdmissionService {
         applyIntakeFields(admission, dto);
 
         Admission saved = repository.save(admission);
+        preAuthorizationRequestService.seedFromAdmission(saved);
         activityLogService.log(new ActivityLogEntry("Admission", "Create")
                 .content("Registered" + (admission.getRoomType() != null ? " for " + admission.getRoomType().getName() : ""))
                 .status("Success")
@@ -466,6 +471,9 @@ public class AdmissionService {
         admission.setWeightKg(dto.weightKg());
         admission.setMlc(dto.mlc() != null && dto.mlc());
         admission.setInsuranceType(dto.insuranceType());
+        admission.setCorporateName(dto.corporateName());
+        admission.setTpaName(dto.tpaName());
+        admission.setInsuranceCompany(dto.insuranceCompany());
         admission.setPatientType(dto.patientType());
         admission.setRemarks(dto.remarks());
         admission.setAadhaarNumber(dto.aadhaarNumber());
@@ -547,6 +555,9 @@ public class AdmissionService {
                 admission.getWeightKg(),
                 admission.isMlc(),
                 admission.getInsuranceType(),
+                admission.getCorporateName(),
+                admission.getTpaName(),
+                admission.getInsuranceCompany(),
                 admission.getPatientType(),
                 admission.getRemarks(),
                 admission.getAadhaarNumber(),

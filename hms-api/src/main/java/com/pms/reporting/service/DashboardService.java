@@ -2,8 +2,8 @@ package com.pms.reporting.service;
 
 import com.pms.billing.entity.InvoiceStatus;
 import com.pms.billing.repository.InvoiceRepository;
-import com.pms.insurance.entity.InsuranceClaimStatus;
-import com.pms.insurance.repository.InsuranceClaimRepository;
+import com.pms.insurance.entity.PreAuthorizationStatus;
+import com.pms.insurance.repository.PreAuthorizationRequestRepository;
 import com.pms.ipadmission.entity.AdmissionStatus;
 import com.pms.ipadmission.repository.AdmissionRepository;
 import com.pms.reporting.dto.DashboardDto;
@@ -28,19 +28,19 @@ public class DashboardService {
     private final AdmissionRepository admissionRepository;
     private final AppointmentRepository appointmentRepository;
     private final InvoiceRepository invoiceRepository;
-    private final InsuranceClaimRepository insuranceClaimRepository;
+    private final PreAuthorizationRequestRepository preAuthorizationRequestRepository;
 
     public DashboardService(
             PatientRepository patientRepository,
             AdmissionRepository admissionRepository,
             AppointmentRepository appointmentRepository,
             InvoiceRepository invoiceRepository,
-            InsuranceClaimRepository insuranceClaimRepository) {
+            PreAuthorizationRequestRepository preAuthorizationRequestRepository) {
         this.patientRepository = patientRepository;
         this.admissionRepository = admissionRepository;
         this.appointmentRepository = appointmentRepository;
         this.invoiceRepository = invoiceRepository;
-        this.insuranceClaimRepository = insuranceClaimRepository;
+        this.preAuthorizationRequestRepository = preAuthorizationRequestRepository;
     }
 
     public DashboardDto summary() {
@@ -49,6 +49,6 @@ public class DashboardService {
                 admissionRepository.countByStatus(AdmissionStatus.ADMITTED),
                 appointmentRepository.findByAppointmentDate(LocalDate.now()).size(),
                 invoiceRepository.sumTotalAmountByStatus(InvoiceStatus.PAID),
-                insuranceClaimRepository.findByStatus(InsuranceClaimStatus.PENDING).size());
+                preAuthorizationRequestRepository.findByStatus(PreAuthorizationStatus.PENDING).size());
     }
 }

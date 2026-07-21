@@ -147,6 +147,26 @@
             }
           </mat-select>
         </mat-form-field>
+        @if (showInsuranceCompany) {
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Insurance Company</mat-label>
+            <mat-select name="insuranceCompany" [(ngModel)]="form.insuranceCompany">
+              @for (option of insuranceCompanyOptions; track option) {
+                <mat-option [value]="option">{{ option }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        }
+        @if (showInsuranceFields) {
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>TPA Name</mat-label>
+            <input matInput name="tpaName" [(ngModel)]="form.tpaName" placeholder="Enter the Name" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Corporate Name</mat-label>
+            <input matInput name="corporateName" [(ngModel)]="form.corporateName" placeholder="Enter the Name" />
+          </mat-form-field>
+        }
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Patient Type</mat-label>
           <mat-select name="patientType" [(ngModel)]="form.patientType">
@@ -171,7 +191,7 @@
         </div>
 
         <div class="admission-submit-row">
-          <button mat-flat-button color="primary" type="submit" [disabled]="submitting()">Submit</button>
+          <button mat-flat-button color="primary" type="submit" [disabled]="submitting()">Create</button>
         </div>
       </form>
     </section>
