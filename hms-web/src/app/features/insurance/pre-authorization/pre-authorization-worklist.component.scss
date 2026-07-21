@@ -105,10 +105,13 @@
 .par-patient-cell,
 .par-other-cell,
 .par-consultant-cell {
+  min-width: 180px;
+}
+
+.par-cell-stack {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  min-width: 180px;
 
   span {
     color: var(--hms-color-text-muted);

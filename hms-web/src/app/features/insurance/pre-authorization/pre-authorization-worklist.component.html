@@ -93,32 +93,38 @@
               <tr>
                 <td>{{ i + 1 }}</td>
                 <td class="par-patient-cell">
-                  <strong>{{ request.patientName }}</strong>
-                  <span>Patient UHID: {{ request.patientUhid }}</span>
-                  @if (request.admissionNumber) {
-                    <span>Inpatient ID: {{ request.admissionNumber }}</span>
-                  }
-                  <span>{{ request.maritalStatus ?? '—' }} / {{ request.patientGender ?? '—' }} / {{ request.patientAge ?? '—' }} yrs</span>
-                  @if (request.attenderName) {
-                    <span>Attender's Mobile: {{ request.relationType ?? '—' }} - {{ request.relationMobileNo ?? '—' }}</span>
-                  }
-                  <app-status-badge [label]="statusLabels[request.status]" [tone]="statusTone[request.status]" />
+                  <div class="par-cell-stack">
+                    <strong>{{ request.patientName }}</strong>
+                    <span>Patient UHID: {{ request.patientUhid }}</span>
+                    @if (request.admissionNumber) {
+                      <span>Inpatient ID: {{ request.admissionNumber }}</span>
+                    }
+                    <span>{{ request.maritalStatus ?? '—' }} / {{ request.patientGender ?? '—' }} / {{ request.patientAge ?? '—' }} yrs</span>
+                    @if (request.attenderName) {
+                      <span>Attender's Mobile: {{ request.relationType ?? '—' }} - {{ request.relationMobileNo ?? '—' }}</span>
+                    }
+                    <app-status-badge [label]="statusLabels[request.status]" [tone]="statusTone[request.status]" />
+                  </div>
                 </td>
                 <td class="par-other-cell">
-                  <strong>{{ request.insurerName ?? '—' }}</strong>
-                  @if (request.admissionDate) {
-                    <span>DOA: {{ request.admissionDate | date: 'dd/MM/yyyy HH:mm' }}</span>
-                  }
-                  @if (request.paymentType) {
-                    <span>Payment Type: {{ paymentTypeLabels[request.paymentType] }}</span>
-                  }
-                  @if (request.roomNumber) {
-                    <span>Location: {{ request.roomNumber }}</span>
-                  }
+                  <div class="par-cell-stack">
+                    <strong>{{ request.insurerName ?? '—' }}</strong>
+                    @if (request.admissionDate) {
+                      <span>DOA: {{ request.admissionDate | date: 'dd/MM/yyyy HH:mm' }}</span>
+                    }
+                    @if (request.paymentType) {
+                      <span>Payment Type: {{ paymentTypeLabels[request.paymentType] }}</span>
+                    }
+                    @if (request.roomNumber) {
+                      <span>Location: {{ request.roomNumber }}</span>
+                    }
+                  </div>
                 </td>
                 <td class="par-consultant-cell">
-                  <span>{{ request.primaryConsultant ?? '—' }}</span>
-                  <span>Ref By: {{ request.referralDoctor }}</span>
+                  <div class="par-cell-stack">
+                    <span>{{ request.primaryConsultant ?? '—' }}</span>
+                    <span>Ref By: {{ request.referralDoctor }}</span>
+                  </div>
                 </td>
                 <td class="par-action-cell">
                   @if (request.status === 'YET_TO_BE_RAISED' && raisingId() !== request.id) {
