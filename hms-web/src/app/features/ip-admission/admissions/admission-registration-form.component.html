@@ -60,7 +60,17 @@
         </mat-form-field>
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Relation Mobile No</mat-label>
-          <input matInput name="relationMobileNo" [(ngModel)]="form.relationMobileNo" />
+          <input
+            matInput
+            name="relationMobileNo"
+            inputmode="numeric"
+            maxlength="10"
+            [ngModel]="form.relationMobileNo"
+            (input)="onRelationMobileInput($event)"
+          />
+          @if (form.relationMobileNo && form.relationMobileNo.length !== 10) {
+            <mat-hint>Must be exactly 10 digits</mat-hint>
+          }
         </mat-form-field>
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Father's/Spouse Name</mat-label>
@@ -191,7 +201,7 @@
         </div>
 
         <div class="admission-submit-row">
-          <button mat-flat-button color="primary" type="submit" [disabled]="submitting()">Create</button>
+          <button mat-flat-button color="primary" type="submit" [disabled]="submitting() || !isRelationMobileValid">Create</button>
         </div>
       </form>
     </section>

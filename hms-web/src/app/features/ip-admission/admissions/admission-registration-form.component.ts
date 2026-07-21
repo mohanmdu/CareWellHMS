@@ -132,6 +132,15 @@ export class AdmissionRegistrationFormComponent {
     this.roomTypeService.list().subscribe({ next: (types) => this.roomTypes.set(types) });
   }
 
+  onRelationMobileInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.form.relationMobileNo = input.value.replace(/\D/g, '').slice(0, 10);
+  }
+
+  get isRelationMobileValid(): boolean {
+    return !this.form.relationMobileNo || /^\d{10}$/.test(this.form.relationMobileNo);
+  }
+
   onPhotoSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) {
@@ -145,7 +154,7 @@ export class AdmissionRegistrationFormComponent {
 
   submit(): void {
     const patient = this.patient();
-    if (!patient || patient.id === null) {
+    if (!patient || patient.id === null || !this.isRelationMobileValid) {
       return;
     }
     this.submitting.set(true);
