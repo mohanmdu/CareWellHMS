@@ -30,4 +30,20 @@ public interface PreAuthorizationRequestRepository extends JpaRepository<PreAuth
             @Param("to") LocalDateTime to,
             @Param("insurerName") String insurerName,
             @Param("patientUhid") String patientUhid);
+
+    // Backs the Insurance Rejected Report - same shape as findApprovedForReport but scoped to REJECTED.
+    @Query("""
+            SELECT r FROM PreAuthorizationRequest r
+            WHERE r.status = com.pms.insurance.entity.PreAuthorizationStatus.REJECTED
+              AND (:from IS NULL OR r.decidedAt >= :from)
+              AND (:to IS NULL OR r.decidedAt < :to)
+              AND (:insurerName IS NULL OR r.insurerName = :insurerName)
+              AND (:patientUhid IS NULL OR r.patient.registrationNumber = :patientUhid)
+            ORDER BY r.decidedAt DESC
+            """)
+    List<PreAuthorizationRequest> findRejectedForReport(
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to,
+            @Param("insurerName") String insurerName,
+            @Param("patientUhid") String patientUhid);
 }

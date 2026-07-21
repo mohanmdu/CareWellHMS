@@ -52,6 +52,15 @@ public class PreAuthorizationRequestController {
         return service.findApprovedReport(from, to, insurerName, patientUhid);
     }
 
+    @GetMapping("/rejected")
+    public List<PreAuthorizationRequestDto> rejected(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam(required = false) String insurerName,
+            @RequestParam(required = false) String patientUhid) {
+        return service.findRejectedReport(from, to, insurerName, patientUhid);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public PreAuthorizationRequestDto create(@Valid @RequestBody PreAuthorizationRequestCreateDto dto) {

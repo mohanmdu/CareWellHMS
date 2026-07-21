@@ -33,11 +33,28 @@ export interface PreAuthorizationAmendInput {
   claimNumber: string | null;
 }
 
-export interface PreAuthorizationApprovedReportFilters {
+export interface PreAuthorizationReportFilters {
   from?: string;
   to?: string;
   insurerName?: string;
   patientUhid?: string;
+}
+
+function toParams(filters: PreAuthorizationReportFilters): HttpParams {
+  let params = new HttpParams();
+  if (filters.from) {
+    params = params.set('from', filters.from);
+  }
+  if (filters.to) {
+    params = params.set('to', filters.to);
+  }
+  if (filters.insurerName) {
+    params = params.set('insurerName', filters.insurerName);
+  }
+  if (filters.patientUhid) {
+    params = params.set('patientUhid', filters.patientUhid);
+  }
+  return params;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -53,21 +70,12 @@ export class PreAuthorizationRequestService {
     return this.http.get<PreAuthorizationRequest[]>(`${this.baseUrl}/pending`);
   }
 
-  getApprovedReport(filters: PreAuthorizationApprovedReportFilters): Observable<PreAuthorizationRequest[]> {
-    let params = new HttpParams();
-    if (filters.from) {
-      params = params.set('from', filters.from);
-    }
-    if (filters.to) {
-      params = params.set('to', filters.to);
-    }
-    if (filters.insurerName) {
-      params = params.set('insurerName', filters.insurerName);
-    }
-    if (filters.patientUhid) {
-      params = params.set('patientUhid', filters.patientUhid);
-    }
-    return this.http.get<PreAuthorizationRequest[]>(`${this.baseUrl}/approved`, { params });
+  getApprovedReport(filters: PreAuthorizationReportFilters): Observable<PreAuthorizationRequest[]> {
+    return this.http.get<PreAuthorizationRequest[]>(`${this.baseUrl}/approved`, { params: toParams(filters) });
+  }
+
+  getRejectedReport(filters: PreAuthorizationReportFilters): Observable<PreAuthorizationRequest[]> {
+    return this.http.get<PreAuthorizationRequest[]>(`${this.baseUrl}/rejected`, { params: toParams(filters) });
   }
 
   create(request: PreAuthorizationRequestInput): Observable<PreAuthorizationRequest> {

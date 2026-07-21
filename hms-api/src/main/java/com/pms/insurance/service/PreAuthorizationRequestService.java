@@ -62,6 +62,15 @@ public class PreAuthorizationRequestService {
                 .toList();
     }
 
+    /** Insurance Rejected Report: requests already decided REJECTED, optionally filtered. */
+    public List<PreAuthorizationRequestDto> findRejectedReport(LocalDate from, LocalDate to, String insurerName, String patientUhid) {
+        LocalDateTime fromDateTime = from != null ? from.atStartOfDay() : null;
+        LocalDateTime toDateTime = to != null ? to.plusDays(1).atStartOfDay() : null;
+        return repository.findRejectedForReport(fromDateTime, toDateTime, insurerName, patientUhid).stream()
+                .map(this::toDto)
+                .toList();
+    }
+
     @Transactional
     public PreAuthorizationRequestDto create(PreAuthorizationRequestCreateDto dto) {
         Patient patient = patientRepository.findById(dto.patientId())

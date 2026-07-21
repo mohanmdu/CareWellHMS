@@ -47,7 +47,9 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: 'Invoices', route: '/billing/invoices', icon: 'request_quote' },
       { label: 'Pre Authorization Requests', route: '/insurance/pre-authorization', icon: 'health_and_safety' },
       { label: 'Insurance Approval Queue', route: '/insurance/approval-queue', icon: 'fact_check' },
-      { label: 'Insurance Claim Report', route: '/insurance/claim-report', icon: 'request_quote' }
+      { label: 'Insurance Claim Report', route: '/insurance/claim-report', icon: 'request_quote' },
+      { label: 'Insurance Rejected Report', route: '/insurance/rejected-report', icon: 'cancel' },
+      { label: 'Insurance Companies', route: '/insurance/companies', icon: 'domain' }
     ]
   },
   {

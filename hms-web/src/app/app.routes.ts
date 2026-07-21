@@ -697,6 +697,20 @@ export const routes: Routes = [
           import('./features/insurance/claim-report/insurance-claim-report.component').then(
             (m) => m.InsuranceClaimReportComponent
           )
+      },
+      {
+        path: 'insurance/rejected-report',
+        loadComponent: () =>
+          import('./features/insurance/rejected-report/insurance-rejected-report.component').then(
+            (m) => m.InsuranceRejectedReportComponent
+          )
+      },
+      {
+        path: 'insurance/companies',
+        loadComponent: () =>
+          import('./features/insurance/companies/insurance-company-list.component').then(
+            (m) => m.InsuranceCompanyListComponent
+          )
       }
       // All Phase 2 modules from the migration plan (§7) now have a working
       // vertical slice: Masters, Appointments, OP Billing, Lab, Pharmacy,

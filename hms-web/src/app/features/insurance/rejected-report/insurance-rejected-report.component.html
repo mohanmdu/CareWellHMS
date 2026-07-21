@@ -1,0 +1,84 @@
+<div class="hms-page irr-page">
+  <h1 class="irr-page-title">Insurance Rejected Report</h1>
+
+  <section class="hms-card-surface irr-filter-card">
+    <span class="irr-filter-label">From :</span>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="irr-date-field">
+      <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" />
+      <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+      <mat-datepicker #fromPicker />
+    </mat-form-field>
+
+    <span class="irr-filter-label">To :</span>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="irr-date-field">
+      <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" />
+      <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+      <mat-datepicker #toPicker />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="irr-company-field">
+      <mat-label>Select Company</mat-label>
+      <mat-select [(ngModel)]="selectedCompany">
+        <mat-option value="">All Companies</mat-option>
+        @for (company of insuranceCompanyOptions; track company) {
+          <mat-option [value]="company">{{ company }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-flat-button color="primary" class="irr-search-btn" type="button" (click)="search()">Search</button>
+  </section>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (searched()) {
+    <section class="hms-card-surface irr-results-card">
+      <div class="irr-banner">
+        <span class="irr-banner-title">Insurance Rejected Report</span>
+        <span>No.Bills: {{ billCount() }}</span>
+        <span>Total Rejected Amount: {{ totalRejectedAmount() | number: '1.0-2' }}</span>
+      </div>
+
+      @if (requests().length === 0) {
+        <app-empty-state icon="cancel" title="No rejections" message="No rejected requests match these filters." />
+      } @else {
+        <div class="irr-table-wrap">
+          <table class="irr-table">
+            <thead>
+              <tr>
+                <th>Patient UHID</th>
+                <th>IPID</th>
+                <th>Name</th>
+                <th>Insurance Company</th>
+                <th>Type</th>
+                <th>Raised Date</th>
+                <th>Estimation</th>
+                <th>Reason</th>
+                <th>Rejected By</th>
+                <th>Rejected Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (request of requests(); track request.id) {
+                <tr>
+                  <td>{{ request.patientUhid }}</td>
+                  <td>{{ request.admissionNumber ?? '—' }}</td>
+                  <td>{{ request.patientName }}</td>
+                  <td>{{ request.insurerName ?? '—' }}</td>
+                  <td>Pre-Authorization</td>
+                  <td>{{ request.raisedAt | date: 'dd-MM-yyyy' }}</td>
+                  <td>{{ request.requestedAmount | number: '1.0-2' }}</td>
+                  <td>{{ request.decisionReason ?? '—' }}</td>
+                  <td>{{ request.approvedBy ?? '—' }}</td>
+                  <td>{{ request.decidedAt ? (request.decidedAt | date: 'dd-MM-yyyy') : '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</div>
