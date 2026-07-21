@@ -52,6 +52,9 @@ public class PreAuthorizationRequest extends Auditable {
     @Column(name = "policy_number")
     private String policyNumber;
 
+    @Column(name = "card_number")
+    private String cardNumber;
+
     @Column(name = "insurer_name")
     private String insurerName;
 

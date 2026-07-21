@@ -1,25 +1,25 @@
-<div class="hms-page">
-  <app-page-header
-    title="Pre Authorization Requests"
-    subtitle="Raise requests directly, or complete ones auto-seeded from an IP Admission's insurance details."
-  />
-
-  <section class="hms-card-surface insurance-raise-section">
-    <h2 class="insurance-section-title">Raise New Request</h2>
+<div class="hms-page par-page">
+  <section class="hms-card-surface par-raise-section">
+    <h2 class="par-section-title">Raise New Request</h2>
 
     @if (!selectedPatient()) {
       <app-patient-search (patientSelected)="selectPatient($event)" />
     } @else {
-      <div class="insurance-selected-patient">
+      <div class="par-selected-patient">
         <mat-icon aria-hidden="true">person</mat-icon>
         <strong>{{ selectedPatient()?.firstName }} {{ selectedPatient()?.lastName }}</strong>
         <button mat-button type="button" (click)="changePatient()">Change patient</button>
       </div>
 
-      <form class="hms-form-grid insurance-claim-form" (ngSubmit)="submit()">
+      <form class="hms-form-grid par-new-request-form" (ngSubmit)="submit()">
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Policy number</mat-label>
           <input matInput name="policyNumber" [(ngModel)]="form.policyNumber" required />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Card number</mat-label>
+          <input matInput name="cardNumber" [(ngModel)]="form.cardNumber" />
         </mat-form-field>
 
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
@@ -42,7 +42,7 @@
           <input matInput name="requestedAmount" type="number" min="0" [(ngModel)]="form.requestedAmount" />
         </mat-form-field>
 
-        <div class="insurance-claim-submit">
+        <div class="par-new-request-submit">
           <button
             mat-flat-button
             color="primary"
@@ -56,84 +56,116 @@
     }
   </section>
 
-  <section class="hms-card-surface insurance-queue-section">
-    <h2 class="insurance-section-title">Pre Authorization Requests</h2>
+  <section class="hms-card-surface par-worklist-section">
+    <h1 class="par-banner">Insurance Pre Authorisation Requests</h1>
 
     @if (loading()) {
       <mat-progress-bar mode="indeterminate" />
     }
 
     @if (!loading() && requests().length === 0) {
-      <app-empty-state icon="health_and_safety" title="No requests yet" message="Requests raised above, or auto-seeded from an admission, will appear here." />
+      <app-empty-state
+        icon="health_and_safety"
+        title="No requests yet"
+        message="Requests raised above, or auto-seeded from an admission, will appear here."
+      />
     } @else if (requests().length > 0) {
-      <table mat-table [dataSource]="requests()" class="insurance-claims-table">
-        <ng-container matColumnDef="requestNumber">
-          <th mat-header-cell *matHeaderCellDef>Request #</th>
-          <td mat-cell *matCellDef="let request">{{ request.requestNumber }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="patient">
-          <th mat-header-cell *matHeaderCellDef>Patient</th>
-          <td mat-cell *matCellDef="let request">{{ request.patientName }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="admission">
-          <th mat-header-cell *matHeaderCellDef>Admission</th>
-          <td mat-cell *matCellDef="let request">{{ request.admissionNumber ?? '—' }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="policyNumber">
-          <th mat-header-cell *matHeaderCellDef>Policy Number</th>
-          <td mat-cell *matCellDef="let request">{{ request.policyNumber ?? '—' }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="insurer">
-          <th mat-header-cell *matHeaderCellDef>Insurer</th>
-          <td mat-cell *matCellDef="let request">{{ request.insurerName ?? '—' }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="tpaCorporate">
-          <th mat-header-cell *matHeaderCellDef>TPA / Corporate</th>
-          <td mat-cell *matCellDef="let request">{{ request.tpaName ?? request.corporateName ?? '—' }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="requested">
-          <th mat-header-cell *matHeaderCellDef>Requested</th>
-          <td mat-cell *matCellDef="let request">{{ request.requestedAmount | number: '1.0-2' }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="approved">
-          <th mat-header-cell *matHeaderCellDef>Approved</th>
-          <td mat-cell *matCellDef="let request">{{ request.approvedAmount ?? '—' }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
-          <td mat-cell *matCellDef="let request">
-            <app-status-badge [label]="statusLabels[request.status]" [tone]="statusTone[request.status]" />
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef class="insurance-actions-header"></th>
-          <td mat-cell *matCellDef="let request" class="insurance-actions-cell">
-            <div class="insurance-actions-row">
-              @if (request.status === 'YET_TO_BE_RAISED') {
-                <button mat-stroked-button color="primary" type="button" (click)="raise(request)">Raise</button>
-                <button mat-stroked-button type="button" (click)="cancel(request)">Cancel</button>
-              }
-              @if (request.status === 'PENDING') {
-                <button mat-stroked-button color="primary" type="button" (click)="approve(request)">Approve</button>
-                <button mat-stroked-button color="warn" type="button" (click)="reject(request)">Reject</button>
-                <button mat-stroked-button type="button" (click)="cancel(request)">Cancel</button>
-              }
-            </div>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-      </table>
+      <div class="par-table-wrap">
+        <table class="par-table">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Patient Details</th>
+              <th>Other Details</th>
+              <th>Consultant</th>
+              <th>Pre-Authorization/Enhancement Request</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (request of requests(); track request.id; let i = $index) {
+              <tr>
+                <td>{{ i + 1 }}</td>
+                <td class="par-patient-cell">
+                  <strong>{{ request.patientName }}</strong>
+                  <span>Patient UHID: {{ request.patientUhid }}</span>
+                  @if (request.admissionNumber) {
+                    <span>Inpatient ID: {{ request.admissionNumber }}</span>
+                  }
+                  <span>{{ request.maritalStatus ?? '—' }} / {{ request.patientGender ?? '—' }} / {{ request.patientAge ?? '—' }} yrs</span>
+                  @if (request.attenderName) {
+                    <span>Attender's Mobile: {{ request.relationType ?? '—' }} - {{ request.relationMobileNo ?? '—' }}</span>
+                  }
+                  <app-status-badge [label]="statusLabels[request.status]" [tone]="statusTone[request.status]" />
+                </td>
+                <td class="par-other-cell">
+                  <strong>{{ request.insurerName ?? '—' }}</strong>
+                  @if (request.admissionDate) {
+                    <span>DOA: {{ request.admissionDate | date: 'dd/MM/yyyy HH:mm' }}</span>
+                  }
+                  @if (request.paymentType) {
+                    <span>Payment Type: {{ paymentTypeLabels[request.paymentType] }}</span>
+                  }
+                  @if (request.roomNumber) {
+                    <span>Location: {{ request.roomNumber }}</span>
+                  }
+                </td>
+                <td class="par-consultant-cell">
+                  <span>{{ request.primaryConsultant ?? '—' }}</span>
+                  @if (request.referralDoctor) {
+                    <span>Ref By: {{ request.referralDoctor }}</span>
+                  }
+                </td>
+                <td class="par-action-cell">
+                  @if (request.status === 'YET_TO_BE_RAISED' && raisingId() !== request.id) {
+                    <button mat-flat-button color="primary" type="button" (click)="startRaise(request)">
+                      Raise Pre-Authorization
+                    </button>
+                    <button mat-button type="button" class="par-cancel-link" (click)="cancelRequest(request)">Cancel</button>
+                  } @else if (request.status === 'YET_TO_BE_RAISED' && raisingId() === request.id) {
+                    <div class="par-raise-panel">
+                      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                        <mat-label>Estimated Amount</mat-label>
+                        <input matInput type="number" min="0" [(ngModel)]="raiseForm.estimatedAmount" />
+                      </mat-form-field>
+                      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                        <mat-label>Policy No</mat-label>
+                        <input matInput [(ngModel)]="raiseForm.policyNo" />
+                      </mat-form-field>
+                      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                        <mat-label>Card No</mat-label>
+                        <input matInput [(ngModel)]="raiseForm.cardNo" />
+                      </mat-form-field>
+                      @if (raising()) {
+                        <mat-progress-bar mode="indeterminate" />
+                      }
+                      <div class="par-raise-panel-actions">
+                        <button mat-button type="button" (click)="cancelRaiseForm()">Close</button>
+                        <button
+                          mat-flat-button
+                          color="primary"
+                          type="button"
+                          [disabled]="!canConfirmRaise || raising()"
+                          (click)="confirmRaise(request)"
+                        >
+                          Confirm
+                        </button>
+                      </div>
+                    </div>
+                  } @else if (request.status === 'PENDING') {
+                    <span class="par-waiting-text">Waiting for Approval from Insurance Company</span>
+                  } @else if (request.status === 'APPROVED') {
+                    <span class="par-decided-text">Approved{{ request.approvedAmount !== null ? ' - ' + (request.approvedAmount | number: '1.0-2') : '' }}</span>
+                  } @else if (request.status === 'REJECTED') {
+                    <span class="par-decided-text">Rejected{{ request.decisionReason ? ': ' + request.decisionReason : '' }}</span>
+                  } @else if (request.status === 'CANCELLED') {
+                    <span class="par-decided-text">Cancelled{{ request.decisionReason ? ': ' + request.decisionReason : '' }}</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     }
   </section>
 </div>

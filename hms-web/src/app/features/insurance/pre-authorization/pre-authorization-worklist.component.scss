@@ -1,30 +1,32 @@
-.insurance-raise-section,
-.insurance-queue-section {
+.par-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-4);
+  padding: var(--hms-space-4);
+}
+
+.par-raise-section {
   padding: var(--hms-space-5);
   display: flex;
   flex-direction: column;
   gap: var(--hms-space-4);
 }
 
-.insurance-queue-section {
-  overflow-x: auto;
-}
-
-.insurance-section-title {
+.par-section-title {
   font-size: var(--hms-font-size-lg);
   margin: 0;
 }
 
-.insurance-selected-patient {
+.par-selected-patient {
   display: flex;
   align-items: center;
   gap: var(--hms-space-3);
   padding: var(--hms-space-3) var(--hms-space-4);
-  border: 1px solid var(--hms-color-border);
-  border-radius: var(--hms-radius-md);
+  border: 1px solid var(--hms-color-border, #e0e0e0);
+  border-radius: var(--hms-radius-md, 4px);
 
   mat-icon {
-    color: var(--hms-color-primary);
+    color: var(--hms-color-primary, #1565c0);
   }
 
   button {
@@ -32,30 +34,122 @@
   }
 }
 
-.insurance-claim-submit {
+.par-new-request-submit {
   display: flex;
   align-items: center;
 }
 
-.insurance-claims-table {
+.par-worklist-section {
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.par-banner {
+  margin: 0;
+  padding: var(--hms-space-3);
+  background: #e65100;
+  color: #fff;
+  text-align: center;
+  font-size: var(--hms-font-size-lg);
+}
+
+.par-table-wrap {
+  overflow: auto;
+  margin: var(--hms-space-4);
+  border: 1px solid var(--hms-color-border, #e0e0e0);
+  border-radius: var(--hms-radius-md, 4px);
+}
+
+.par-table {
   width: 100%;
+  border-collapse: collapse;
+  font-size: var(--hms-font-size-sm);
+
+  th,
+  td {
+    padding: var(--hms-space-3);
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--hms-color-border, #e0e0e0);
+  }
+
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--hms-color-primary, #1565c0);
+    color: #fff;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  tbody tr:nth-child(even) {
+    background: var(--hms-color-surface-alt, #f7f7f7);
+  }
 }
 
-.insurance-actions-cell {
-  text-align: right;
-}
-
-.insurance-actions-row {
+.par-patient-cell,
+.par-other-cell,
+.par-consultant-cell {
   display: flex;
-  align-items: center;
-  gap: var(--hms-space-2);
-  justify-content: flex-end;
-  flex-wrap: nowrap;
-  white-space: nowrap;
-  padding: var(--hms-space-2) 0;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 180px;
+
+  span {
+    color: var(--hms-color-text-muted);
+  }
+
+  strong {
+    color: var(--hms-color-text, #212121);
+  }
 }
 
-.insurance-actions-header {
-  width: 0;
-  white-space: nowrap;
+.par-patient-cell app-status-badge {
+  margin-top: 4px;
+  align-self: flex-start;
+}
+
+.par-action-cell {
+  min-width: 220px;
+
+  button {
+    display: block;
+    margin-bottom: 4px;
+  }
+}
+
+.par-cancel-link {
+  color: var(--hms-color-text-muted);
+  min-width: 0;
+  padding: 0;
+}
+
+.par-waiting-text {
+  color: #e65100;
+  font-weight: 600;
+}
+
+.par-decided-text {
+  color: var(--hms-color-text-muted);
+  font-weight: 600;
+}
+
+.par-raise-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-2);
+  padding: var(--hms-space-3);
+  border: 2px solid var(--hms-color-primary, #1565c0);
+  border-radius: var(--hms-radius-md, 4px);
+  background: #fff;
+  min-width: 240px;
+}
+
+.par-raise-panel-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--hms-space-2);
 }

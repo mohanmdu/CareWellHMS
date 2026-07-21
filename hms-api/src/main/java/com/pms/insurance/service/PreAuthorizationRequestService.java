@@ -53,6 +53,7 @@ public class PreAuthorizationRequestService {
         request.setRequestNumber(nextRequestNumber());
         request.setPatient(patient);
         request.setPolicyNumber(dto.policyNumber());
+        request.setCardNumber(dto.cardNumber());
         request.setInsurerName(dto.insurerName());
         request.setTpaName(dto.tpaName());
         request.setCorporateName(dto.corporateName());
@@ -91,7 +92,7 @@ public class PreAuthorizationRequestService {
         repository.save(request);
     }
 
-    /** Confirms the real policy/insurer/amount for a YET_TO_BE_RAISED request and actually submits it. */
+    /** Confirms the real policy/card/estimated-amount for a YET_TO_BE_RAISED request and actually submits it. */
     @Transactional
     public PreAuthorizationRequestDto raise(Long id, PreAuthorizationRequestRaiseDto dto) {
         PreAuthorizationRequest request = getOrThrow(id);
@@ -99,7 +100,7 @@ public class PreAuthorizationRequestService {
             throw new IllegalArgumentException("Request " + request.getRequestNumber() + " has already been raised.");
         }
         request.setPolicyNumber(dto.policyNumber());
-        request.setInsurerName(dto.insurerName());
+        request.setCardNumber(dto.cardNumber());
         request.setRequestedAmount(dto.requestedAmount());
         request.setStatus(PreAuthorizationStatus.PENDING);
         request.setRaisedAt(LocalDateTime.now());
@@ -165,9 +166,21 @@ public class PreAuthorizationRequestService {
                 patient.getId(),
                 (patient.getFirstName() + " " + (patient.getLastName() != null ? patient.getLastName() : "")).trim(),
                 patient.getRegistrationNumber(),
+                patient.getGender(),
+                patient.getAge(),
+                admission != null ? admission.getMaritalStatus() : null,
                 admission != null ? admission.getId() : null,
                 admission != null ? admission.getAdmissionNumber() : null,
+                admission != null ? admission.getAdmissionDate() : null,
+                admission != null && admission.getPaymentType() != null ? admission.getPaymentType().name() : null,
+                admission != null && admission.getRoom() != null ? admission.getRoom().getRoomNumber() : null,
+                admission != null ? admission.getAttenderName() : null,
+                admission != null ? admission.getRelationType() : null,
+                admission != null ? admission.getRelationMobileNo() : null,
+                admission != null ? admission.getReferralDoctor() : null,
+                admission != null ? admission.getPrimaryConsultant() : null,
                 request.getPolicyNumber(),
+                request.getCardNumber(),
                 request.getInsurerName(),
                 request.getTpaName(),
                 request.getCorporateName(),

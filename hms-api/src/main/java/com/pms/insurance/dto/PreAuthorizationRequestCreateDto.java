@@ -8,6 +8,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 public record PreAuthorizationRequestCreateDto(
         @NotNull Long patientId,
         @NotBlank String policyNumber,
+        String cardNumber,
         @NotBlank String insurerName,
         String tpaName,
         String corporateName,

@@ -6,12 +6,12 @@ import { PreAuthorizationRequest } from './pre-authorization-request.model';
 
 export type PreAuthorizationRequestInput = Pick<
   PreAuthorizationRequest,
-  'patientId' | 'policyNumber' | 'insurerName' | 'tpaName' | 'corporateName' | 'requestedAmount'
+  'patientId' | 'policyNumber' | 'cardNumber' | 'insurerName' | 'tpaName' | 'corporateName' | 'requestedAmount'
 >;
 
 export interface PreAuthorizationRaiseInput {
   policyNumber: string;
-  insurerName: string;
+  cardNumber: string | null;
   requestedAmount: number;
 }
 

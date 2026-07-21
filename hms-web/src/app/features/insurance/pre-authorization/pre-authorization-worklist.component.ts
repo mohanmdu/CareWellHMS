@@ -1,4 +1,4 @@
-import { DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -6,11 +6,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatTableModule } from '@angular/material/table';
+import { ConfirmDialogService } from '../../../shared/services/confirm-dialog.service';
 import { NotificationService } from '../../../shared/services/notification.service';
-import { PromptDialogService } from '../../../shared/services/prompt-dialog.service';
 import { EmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
-import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
 import { PatientSearchComponent } from '../../../shared/ui/patient-search/patient-search.component';
 import { StatusBadgeComponent, StatusBadgeTone } from '../../../shared/ui/status-badge/status-badge.component';
 import { Patient } from '../../registration/patients/patient.model';
@@ -27,33 +25,42 @@ const STATUS_TONE: Record<string, StatusBadgeTone> = {
 
 const STATUS_LABELS: Record<string, string> = {
   YET_TO_BE_RAISED: 'Yet to be Raised',
-  PENDING: 'Pending',
+  PENDING: 'Pre-Authorization Pending',
   APPROVED: 'Approved',
   REJECTED: 'Rejected',
   CANCELLED: 'Cancelled'
 };
 
+const PAYMENT_TYPE_LABELS: Record<string, string> = {
+  CASH: 'Cash',
+  INSURANCE: 'Insurance',
+  CORPORATE: 'Corporate'
+};
+
 /**
- * Insurance Module: Pre Authorization Request worklist. Rows arrive two
- * ways - auto-seeded from an Admission whose insuranceType != "None" (status
- * YET_TO_BE_RAISED, no policy number yet - see "Raise" action), or raised
- * directly here via the form below (status PENDING immediately). Replaces
- * the earlier generic Insurance Claims module (which also modeled
- * Enhancement claims, dropped here as out of scope).
+ * Insurance Pre Authorisation Requests. A row arrives two ways - auto-seeded
+ * from an Admission (status YET_TO_BE_RAISED, Inpatient ID/DOA/Payment
+ * Type/Location all populated from that admission) or raised directly here
+ * via the form below (status PENDING immediately, no admission details).
+ * "Raise Pre-Authorization" expands an inline panel in that row's action
+ * cell (not a modal) for Estimated Amount/Policy No/Card No, confirmed via
+ * ConfirmDialogService, landing on "Waiting for Approval from Insurance
+ * Company" - Approve/Reject aren't actioned from this screen (they'd belong
+ * to a separate Insurance Approval Queue, not built yet), so only Cancel
+ * remains available pre-decision.
  */
 @Component({
   selector: 'app-pre-authorization-worklist',
   standalone: true,
   imports: [
+    DatePipe,
     DecimalPipe,
     FormsModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatTableModule,
     MatProgressBarModule,
-    PageHeaderComponent,
     PatientSearchComponent,
     StatusBadgeComponent,
     EmptyStateComponent
@@ -64,30 +71,28 @@ const STATUS_LABELS: Record<string, string> = {
 export class PreAuthorizationWorklistComponent {
   private readonly requestService = inject(PreAuthorizationRequestService);
   private readonly notification = inject(NotificationService);
-  private readonly promptDialog = inject(PromptDialogService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
-  readonly displayedColumns = [
-    'requestNumber',
-    'patient',
-    'admission',
-    'policyNumber',
-    'insurer',
-    'tpaCorporate',
-    'requested',
-    'approved',
-    'status',
-    'actions'
-  ];
   readonly statusTone = STATUS_TONE;
   readonly statusLabels = STATUS_LABELS;
+  readonly paymentTypeLabels = PAYMENT_TYPE_LABELS;
 
   loading = signal(false);
   requests = signal<PreAuthorizationRequest[]>([]);
   selectedPatient = signal<Patient | null>(null);
   submitting = signal(false);
 
+  raisingId = signal<number | null>(null);
+  raising = signal(false);
+  raiseForm: { estimatedAmount: number | null; policyNo: string; cardNo: string } = {
+    estimatedAmount: null,
+    policyNo: '',
+    cardNo: ''
+  };
+
   form = {
     policyNumber: '',
+    cardNumber: '',
     insurerName: '',
     tpaName: '',
     corporateName: '',
@@ -130,6 +135,7 @@ export class PreAuthorizationWorklistComponent {
       .create({
         patientId: patient.id,
         policyNumber: this.form.policyNumber,
+        cardNumber: this.form.cardNumber || null,
         insurerName: this.form.insurerName,
         tpaName: this.form.tpaName || null,
         corporateName: this.form.corporateName || null,
@@ -139,7 +145,7 @@ export class PreAuthorizationWorklistComponent {
         next: () => {
           this.submitting.set(false);
           this.selectedPatient.set(null);
-          this.form = { policyNumber: '', insurerName: '', tpaName: '', corporateName: '', requestedAmount: 0 };
+          this.form = { policyNumber: '', cardNumber: '', insurerName: '', tpaName: '', corporateName: '', requestedAmount: 0 };
           this.notification.success('Pre authorization request raised.');
           this.refresh();
         },
@@ -150,115 +156,71 @@ export class PreAuthorizationWorklistComponent {
       });
   }
 
-  raise(request: PreAuthorizationRequest): void {
-    if (request.id === null) {
+  startRaise(request: PreAuthorizationRequest): void {
+    this.raisingId.set(request.id);
+    this.raiseForm = { estimatedAmount: null, policyNo: '', cardNo: '' };
+  }
+
+  cancelRaiseForm(): void {
+    this.raisingId.set(null);
+  }
+
+  get canConfirmRaise(): boolean {
+    return this.raiseForm.policyNo.trim().length > 0 && this.raiseForm.estimatedAmount !== null && this.raiseForm.estimatedAmount >= 0;
+  }
+
+  confirmRaise(request: PreAuthorizationRequest): void {
+    if (request.id === null || !this.canConfirmRaise) {
       return;
     }
-    this.promptDialog
-      .prompt({
-        title: `Raise request ${request.requestNumber}`,
-        message: 'Confirm the policy number, insurer, and requested amount to actually submit this request.',
-        fields: [
-          { key: 'policyNumber', label: 'Policy number', type: 'text', required: true },
-          { key: 'insurerName', label: 'Insurer name', type: 'text', required: true, initialValue: request.insurerName ?? '' },
-          { key: 'requestedAmount', label: 'Requested amount', type: 'number', required: true, min: 0 }
-        ],
-        confirmLabel: 'Raise'
+    this.confirmDialog
+      .confirm({
+        title: 'Raise Pre-Authorization',
+        message: 'Are you sure you want to Raise Pre-Authorization?',
+        confirmLabel: 'OK'
       })
-      .subscribe((values) => {
-        if (!values || request.id === null) {
+      .subscribe((confirmed) => {
+        if (!confirmed || request.id === null) {
           return;
         }
+        this.raising.set(true);
         this.requestService
           .raise(request.id, {
-            policyNumber: values['policyNumber'] as string,
-            insurerName: values['insurerName'] as string,
-            requestedAmount: values['requestedAmount'] as number
+            policyNumber: this.raiseForm.policyNo,
+            cardNumber: this.raiseForm.cardNo || null,
+            requestedAmount: this.raiseForm.estimatedAmount ?? 0
           })
           .subscribe({
             next: () => {
-              this.notification.success('Request raised.');
+              this.raising.set(false);
+              this.raisingId.set(null);
+              this.notification.success('Pre-Authorization raised.');
               this.refresh();
             },
-            error: (err) => this.notification.error(err.error?.message ?? 'Failed to raise the request.')
+            error: (err) => {
+              this.raising.set(false);
+              this.notification.error(err.error?.message ?? 'Failed to raise the request.');
+            }
           });
       });
   }
 
-  approve(request: PreAuthorizationRequest): void {
+  cancelRequest(request: PreAuthorizationRequest): void {
     if (request.id === null) {
       return;
     }
-    this.promptDialog
-      .prompt({
-        title: `Approve request ${request.requestNumber}`,
-        fields: [
-          {
-            key: 'approvedAmount',
-            label: 'Approved amount',
-            type: 'number',
-            initialValue: request.requestedAmount,
-            required: true,
-            min: 0
-          }
-        ],
-        confirmLabel: 'Approve'
-      })
-      .subscribe((values) => {
-        if (!values || request.id === null) {
-          return;
-        }
-        this.requestService.approve(request.id, values['approvedAmount'] as number).subscribe({
-          next: () => {
-            this.notification.success('Request approved.');
-            this.refresh();
-          },
-          error: (err) => this.notification.error(err.error?.message ?? 'Failed to approve the request.')
-        });
-      });
-  }
-
-  reject(request: PreAuthorizationRequest): void {
-    if (request.id === null) {
-      return;
-    }
-    this.promptDialog
-      .prompt({
-        title: `Reject request ${request.requestNumber}`,
-        fields: [{ key: 'reason', label: 'Rejection reason', type: 'textarea', required: true }],
-        confirmLabel: 'Reject',
-        destructive: true
-      })
-      .subscribe((values) => {
-        if (!values || request.id === null) {
-          return;
-        }
-        this.requestService.reject(request.id, values['reason'] as string).subscribe({
-          next: () => {
-            this.notification.success('Request rejected.');
-            this.refresh();
-          },
-          error: (err) => this.notification.error(err.error?.message ?? 'Failed to reject the request.')
-        });
-      });
-  }
-
-  cancel(request: PreAuthorizationRequest): void {
-    if (request.id === null) {
-      return;
-    }
-    this.promptDialog
-      .prompt({
+    this.confirmDialog
+      .confirm({
         title: `Cancel request ${request.requestNumber}`,
-        fields: [{ key: 'reason', label: 'Cancellation reason', type: 'textarea', required: true }],
-        confirmLabel: 'Cancel request',
+        message: 'This pre authorization request will be cancelled.',
+        confirmLabel: 'Cancel Request',
         destructive: true
       })
-      .subscribe((values) => {
-        if (!values || request.id === null) {
+      .subscribe((confirmed) => {
+        if (!confirmed || request.id === null) {
           return;
         }
-        this.requestService.cancel(request.id, values['reason'] as string).subscribe({
+        this.requestService.cancel(request.id, 'Cancelled by staff').subscribe({
           next: () => {
             this.notification.success('Request cancelled.');
             this.refresh();
