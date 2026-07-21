@@ -24,6 +24,7 @@ public record PreAuthorizationRequestDto(
         String primaryConsultant,
         String policyNumber,
         String cardNumber,
+        String claimNumber,
         String insurerName,
         String tpaName,
         String corporateName,
@@ -32,5 +33,7 @@ public record PreAuthorizationRequestDto(
         PreAuthorizationStatus status,
         String decisionReason,
         LocalDateTime raisedAt,
-        String raisedBy) {
+        String raisedBy,
+        LocalDateTime decidedAt,
+        String approvedBy) {
 }

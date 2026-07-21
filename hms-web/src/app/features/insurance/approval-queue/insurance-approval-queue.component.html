@@ -1,0 +1,103 @@
+<div class="hms-page iaq-page">
+  <section class="hms-card-surface iaq-section">
+    <h1 class="iaq-banner">Insurance Approval Queue</h1>
+
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    @if (!loading() && requests().length === 0) {
+      <app-empty-state
+        icon="fact_check"
+        title="Queue is empty"
+        message="Pre-authorization requests awaiting a decision will appear here."
+      />
+    } @else if (requests().length > 0) {
+      <div class="iaq-table-wrap">
+        <table class="iaq-table">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Patient UHID</th>
+              <th>IPID</th>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Raised Date</th>
+              <th>Estimate</th>
+              <th>Update Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (request of requests(); track request.id; let i = $index) {
+              <tr>
+                <td>{{ i + 1 }}</td>
+                <td>{{ request.patientUhid }}</td>
+                <td>{{ request.admissionNumber ?? '—' }}</td>
+                <td>{{ request.patientName }}</td>
+                <td>Pre-Authorization Pending</td>
+                <td>{{ request.raisedAt | date: 'dd-MM-yyyy' }}</td>
+                <td>{{ request.requestedAmount | number: '1.0-2' }}</td>
+                <td>
+                  @if (editingId() !== request.id) {
+                    <button mat-button type="button" class="iaq-edit-link" (click)="startEdit(request)">Edit</button>
+                  } @else {
+                    <button mat-button type="button" class="iaq-edit-link" (click)="hideEdit()">Hide</button>
+                  }
+                </td>
+              </tr>
+              @if (editingId() === request.id) {
+                <tr class="iaq-panel-row">
+                  <td colspan="8">
+                    <div class="iaq-panel">
+                      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                        <mat-label>Claim Amount Approved</mat-label>
+                        <input matInput type="number" min="0" [(ngModel)]="form.claimAmountApproved" />
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                        <mat-label>Approved/Rejected Date</mat-label>
+                        <input matInput [matDatepicker]="decidedPicker" [(ngModel)]="form.decidedDate" />
+                        <mat-datepicker-toggle matIconSuffix [for]="decidedPicker" />
+                        <mat-datepicker #decidedPicker />
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                        <mat-label>Status</mat-label>
+                        <mat-select [(ngModel)]="form.status">
+                          <mat-option value="">Select</mat-option>
+                          <mat-option value="APPROVED">Approved</mat-option>
+                          <mat-option value="REJECTED">Rejected</mat-option>
+                        </mat-select>
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="iaq-reason-field">
+                        <mat-label>Reason (If Any)</mat-label>
+                        <textarea matInput rows="2" [(ngModel)]="form.reason"></textarea>
+                      </mat-form-field>
+
+                      @if (submitting()) {
+                        <mat-progress-bar mode="indeterminate" />
+                      }
+
+                      <div class="iaq-panel-actions">
+                        <button
+                          mat-flat-button
+                          color="primary"
+                          type="button"
+                          [disabled]="!canConfirm || submitting()"
+                          (click)="confirmUpdate(request)"
+                        >
+                          Confirm
+                        </button>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</div>

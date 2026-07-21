@@ -683,6 +683,20 @@ export const routes: Routes = [
           import('./features/insurance/pre-authorization/pre-authorization-worklist.component').then(
             (m) => m.PreAuthorizationWorklistComponent
           )
+      },
+      {
+        path: 'insurance/approval-queue',
+        loadComponent: () =>
+          import('./features/insurance/approval-queue/insurance-approval-queue.component').then(
+            (m) => m.InsuranceApprovalQueueComponent
+          )
+      },
+      {
+        path: 'insurance/claim-report',
+        loadComponent: () =>
+          import('./features/insurance/claim-report/insurance-claim-report.component').then(
+            (m) => m.InsuranceClaimReportComponent
+          )
       }
       // All Phase 2 modules from the migration plan (§7) now have a working
       // vertical slice: Masters, Appointments, OP Billing, Lab, Pharmacy,

@@ -1,15 +1,19 @@
 package com.pms.insurance.service;
 
 import com.pms.common.EntityNotFoundException;
+import com.pms.insurance.dto.PreAuthorizationRequestAmendDto;
+import com.pms.insurance.dto.PreAuthorizationRequestApproveDto;
 import com.pms.insurance.dto.PreAuthorizationRequestCreateDto;
 import com.pms.insurance.dto.PreAuthorizationRequestDto;
 import com.pms.insurance.dto.PreAuthorizationRequestRaiseDto;
+import com.pms.insurance.dto.PreAuthorizationRequestRejectDto;
 import com.pms.insurance.entity.PreAuthorizationRequest;
 import com.pms.insurance.entity.PreAuthorizationStatus;
 import com.pms.insurance.repository.PreAuthorizationRequestRepository;
 import com.pms.ipadmission.entity.Admission;
 import com.pms.registration.entity.Patient;
 import com.pms.registration.repository.PatientRepository;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.List;
@@ -42,6 +46,20 @@ public class PreAuthorizationRequestService {
 
     public List<PreAuthorizationRequestDto> findAll() {
         return repository.findAllByOrderByIdDesc().stream().map(this::toDto).toList();
+    }
+
+    /** Insurance Approval Queue: requests actually raised and awaiting a decision. */
+    public List<PreAuthorizationRequestDto> findPending() {
+        return repository.findByStatus(PreAuthorizationStatus.PENDING).stream().map(this::toDto).toList();
+    }
+
+    /** Insurance Claim Report: requests already decided APPROVED, optionally filtered. */
+    public List<PreAuthorizationRequestDto> findApprovedReport(LocalDate from, LocalDate to, String insurerName, String patientUhid) {
+        LocalDateTime fromDateTime = from != null ? from.atStartOfDay() : null;
+        LocalDateTime toDateTime = to != null ? to.plusDays(1).atStartOfDay() : null;
+        return repository.findApprovedForReport(fromDateTime, toDateTime, insurerName, patientUhid).stream()
+                .map(this::toDto)
+                .toList();
     }
 
     @Transactional
@@ -109,18 +127,34 @@ public class PreAuthorizationRequestService {
     }
 
     @Transactional
-    public PreAuthorizationRequestDto approve(Long id, double approvedAmount) {
+    public PreAuthorizationRequestDto approve(Long id, PreAuthorizationRequestApproveDto dto) {
         PreAuthorizationRequest request = requirePending(id);
         request.setStatus(PreAuthorizationStatus.APPROVED);
-        request.setApprovedAmount(approvedAmount);
+        request.setApprovedAmount(dto.approvedAmount());
+        request.setDecisionReason(dto.reason());
+        request.setDecidedAt(dto.decidedDate().atStartOfDay());
+        request.setApprovedBy(currentUsername());
         return toDto(repository.save(request));
     }
 
     @Transactional
-    public PreAuthorizationRequestDto reject(Long id, String reason) {
+    public PreAuthorizationRequestDto reject(Long id, PreAuthorizationRequestRejectDto dto) {
         PreAuthorizationRequest request = requirePending(id);
         request.setStatus(PreAuthorizationStatus.REJECTED);
-        request.setDecisionReason(reason);
+        request.setDecisionReason(dto.reason());
+        request.setDecidedAt(dto.decidedDate().atStartOfDay());
+        request.setApprovedBy(currentUsername());
+        return toDto(repository.save(request));
+    }
+
+    /** "Change the Amount" (Insurance Claim Report) - corrects an already-decided request's figures; no status change. */
+    @Transactional
+    public PreAuthorizationRequestDto amend(Long id, PreAuthorizationRequestAmendDto dto) {
+        PreAuthorizationRequest request = getOrThrow(id);
+        request.setRequestedAmount(dto.requestedAmount());
+        request.setApprovedAmount(dto.approvedAmount());
+        request.setCardNumber(dto.cardNumber());
+        request.setClaimNumber(dto.claimNumber());
         return toDto(repository.save(request));
     }
 
@@ -181,6 +215,7 @@ public class PreAuthorizationRequestService {
                 admission != null ? admission.getPrimaryConsultant() : null,
                 request.getPolicyNumber(),
                 request.getCardNumber(),
+                request.getClaimNumber(),
                 request.getInsurerName(),
                 request.getTpaName(),
                 request.getCorporateName(),
@@ -189,6 +224,8 @@ public class PreAuthorizationRequestService {
                 request.getStatus(),
                 request.getDecisionReason(),
                 request.getRaisedAt(),
-                request.getRaisedBy());
+                request.getRaisedBy(),
+                request.getDecidedAt(),
+                request.getApprovedBy());
     }
 }

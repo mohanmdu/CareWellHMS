@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
@@ -15,6 +15,31 @@ export interface PreAuthorizationRaiseInput {
   requestedAmount: number;
 }
 
+export interface PreAuthorizationApproveInput {
+  approvedAmount: number;
+  reason: string | null;
+  decidedDate: string;
+}
+
+export interface PreAuthorizationRejectInput {
+  reason: string | null;
+  decidedDate: string;
+}
+
+export interface PreAuthorizationAmendInput {
+  requestedAmount: number;
+  approvedAmount: number;
+  cardNumber: string | null;
+  claimNumber: string | null;
+}
+
+export interface PreAuthorizationApprovedReportFilters {
+  from?: string;
+  to?: string;
+  insurerName?: string;
+  patientUhid?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class PreAuthorizationRequestService {
   private readonly http = inject(HttpClient);
@@ -22,6 +47,27 @@ export class PreAuthorizationRequestService {
 
   list(): Observable<PreAuthorizationRequest[]> {
     return this.http.get<PreAuthorizationRequest[]>(this.baseUrl);
+  }
+
+  getPending(): Observable<PreAuthorizationRequest[]> {
+    return this.http.get<PreAuthorizationRequest[]>(`${this.baseUrl}/pending`);
+  }
+
+  getApprovedReport(filters: PreAuthorizationApprovedReportFilters): Observable<PreAuthorizationRequest[]> {
+    let params = new HttpParams();
+    if (filters.from) {
+      params = params.set('from', filters.from);
+    }
+    if (filters.to) {
+      params = params.set('to', filters.to);
+    }
+    if (filters.insurerName) {
+      params = params.set('insurerName', filters.insurerName);
+    }
+    if (filters.patientUhid) {
+      params = params.set('patientUhid', filters.patientUhid);
+    }
+    return this.http.get<PreAuthorizationRequest[]>(`${this.baseUrl}/approved`, { params });
   }
 
   create(request: PreAuthorizationRequestInput): Observable<PreAuthorizationRequest> {
@@ -32,12 +78,16 @@ export class PreAuthorizationRequestService {
     return this.http.patch<PreAuthorizationRequest>(`${this.baseUrl}/${id}/raise`, input);
   }
 
-  approve(id: number, approvedAmount: number): Observable<PreAuthorizationRequest> {
-    return this.http.patch<PreAuthorizationRequest>(`${this.baseUrl}/${id}/approve`, { approvedAmount });
+  approve(id: number, input: PreAuthorizationApproveInput): Observable<PreAuthorizationRequest> {
+    return this.http.patch<PreAuthorizationRequest>(`${this.baseUrl}/${id}/approve`, input);
   }
 
-  reject(id: number, reason: string): Observable<PreAuthorizationRequest> {
-    return this.http.patch<PreAuthorizationRequest>(`${this.baseUrl}/${id}/reject`, { reason });
+  reject(id: number, input: PreAuthorizationRejectInput): Observable<PreAuthorizationRequest> {
+    return this.http.patch<PreAuthorizationRequest>(`${this.baseUrl}/${id}/reject`, input);
+  }
+
+  amend(id: number, input: PreAuthorizationAmendInput): Observable<PreAuthorizationRequest> {
+    return this.http.patch<PreAuthorizationRequest>(`${this.baseUrl}/${id}/amend`, input);
   }
 
   cancel(id: number, reason: string): Observable<PreAuthorizationRequest> {

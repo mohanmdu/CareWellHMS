@@ -1,0 +1,108 @@
+<div class="hms-page icr-page">
+  <h1 class="icr-page-title">Insurance Claim Report</h1>
+
+  <section class="hms-card-surface icr-filter-card">
+    <span class="icr-filter-label">From :</span>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="icr-date-field">
+      <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" />
+      <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+      <mat-datepicker #fromPicker />
+    </mat-form-field>
+
+    <span class="icr-filter-label">To :</span>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="icr-date-field">
+      <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" />
+      <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+      <mat-datepicker #toPicker />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="icr-company-field">
+      <mat-label>Select Company</mat-label>
+      <mat-select [(ngModel)]="selectedCompany">
+        <mat-option value="">All Companies</mat-option>
+        @for (company of insuranceCompanyOptions; track company) {
+          <mat-option [value]="company">{{ company }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="icr-uhid-field">
+      <mat-label>Patient UHID</mat-label>
+      <input matInput [(ngModel)]="patientUhid" />
+    </mat-form-field>
+
+    <button mat-flat-button color="primary" class="icr-search-btn" type="button" (click)="search()">Search</button>
+  </section>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (searched()) {
+    <section class="hms-card-surface icr-summary-card">
+      <div class="icr-summary-item">
+        <span class="icr-summary-label">Bills</span>
+        <span class="icr-summary-value">{{ billCount() }}</span>
+      </div>
+      <div class="icr-summary-item">
+        <span class="icr-summary-label">Total Estimation</span>
+        <span class="icr-summary-value">{{ totalEstimation() | number: '1.0-2' }}</span>
+      </div>
+      <div class="icr-summary-item">
+        <span class="icr-summary-label">Total Claims Approved</span>
+        <span class="icr-summary-value">{{ totalClaimsApproved() | number: '1.0-2' }}</span>
+      </div>
+    </section>
+
+    <section class="hms-card-surface icr-results-card">
+      <h2 class="icr-banner">Insurance Claim Report</h2>
+
+      @if (requests().length === 0) {
+        <app-empty-state icon="request_quote" title="No claims" message="No approved claims match these filters." />
+      } @else {
+        <div class="icr-table-wrap">
+          <table class="icr-table">
+            <thead>
+              <tr>
+                <th>Patient UHID</th>
+                <th>IPID</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Insurance Company</th>
+                <th>Estimation</th>
+                <th>Raised By</th>
+                <th>Raised Date</th>
+                <th>Claim Approved Amount</th>
+                <th>Claim By</th>
+                <th>Claim Approved Date</th>
+                <th>Edit</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (request of requests(); track request.id) {
+                <tr>
+                  <td>{{ request.patientUhid }}</td>
+                  <td>{{ request.admissionNumber ?? '—' }}</td>
+                  <td>{{ request.patientName }}</td>
+                  <td>Pre-Authorization</td>
+                  <td>{{ request.insurerName ?? '—' }}</td>
+                  <td>{{ request.requestedAmount | number: '1.0-2' }}</td>
+                  <td>{{ request.raisedBy ?? '—' }}</td>
+                  <td>{{ request.raisedAt | date: 'dd-MM-yyyy' }}</td>
+                  <td>{{ request.approvedAmount !== null ? (request.approvedAmount | number: '1.0-2') : '—' }}</td>
+                  <td>{{ request.approvedBy ?? '—' }}</td>
+                  <td>{{ request.decidedAt ? (request.decidedAt | date: 'dd-MM-yyyy') : '—' }}</td>
+                  <td>
+                    <button mat-icon-button type="button" aria-label="Change the Amount" (click)="editAmount(request)">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</div>

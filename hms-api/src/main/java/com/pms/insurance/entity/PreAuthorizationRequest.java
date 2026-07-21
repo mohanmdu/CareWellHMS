@@ -55,6 +55,10 @@ public class PreAuthorizationRequest extends Auditable {
     @Column(name = "card_number")
     private String cardNumber;
 
+    /** The insurer's own claim reference number - distinct from requestNumber (our internal PAR-... id), assigned/edited from the Insurance Claim Report. */
+    @Column(name = "claim_number")
+    private String claimNumber;
+
     @Column(name = "insurer_name")
     private String insurerName;
 
@@ -82,4 +86,11 @@ public class PreAuthorizationRequest extends Auditable {
 
     @Column(name = "raised_by", length = 100)
     private String raisedBy;
+
+    /** When the Approve/Reject decision was recorded (Insurance Approval Queue's "Approved/Rejected Date"). */
+    @Column(name = "decided_at")
+    private LocalDateTime decidedAt;
+
+    @Column(name = "approved_by", length = 100)
+    private String approvedBy;
 }

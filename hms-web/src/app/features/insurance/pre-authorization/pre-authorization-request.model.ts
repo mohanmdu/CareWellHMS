@@ -21,6 +21,7 @@ export interface PreAuthorizationRequest {
   primaryConsultant: string | null;
   policyNumber: string | null;
   cardNumber: string | null;
+  claimNumber: string | null;
   insurerName: string | null;
   tpaName: string | null;
   corporateName: string | null;
@@ -30,4 +31,6 @@ export interface PreAuthorizationRequest {
   decisionReason: string | null;
   raisedAt: string | null;
   raisedBy: string | null;
+  decidedAt: string | null;
+  approvedBy: string | null;
 }
