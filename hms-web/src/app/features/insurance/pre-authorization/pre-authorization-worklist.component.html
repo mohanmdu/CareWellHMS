@@ -59,6 +59,13 @@
   <section class="hms-card-surface par-worklist-section">
     <h1 class="par-banner">Insurance Pre Authorisation Requests</h1>
 
+    @if (!loading() && requests().length > 0) {
+      <div class="par-summary-banner">
+        <span>Insurance Patients</span>
+        <span>Total Patients: {{ requests().length }}</span>
+      </div>
+    }
+
     @if (loading()) {
       <mat-progress-bar mode="indeterminate" />
     }
@@ -111,9 +118,7 @@
                 </td>
                 <td class="par-consultant-cell">
                   <span>{{ request.primaryConsultant ?? '—' }}</span>
-                  @if (request.referralDoctor) {
-                    <span>Ref By: {{ request.referralDoctor }}</span>
-                  }
+                  <span>Ref By: {{ request.referralDoctor }}</span>
                 </td>
                 <td class="par-action-cell">
                   @if (request.status === 'YET_TO_BE_RAISED' && raisingId() !== request.id) {
