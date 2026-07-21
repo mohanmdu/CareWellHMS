@@ -1,0 +1,52 @@
+<div class="hms-page pal-page">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading()) {
+    <section class="hms-card-surface pal-card">
+      <h1 class="pal-title">Uploaded Audit Logs for Patient</h1>
+
+      @if (rows().length === 0) {
+        <app-empty-state icon="history" title="No audit log entries" message="No file uploads have been recorded yet." />
+      } @else {
+        <div class="pal-table-wrap">
+          <table class="pal-table">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Operation</th>
+                <th>Patient ID</th>
+                <th>Patient Name</th>
+                <th>Image</th>
+                <th>Date Time</th>
+                <th>Created By</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of rows(); track row.id; let i = $index) {
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ row.operation }}</td>
+                  <td>{{ row.patientUhid }}</td>
+                  <td>{{ row.patientName }}</td>
+                  <td>
+                    <a [href]="row.filePath" target="_blank" class="pal-image-link">
+                      @if (isImage(row)) {
+                        <img [src]="row.filePath" alt="" class="pal-thumbnail" />
+                      } @else {
+                        Document
+                      }
+                    </a>
+                  </td>
+                  <td>{{ row.dateTime | date: 'dd-MM-yyyy HH:mm' }}</td>
+                  <td>{{ row.createdBy ?? '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</div>

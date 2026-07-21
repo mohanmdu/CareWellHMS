@@ -58,7 +58,25 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: 'Lab Approved Report/Reports Share to WhatsApp', route: '/lab/test-entries/approved', icon: 'verified' },
       { label: 'Lab Category', route: '/lab/masters/categories', icon: 'category' },
       { label: 'Lab Sub-Category', route: '/lab/masters/sub-categories', icon: 'list_alt' },
-      { label: 'Lab Component', route: '/lab/masters/components', icon: 'science' }
+      { label: 'Lab Component', route: '/lab/masters/components', icon: 'science' },
+      { label: 'Summary Collection Report', route: '/lab/reports/summary-collection', icon: 'summarize' },
+      { label: 'Lab Detail Collection Report', route: '/lab/reports/lab-detail-collection', icon: 'receipt_long' },
+      {
+        label: 'Investigation Detail Collection Report',
+        route: '/lab/reports/investigation-detail-collection',
+        icon: 'receipt_long'
+      },
+      { label: 'Payment Refund', route: '/lab/refunds', icon: 'currency_exchange' },
+      { label: 'Refund Report', route: '/lab/reports/refund', icon: 'assignment_return' },
+      { label: 'Cancelled Report', route: '/lab/reports/cancelled', icon: 'event_busy' }
+    ]
+  },
+  {
+    label: 'Upload Reports',
+    items: [
+      { label: 'Upload Reports', route: '/patient-reports/upload', icon: 'upload_file' },
+      { label: 'View Files/Reports share to WhatsApp', route: '/patient-reports/view', icon: 'folder_shared' },
+      { label: 'Audit Log', route: '/patient-reports/audit-log', icon: 'fact_check' }
     ]
   },
   {

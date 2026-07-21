@@ -1,0 +1,148 @@
+<div class="hms-page lcr-page">
+  <h1 class="lcr-page-title">Investigation Detail Collection Report</h1>
+
+  <section class="hms-card-surface lcr-filter-card">
+    <span class="lcr-filter-label">From :</span>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="lcr-date-field">
+      <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" />
+      <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+      <mat-datepicker #fromPicker />
+    </mat-form-field>
+
+    <span class="lcr-filter-label">To :</span>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="lcr-date-field">
+      <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" />
+      <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+      <mat-datepicker #toPicker />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="lcr-select-field">
+      <mat-label>Consultant</mat-label>
+      <mat-select [(ngModel)]="consultantId">
+        <mat-option [value]="null">All</mat-option>
+        @for (c of consultants(); track c.id) {
+          <mat-option [value]="c.id">{{ c.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="lcr-select-field">
+      <mat-label>Category</mat-label>
+      <mat-select [(ngModel)]="categoryId">
+        <mat-option [value]="null">All</mat-option>
+        @for (cat of categories(); track cat.id) {
+          <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="lcr-select-field">
+      <mat-label>Payment Mode</mat-label>
+      <mat-select [(ngModel)]="paymentMode">
+        <mat-option [value]="null">All</mat-option>
+        @for (mode of paymentModes; track mode) {
+          <mat-option [value]="mode">{{ paymentModeLabels[mode] }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-flat-button color="primary" class="lcr-submit-btn" type="button" (click)="search()">Submit</button>
+  </section>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (searched()) {
+    <section class="hms-card-surface lcr-results-card">
+      <h2 class="lcr-results-title">
+        Collection Report - Date : {{ appliedFrom() | date: 'dd-MM-yyyy' }} to {{ appliedTo() | date: 'dd-MM-yyyy' }}
+        DoctorName: {{ appliedConsultantName() ?? 'All' }} Category: {{ appliedCategoryName() ?? 'All' }} PaymentMode:
+        {{ appliedPaymentModeLabel() }}
+      </h2>
+
+      @if (report().rows.length === 0) {
+        <app-empty-state
+          icon="monitor_heart"
+          title="No collections found"
+          message="No billed X-Ray/Scan/ECG/Other Services invoices match these filters."
+        />
+      } @else {
+        <div class="lcr-table-wrap">
+          <table class="lcr-table">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Patient Name</th>
+                <th>Type</th>
+                <th>Patient ID</th>
+                <th>Date &amp; Time</th>
+                <th>Payment Mode</th>
+                <th>Consultant Name</th>
+                <th>Invoice Amount</th>
+                <th>Discount Amount</th>
+                <th>Receipt Amount</th>
+                <th>Refund Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of report().rows; track row.requisitionId; let i = $index) {
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ row.patientName }}</td>
+                  <td>{{ row.typeLabel }}</td>
+                  <td>{{ row.patientUhid }}</td>
+                  <td>{{ row.billedAt | date: 'dd-MM-yyyy HH:mm' }}</td>
+                  <td>{{ paymentModeLabel(row.paymentMode) }}</td>
+                  <td>{{ row.consultantName ?? '—' }}</td>
+                  <td>{{ row.invoiceAmount | number: '1.0-2' }}</td>
+                  <td>{{ row.discountAmount | number: '1.0-2' }}</td>
+                  <td>{{ row.receiptAmount | number: '1.0-2' }}</td>
+                  <td>{{ row.refundAmount | number: '1.0-2' }}</td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr class="lcr-total-row">
+                <td colspan="7">Total</td>
+                <td>{{ report().totals.invoiceAmount | number: '1.0-2' }}</td>
+                <td>{{ report().totals.discountAmount | number: '1.0-2' }}</td>
+                <td>{{ report().totals.receiptAmount | number: '1.0-2' }}</td>
+                <td>{{ report().totals.refundAmount | number: '1.0-2' }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="lcr-summary-box">
+          <table class="lcr-summary-table">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Invoice Amount</td>
+                <td>{{ report().totals.invoiceAmount | number: '1.0-2' }}</td>
+              </tr>
+              <tr>
+                <td>Discount Amount</td>
+                <td>{{ report().totals.discountAmount | number: '1.0-2' }}</td>
+              </tr>
+              <tr>
+                <td>Refund Amount</td>
+                <td>{{ report().totals.refundAmount | number: '1.0-2' }}</td>
+              </tr>
+              <tr class="lcr-summary-final">
+                <td>Total Collection Amount</td>
+                <td>{{ report().totals.totalCollectionAmount | number: '1.0-2' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</div>

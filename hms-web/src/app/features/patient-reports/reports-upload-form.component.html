@@ -1,0 +1,109 @@
+<div class="hms-page ruf-page">
+  <section class="hms-card-surface ruf-card">
+    <div class="ruf-header">
+      <h1 class="ruf-title">Reports Upload</h1>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="ruf-name-field">
+        <mat-label>Patient Name:</mat-label>
+        <input
+          matInput
+          [ngModel]="nameQuery()"
+          (ngModelChange)="onNameQueryChange($event)"
+          [matAutocomplete]="nameAuto"
+          placeholder="Search by patient name..."
+        />
+        <mat-autocomplete #nameAuto="matAutocomplete" (optionSelected)="selectPatientFromAutocomplete($event.option.value)">
+          @for (p of nameResults(); track p.id) {
+            <mat-option [value]="p">{{ p.firstName }} {{ p.lastName }} ({{ p.registrationNumber }})</mat-option>
+          } @empty {
+            <mat-option disabled>No matching patients</mat-option>
+          }
+        </mat-autocomplete>
+      </mat-form-field>
+    </div>
+
+    <div class="ruf-form-grid">
+      <div class="ruf-field">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Patient ID*</mat-label>
+          <input matInput [ngModel]="patientIdInput()" (ngModelChange)="onPatientIdChange($event)" />
+        </mat-form-field>
+        <p class="ruf-warning">(Enter Correct Patient ID or search for Patient Name at top right)</p>
+      </div>
+
+      @if (selectedPatient(); as p) {
+        <div class="ruf-field ruf-readonly-field">
+          <span>Patient Name:</span>
+          <strong>{{ p.firstName }} {{ p.lastName }}</strong>
+        </div>
+        <div class="ruf-field ruf-readonly-field">
+          <span>Patient Mobile No:</span>
+          <strong>{{ p.mobileNumber }}</strong>
+        </div>
+      }
+
+      <div class="ruf-field ruf-comments-field">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Comments:</mat-label>
+          <textarea matInput rows="3" [(ngModel)]="comments"></textarea>
+        </mat-form-field>
+      </div>
+
+      <div class="ruf-field">
+        <span class="ruf-file-label">File Upload*:</span>
+        <input class="ruf-file-input" type="file" accept="image/jpeg,image/png,application/pdf" (change)="onFileSelected($event)" />
+        <p class="ruf-hint">(Only .jpg, .png, .pdf files are allowed)</p>
+      </div>
+    </div>
+
+    @if (uploading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+
+    <button mat-flat-button color="primary" class="ruf-upload-btn" type="button" [disabled]="!canUpload()" (click)="upload()">
+      Upload
+    </button>
+
+    @if (selectedFile(); as file) {
+      <div class="ruf-preview">
+        @if (isImagePreview() && filePreviewUrl(); as url) {
+          <img [src]="url" alt="File preview" class="ruf-preview-image" />
+        } @else {
+          <div class="ruf-preview-badge">
+            <mat-icon aria-hidden="true">description</mat-icon>
+            <span>{{ file.name }}</span>
+          </div>
+        }
+      </div>
+    }
+  </section>
+
+  <section class="hms-card-surface ruf-registry-card">
+    @if (loadingPatients()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+    <div class="ruf-table-wrap">
+      <table class="ruf-table">
+        <thead>
+          <tr>
+            <th>Patient ID</th>
+            <th>Name</th>
+            <th>Gender</th>
+            <th>Mobile</th>
+            <th>Address</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of patients(); track p.id) {
+            <tr (click)="selectPatient(p)" class="ruf-registry-row">
+              <td>{{ p.registrationNumber }}</td>
+              <td>{{ p.firstName }} {{ p.lastName }}</td>
+              <td>{{ p.gender ?? '—' }}</td>
+              <td>{{ p.mobileNumber }}</td>
+              <td>{{ p.address ?? '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

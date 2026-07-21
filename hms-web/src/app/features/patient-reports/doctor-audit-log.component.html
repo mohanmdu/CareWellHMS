@@ -1,0 +1,58 @@
+<div class="hms-page dal-page">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading()) {
+    <section class="hms-card-surface dal-card">
+      <h1 class="dal-title">Uploaded Audit Logs for Doctor</h1>
+
+      @if (rows().length === 0) {
+        <app-empty-state
+          icon="history"
+          title="No audit log entries"
+          message="No uploads are linked to a patient with a recorded consultant visit yet."
+        />
+      } @else {
+        <div class="dal-table-wrap">
+          <table class="dal-table">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Operation</th>
+                <th>Patient ID</th>
+                <th>Patient Name</th>
+                <th>Doctor Name</th>
+                <th>Image</th>
+                <th>Date Time</th>
+                <th>Created By</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of rows(); track row.id; let i = $index) {
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ row.operation }}</td>
+                  <td>{{ row.patientUhid }}</td>
+                  <td>{{ row.patientName }}</td>
+                  <td>{{ row.doctorName ?? '—' }}</td>
+                  <td>
+                    <a [href]="row.filePath" target="_blank" class="dal-image-link">
+                      @if (isImage(row)) {
+                        <img [src]="row.filePath" alt="" class="dal-thumbnail" />
+                      } @else {
+                        Document
+                      }
+                    </a>
+                  </td>
+                  <td>{{ row.dateTime | date: 'dd-MM-yyyy HH:mm' }}</td>
+                  <td>{{ row.createdBy ?? '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</div>

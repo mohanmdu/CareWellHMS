@@ -1,11 +1,14 @@
 package com.pms.lab.repository;
 
+import com.pms.lab.entity.LabPaymentMode;
 import com.pms.lab.entity.LabRequisition;
 import com.pms.lab.entity.LabRequisitionStatus;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface LabRequisitionRepository extends JpaRepository<LabRequisition, Long> {
     List<LabRequisition> findByStatusOrderByRequisitionDateDesc(LabRequisitionStatus status);
@@ -17,4 +20,32 @@ public interface LabRequisitionRepository extends JpaRepository<LabRequisition, 
 
     @Query("SELECT MAX(r.invoiceNumber) FROM LabRequisition r")
     Long findMaxInvoiceNumber();
+
+    Optional<LabRequisition> findByInvoiceNumber(Long invoiceNumber);
+
+    // Backs the three Collection Report screens (Summary/Lab Detail/
+    // Investigation Detail) - requisitionType/consultantId/paymentMode/
+    // categoryName are all optional filters, and categoryName is matched via
+    // an EXISTS subquery against the item snapshot rather than a join, so a
+    // requisition with several matching items still contributes only one row.
+    @Query("""
+            SELECT r FROM LabRequisition r
+            WHERE r.status = :status
+              AND (:from IS NULL OR r.approvedAt >= :from)
+              AND (:to IS NULL OR r.approvedAt < :to)
+              AND (:requisitionType IS NULL OR r.requisitionType = :requisitionType)
+              AND (:consultantId IS NULL OR r.consultant.id = :consultantId)
+              AND (:paymentMode IS NULL OR r.paymentMode = :paymentMode)
+              AND (:categoryName IS NULL OR EXISTS (
+                    SELECT 1 FROM LabRequisitionItem i WHERE i.requisition = r AND i.categoryName = :categoryName))
+            ORDER BY r.approvedAt DESC
+            """)
+    List<LabRequisition> findForCollectionReport(
+            @Param("status") LabRequisitionStatus status,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to,
+            @Param("requisitionType") String requisitionType,
+            @Param("consultantId") Long consultantId,
+            @Param("paymentMode") LabPaymentMode paymentMode,
+            @Param("categoryName") String categoryName);
 }

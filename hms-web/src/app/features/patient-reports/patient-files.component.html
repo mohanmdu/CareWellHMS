@@ -1,0 +1,255 @@
+<div class="hms-page pf-page">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading() && patient(); as p) {
+    <section class="hms-card-surface pf-details-card">
+      <h1 class="pf-details-title">Patient Details</h1>
+      <div class="pf-details-grid">
+        <div class="pf-details-field"><span>Patient ID</span><strong>{{ p.registrationNumber }}</strong></div>
+        <div class="pf-details-field"><span>Patient Name</span><strong>{{ p.firstName }} {{ p.lastName }}</strong></div>
+        <div class="pf-details-field"><span>Gender</span><strong>{{ p.gender ?? '—' }}</strong></div>
+        <div class="pf-details-field"><span>Age</span><strong>{{ p.age ?? '—' }}</strong></div>
+        <div class="pf-details-field"><span>Mobile No</span><strong>{{ p.mobileNumber }}</strong></div>
+      </div>
+    </section>
+
+    <section class="hms-card-surface pf-table-card">
+      <h2 class="pf-table-title">{{ p.firstName }}'s Files</h2>
+
+      <div class="pf-toolbar">
+        <div class="pf-show-entries">
+          <span>Show</span>
+          <select class="pf-inline-select" [ngModel]="activePagination.pageSize()" (ngModelChange)="onActivePageSizeChange($event)">
+            @for (size of pageSizeOptions; track size) {
+              <option [ngValue]="size">{{ size }}</option>
+            }
+          </select>
+          <span>entries</span>
+        </div>
+      </div>
+
+      <div class="pf-table-wrap">
+        <table class="pf-table">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Mobile No</th>
+              <th>File Created On</th>
+              <th>File Uploaded On</th>
+              <th>Uploaded By</th>
+              <th>Comments</th>
+              <th>View</th>
+              <th>Delete</th>
+            </tr>
+            <tr class="pf-filter-row">
+              <th><input [ngModel]="activeFilterSNo()" (ngModelChange)="activeFilterSNo.set($event)" placeholder="Search S.No" /></th>
+              <th>
+                <input [ngModel]="activeFilterMobile()" (ngModelChange)="activeFilterMobile.set($event)" placeholder="Search Mobile No" />
+              </th>
+              <th>
+                <input
+                  [ngModel]="activeFilterCreated()"
+                  (ngModelChange)="activeFilterCreated.set($event)"
+                  placeholder="Search File Created"
+                />
+              </th>
+              <th>
+                <input
+                  [ngModel]="activeFilterUploaded()"
+                  (ngModelChange)="activeFilterUploaded.set($event)"
+                  placeholder="Search File Uploaded"
+                />
+              </th>
+              <th>
+                <input
+                  [ngModel]="activeFilterUploadedBy()"
+                  (ngModelChange)="activeFilterUploadedBy.set($event)"
+                  placeholder="Search Uploader"
+                />
+              </th>
+              <th>
+                <input
+                  [ngModel]="activeFilterComments()"
+                  (ngModelChange)="activeFilterComments.set($event)"
+                  placeholder="Search Comments"
+                />
+              </th>
+              <th></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of activePagination.page(); track row.file.id) {
+              <tr>
+                <td>{{ row.sNo }}</td>
+                <td>{{ row.file.patientMobileNumber }}</td>
+                <td>{{ row.file.uploadedAt | date: 'dd-MM-yyyy HH:mm' }}</td>
+                <td>{{ row.file.uploadedAt | date: 'dd-MM-yyyy HH:mm' }}</td>
+                <td>{{ row.file.uploadedBy ?? '—' }}</td>
+                <td>{{ row.file.comments ?? '—' }}</td>
+                <td>
+                  <a [href]="row.file.filePath" target="_blank" class="pf-view-link">
+                    @if (isImage(row.file)) {
+                      <img [src]="row.file.filePath" alt="" class="pf-thumbnail" />
+                    } @else {
+                      <mat-icon aria-hidden="true">description</mat-icon>
+                    }
+                  </a>
+                  <button mat-button type="button" class="pf-whatsapp-link" (click)="shareToWhatsApp(row.file)">
+                    Share PDF on WhatsApp
+                  </button>
+                </td>
+                <td>
+                  <button mat-flat-button color="primary" class="pf-delete-btn" type="button" (click)="deleteFile(row.file)">
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8" class="pf-no-data">No data available in table</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pf-pagination-footer">
+        <span class="pf-pagination-summary">
+          Showing {{ activeRangeStart() }} to {{ activeRangeEnd() }} of {{ activePagination.length() }} entries
+        </span>
+        <div class="pf-pagination-controls">
+          <button type="button" [disabled]="activePagination.pageIndex() === 0" (click)="activePreviousPage()">Previous</button>
+          @for (page of activePageNumbers(); track page) {
+            <button type="button" [class.pf-page-active]="activePagination.pageIndex() + 1 === page" (click)="activeGoToPage(page)">
+              {{ page }}
+            </button>
+          }
+          <button type="button" [disabled]="activePagination.pageIndex() + 1 >= activeTotalPages()" (click)="activeNextPage()">
+            Next
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="hms-card-surface pf-table-card">
+      <h2 class="pf-table-title">{{ p.firstName }}'s Deleted Files</h2>
+
+      <div class="pf-toolbar">
+        <div class="pf-show-entries">
+          <span>Show</span>
+          <select class="pf-inline-select" [ngModel]="deletedPagination.pageSize()" (ngModelChange)="onDeletedPageSizeChange($event)">
+            @for (size of pageSizeOptions; track size) {
+              <option [ngValue]="size">{{ size }}</option>
+            }
+          </select>
+          <span>entries</span>
+        </div>
+      </div>
+
+      <div class="pf-table-wrap">
+        <table class="pf-table">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>File Type</th>
+              <th>File Created On</th>
+              <th>File Deleted On</th>
+              <th>Deleted By</th>
+              <th>Reason</th>
+              <th>View</th>
+              <th>Permanent Delete</th>
+            </tr>
+            <tr class="pf-filter-row">
+              <th>
+                <input [ngModel]="deletedFilterSNo()" (ngModelChange)="deletedFilterSNo.set($event)" placeholder="Search S.No" />
+              </th>
+              <th>
+                <input
+                  [ngModel]="deletedFilterFileType()"
+                  (ngModelChange)="deletedFilterFileType.set($event)"
+                  placeholder="Search File Type"
+                />
+              </th>
+              <th>
+                <input
+                  [ngModel]="deletedFilterCreated()"
+                  (ngModelChange)="deletedFilterCreated.set($event)"
+                  placeholder="Search File Created"
+                />
+              </th>
+              <th>
+                <input
+                  [ngModel]="deletedFilterDeleted()"
+                  (ngModelChange)="deletedFilterDeleted.set($event)"
+                  placeholder="Search File Deleted"
+                />
+              </th>
+              <th>
+                <input
+                  [ngModel]="deletedFilterDeletedBy()"
+                  (ngModelChange)="deletedFilterDeletedBy.set($event)"
+                  placeholder="Search Deleted"
+                />
+              </th>
+              <th>
+                <input [ngModel]="deletedFilterReason()" (ngModelChange)="deletedFilterReason.set($event)" placeholder="Search Reason" />
+              </th>
+              <th></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of deletedPagination.page(); track row.file.id) {
+              <tr>
+                <td>{{ row.sNo }}</td>
+                <td>{{ row.file.fileType }}</td>
+                <td>{{ row.file.uploadedAt | date: 'dd-MM-yyyy HH:mm' }}</td>
+                <td>{{ row.file.deletedAt | date: 'dd-MM-yyyy HH:mm' }}</td>
+                <td>{{ row.file.deletedBy ?? '—' }}</td>
+                <td>{{ row.file.deleteReason ?? '—' }}</td>
+                <td>
+                  <a [href]="row.file.filePath" target="_blank" class="pf-view-link">
+                    @if (isImage(row.file)) {
+                      <img [src]="row.file.filePath" alt="" class="pf-thumbnail" />
+                    } @else {
+                      <mat-icon aria-hidden="true">description</mat-icon>
+                    }
+                  </a>
+                </td>
+                <td>
+                  <button mat-flat-button class="pf-permanent-delete-btn" type="button" (click)="permanentlyDelete(row.file)">
+                    Delete Permanently
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8" class="pf-no-data">No data available in table</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pf-pagination-footer">
+        <span class="pf-pagination-summary">
+          Showing {{ deletedRangeStart() }} to {{ deletedRangeEnd() }} of {{ deletedPagination.length() }} entries
+        </span>
+        <div class="pf-pagination-controls">
+          <button type="button" [disabled]="deletedPagination.pageIndex() === 0" (click)="deletedPreviousPage()">Previous</button>
+          @for (page of deletedPageNumbers(); track page) {
+            <button type="button" [class.pf-page-active]="deletedPagination.pageIndex() + 1 === page" (click)="deletedGoToPage(page)">
+              {{ page }}
+            </button>
+          }
+          <button type="button" [disabled]="deletedPagination.pageIndex() + 1 >= deletedTotalPages()" (click)="deletedNextPage()">
+            Next
+          </button>
+        </div>
+      </div>
+    </section>
+  }
+</div>

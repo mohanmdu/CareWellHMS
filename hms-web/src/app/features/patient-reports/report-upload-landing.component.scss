@@ -1,0 +1,31 @@
+.rul-page {
+  display: flex;
+  flex-direction: column;
+  padding: var(--hms-space-4);
+  max-width: 600px;
+}
+
+.rul-card {
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--hms-space-4);
+}
+
+.rul-title {
+  margin: 0;
+  width: 100%;
+  padding: var(--hms-space-3);
+  background: var(--hms-color-text, #37474f);
+  color: #fff;
+  text-align: center;
+  font-size: var(--hms-font-size-lg);
+  box-sizing: border-box;
+}
+
+.rul-patient-btn {
+  margin-bottom: var(--hms-space-4);
+  min-width: 160px;
+}

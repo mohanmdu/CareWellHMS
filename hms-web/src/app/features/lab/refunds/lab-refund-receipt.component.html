@@ -1,0 +1,88 @@
+<div class="hms-page lrrc-page">
+  <div class="lrrc-toolbar">
+    <button mat-icon-button type="button" aria-label="Print" (click)="print()">
+      <mat-icon aria-hidden="true">print</mat-icon>
+    </button>
+    <button mat-flat-button color="primary" type="button" (click)="back()">
+      <mat-icon aria-hidden="true">arrow_back</mat-icon>
+      Back
+    </button>
+  </div>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading() && refund(); as r) {
+    <section class="hms-card-surface">
+      <div class="receipt" #receiptContent>
+        <div class="receipt-header">
+          @if (clinicSettings()?.logoUrl; as logo) {
+            <img [src]="logo" alt="" class="receipt-logo" />
+          }
+          <div class="receipt-clinic-info">
+            <strong class="receipt-clinic-name">{{ clinicSettings()?.name ?? 'Hospital' }}</strong>
+            @if (clinicSettings()?.address) {
+              <span>{{ clinicSettings()?.address }}</span>
+            }
+            <span>
+              @if (clinicSettings()?.phone) {
+                Phone: {{ clinicSettings()?.phone }}
+              }
+              @if (clinicSettings()?.email) {
+                &nbsp;&middot; Email: {{ clinicSettings()?.email }}
+              }
+            </span>
+          </div>
+        </div>
+
+        <div class="receipt-meta">
+          <span>Refund Receipt No: {{ r.refundNumber }}</span>
+          <span>Invoice No: {{ r.invoiceNumber }}</span>
+        </div>
+        <div class="receipt-meta">
+          <span>Patient Name: {{ r.patientName }}</span>
+          <span>Patient ID: {{ r.patientUhid }}</span>
+        </div>
+        <div class="receipt-meta">
+          <span>Gender: {{ r.gender ?? '—' }}</span>
+          <span>Age: {{ r.age ?? '—' }}</span>
+        </div>
+
+        <table class="receipt-items-table">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Description</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>
+                Refund Amount Towards Invoice No. {{ r.invoiceNumber }}
+                @if (r.billedAt) {
+                  Paid on {{ r.billedAt | date: 'dd-MM-yyyy' }}
+                }
+              </td>
+              <td>{{ r.refundAmount | number: '1.0-2' }}</td>
+            </tr>
+            <tr class="receipt-total-row">
+              <td></td>
+              <td>Total Amount Refunded</td>
+              <td>{{ r.refundAmount | number: '1.0-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="receipt-words">Sum of Rupees <strong>{{ amountInWords }}</strong> Only has been refunded.</p>
+        @if (r.reason) {
+          <p class="receipt-remarks">Reason: {{ r.reason }}</p>
+        }
+
+        <p class="receipt-signature">Cashier</p>
+      </div>
+    </section>
+  }
+</div>

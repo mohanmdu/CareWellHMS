@@ -1,0 +1,32 @@
+.all-page {
+  display: flex;
+  flex-direction: column;
+  padding: var(--hms-space-4);
+  max-width: 700px;
+}
+
+.all-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.all-title {
+  margin: 0;
+  padding: var(--hms-space-3);
+  background: var(--hms-color-text, #37474f);
+  color: #fff;
+  text-align: center;
+  font-size: var(--hms-font-size-lg);
+}
+
+.all-panel {
+  display: flex;
+  justify-content: center;
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-4);
+  background: var(--hms-color-surface-alt, #f0f0f0);
+}
+
+.all-btn {
+  min-width: 180px;
+}

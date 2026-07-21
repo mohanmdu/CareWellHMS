@@ -1,0 +1,44 @@
+<div class="hms-page lcr-page">
+  <h1 class="lcr-page-title">Cancelled Payments - Lab/X-Ray</h1>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading()) {
+    <section class="hms-card-surface lcr-results-card">
+      @if (rows().length === 0) {
+        <app-empty-state icon="event_busy" title="No cancelled payments" message="No Lab or Investigation requisitions have been cancelled." />
+      } @else {
+        <div class="lcr-table-wrap">
+          <table class="lcr-table">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Patient ID</th>
+                <th>Patient Name</th>
+                <th>Invoice No</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Invoiced Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of rows(); track row.requisitionId; let i = $index) {
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td>{{ row.patientUhid }}</td>
+                  <td>{{ row.patientName }}</td>
+                  <td>{{ row.invoiceNumber ?? '—' }}</td>
+                  <td>{{ row.typeLabel || '—' }}</td>
+                  <td>{{ row.amount | number: '1.0-2' }}</td>
+                  <td>{{ row.requisitionDate | date: 'dd-MM-yyyy HH:mm' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</div>

@@ -1,0 +1,201 @@
+.pf-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-4);
+  padding: var(--hms-space-4);
+}
+
+.pf-details-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.pf-details-title {
+  margin: 0;
+  padding: var(--hms-space-2) var(--hms-space-3);
+  background: #e65100;
+  color: #fff;
+  font-size: var(--hms-font-size-lg);
+}
+
+.pf-details-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-3);
+  background: var(--hms-color-surface-alt, #f7f7f7);
+}
+
+.pf-details-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+
+  span {
+    font-size: var(--hms-font-size-sm);
+    color: var(--hms-color-text-muted);
+    font-weight: 600;
+  }
+}
+
+.pf-table-card {
+  padding: var(--hms-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+}
+
+.pf-table-title {
+  margin: 0;
+  padding: var(--hms-space-2) var(--hms-space-3);
+  background: var(--hms-color-primary, #1565c0);
+  color: #fff;
+  border-radius: var(--hms-radius-sm, 2px);
+  font-size: var(--hms-font-size-md);
+}
+
+.pf-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pf-show-entries {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+  font-size: var(--hms-font-size-sm);
+}
+
+.pf-inline-select {
+  padding: 2px var(--hms-space-2);
+  border: 1px solid var(--hms-color-border, #bcd0e5);
+  border-radius: var(--hms-radius-sm, 2px);
+}
+
+.pf-table-wrap {
+  overflow: auto;
+  max-height: 60vh;
+  border: 1px solid var(--hms-color-border, #e0e0e0);
+  border-radius: var(--hms-radius-md, 4px);
+}
+
+.pf-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--hms-font-size-sm);
+
+  th,
+  td {
+    padding: var(--hms-space-2) var(--hms-space-3);
+    text-align: left;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--hms-color-border, #e0e0e0);
+  }
+
+  thead tr:first-child th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--hms-color-primary, #1565c0);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  tbody tr:nth-child(even) {
+    background: var(--hms-color-surface-alt, #f7f7f7);
+  }
+}
+
+.pf-filter-row {
+  th {
+    position: sticky;
+    top: 33px;
+    z-index: 1;
+    background: #fff;
+    padding: var(--hms-space-1) var(--hms-space-2);
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 4px 6px;
+      border: 1px solid var(--hms-color-border, #bcd0e5);
+      border-radius: var(--hms-radius-sm, 2px);
+      font: inherit;
+      font-size: var(--hms-font-size-sm);
+    }
+  }
+}
+
+.pf-no-data {
+  text-align: center;
+  color: var(--hms-color-text-muted);
+  padding: var(--hms-space-4) !important;
+}
+
+.pf-view-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--hms-color-text-muted);
+}
+
+.pf-thumbnail {
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: var(--hms-radius-sm, 2px);
+  border: 1px solid var(--hms-color-border, #e0e0e0);
+}
+
+.pf-whatsapp-link {
+  display: block;
+  color: #2e7d32;
+  font-size: var(--hms-font-size-sm);
+  min-width: 0;
+  padding: 0;
+}
+
+.pf-delete-btn {
+  background: var(--hms-color-primary, #1565c0);
+  color: #fff;
+}
+
+.pf-permanent-delete-btn {
+  background: var(--hms-color-primary, #1565c0);
+  color: #fff;
+}
+
+.pf-pagination-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--hms-space-2);
+  font-size: var(--hms-font-size-sm);
+}
+
+.pf-pagination-controls {
+  display: flex;
+  gap: 4px;
+
+  button {
+    padding: 4px 10px;
+    border: 1px solid var(--hms-color-border, #bcd0e5);
+    background: #fff;
+    border-radius: var(--hms-radius-sm, 2px);
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+  }
+}
+
+.pf-page-active {
+  background: var(--hms-color-primary, #1565c0) !important;
+  color: #fff;
+  border-color: var(--hms-color-primary, #1565c0) !important;
+}

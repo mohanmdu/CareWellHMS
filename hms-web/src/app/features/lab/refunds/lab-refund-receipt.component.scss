@@ -1,0 +1,20 @@
+@use '../../../shared/receipt/receipt';
+
+.lrrc-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+  padding: var(--hms-space-4);
+  max-width: 800px;
+}
+
+.lrrc-toolbar {
+  display: flex;
+  gap: var(--hms-space-2);
+}
+
+@media print {
+  .lrrc-toolbar {
+    display: none !important;
+  }
+}

@@ -1,0 +1,85 @@
+<div class="hms-page lcr-page">
+  <h1 class="lcr-page-title">Lab &amp; X-Ray Refund Report</h1>
+
+  <section class="hms-card-surface lcr-filter-card">
+    <span class="lcr-filter-label">From :</span>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="lcr-date-field">
+      <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" />
+      <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+      <mat-datepicker #fromPicker />
+    </mat-form-field>
+
+    <span class="lcr-filter-label">To :</span>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="lcr-date-field">
+      <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" />
+      <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+      <mat-datepicker #toPicker />
+    </mat-form-field>
+
+    <button mat-flat-button color="primary" class="lcr-submit-btn" type="button" (click)="search()">Submit</button>
+  </section>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (searched()) {
+    <section class="hms-card-surface lcr-results-card">
+      @if (entries().length === 0) {
+        <app-empty-state icon="currency_exchange" title="No refunds" message="No refunds match these filters." />
+      } @else {
+        <div class="lcr-table-wrap">
+          <table class="lcr-table">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Refund No</th>
+                <th>Patient ID</th>
+                <th>Patient Name</th>
+                <th>Type</th>
+                <th>Billing Type</th>
+                <th>Invoice No</th>
+                <th>Invoice Amount</th>
+                <th>Paid Amount</th>
+                <th>Refund Amount</th>
+                <th>Reason</th>
+                <th>Refund Date</th>
+                <th>Refunded By</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (entry of entries(); track entry.id; let i = $index) {
+                <tr>
+                  <td>{{ i + 1 }}</td>
+                  <td>
+                    <button mat-button type="button" class="lcr-invoice-link" (click)="viewReceipt(entry)">
+                      {{ entry.refundNumber }}
+                    </button>
+                  </td>
+                  <td>{{ entry.patientUhid }}</td>
+                  <td>{{ entry.patientName }}</td>
+                  <td>{{ entry.patientType ?? '—' }}</td>
+                  <td>{{ entry.requisitionType }}</td>
+                  <td>{{ entry.invoiceNumber }}</td>
+                  <td>{{ entry.invoiceAmount | number: '1.0-2' }}</td>
+                  <td>{{ entry.paidAmount | number: '1.0-2' }}</td>
+                  <td>{{ entry.refundAmount | number: '1.0-2' }}</td>
+                  <td>{{ entry.reason ?? '—' }}</td>
+                  <td>{{ entry.refundedAt | date: 'dd-MM-yyyy HH:mm' }}</td>
+                  <td>{{ entry.refundedBy ?? '—' }}</td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr class="lcr-total-row">
+                <td colspan="9">Total</td>
+                <td>{{ totalRefundAmount() | number: '1.0-2' }}</td>
+                <td colspan="3"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</div>

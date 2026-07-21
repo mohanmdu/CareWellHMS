@@ -1,0 +1,144 @@
+// Shared table/filter/summary styling for the three Lab & Investigations
+// collection report screens (Summary / Lab Detail / Investigation Detail) -
+// column counts differ per screen, handled in each template via colspan,
+// but the visual structure (filter row, blue-header table, yellow total
+// row, Description/Amount recap box) is identical.
+
+.lcr-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-4);
+  padding: var(--hms-space-4);
+}
+
+.lcr-page-title {
+  margin: 0;
+  font-size: var(--hms-font-size-lg);
+  color: var(--hms-color-primary, #1565c0);
+}
+
+.lcr-filter-card {
+  padding: var(--hms-space-4);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--hms-space-3);
+}
+
+.lcr-filter-label {
+  font-weight: 600;
+  color: var(--hms-color-text-muted);
+}
+
+.lcr-date-field {
+  width: 160px;
+}
+
+.lcr-select-field {
+  width: 200px;
+}
+
+.lcr-submit-btn {
+  margin-left: auto;
+}
+
+.lcr-results-card {
+  padding: var(--hms-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-3);
+}
+
+.lcr-results-title {
+  margin: 0;
+  font-size: var(--hms-font-size-md);
+  font-weight: 700;
+  color: var(--hms-color-text, #212121);
+}
+
+.lcr-table-wrap {
+  overflow: auto;
+  max-height: 60vh;
+  border: 1px solid var(--hms-color-border, #e0e0e0);
+  border-radius: var(--hms-radius-md, 4px);
+}
+
+.lcr-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--hms-font-size-sm);
+
+  th,
+  td {
+    padding: var(--hms-space-2) var(--hms-space-3);
+    text-align: left;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--hms-color-border, #e0e0e0);
+  }
+
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--hms-color-primary, #1565c0);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  tbody tr:nth-child(even) {
+    background: var(--hms-color-surface-alt, #f7f7f7);
+  }
+
+  tfoot td {
+    border-bottom: none;
+  }
+}
+
+.lcr-invoice-link {
+  padding: 0;
+  min-width: 0;
+  color: var(--hms-color-primary, #1565c0);
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+.lcr-total-row {
+  background: #fff59d !important;
+  font-weight: 700;
+
+  td:first-child {
+    text-align: right;
+  }
+}
+
+.lcr-summary-box {
+  align-self: flex-start;
+  min-width: 320px;
+}
+
+.lcr-summary-table {
+  border-collapse: collapse;
+  font-size: var(--hms-font-size-sm);
+
+  th,
+  td {
+    padding: var(--hms-space-2) var(--hms-space-4);
+    border: 1px solid var(--hms-color-border, #e0e0e0);
+    text-align: left;
+  }
+
+  thead th {
+    background: var(--hms-color-primary, #1565c0);
+    color: #fff;
+  }
+
+  td:last-child {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.lcr-summary-final {
+  font-weight: 700;
+  background: #fff59d;
+}

@@ -1,0 +1,98 @@
+<div class="hms-page lrfd-page">
+  <section class="hms-card-surface lrfd-search-card">
+    <h1 class="lrfd-title">Refund Search Input</h1>
+    <div class="lrfd-search-row">
+      <span class="lrfd-label">Invoice Number :</span>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="lrfd-invoice-field">
+        <input matInput type="number" [(ngModel)]="invoiceNumberInput" (keydown.enter)="searchInvoice()" />
+      </mat-form-field>
+      <button
+        mat-flat-button
+        color="primary"
+        class="lrfd-submit-btn"
+        type="button"
+        [disabled]="!invoiceNumberInput || searching()"
+        (click)="searchInvoice()"
+      >
+        Submit
+      </button>
+    </div>
+  </section>
+
+  @if (searching()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (candidate(); as c) {
+    <section class="hms-card-surface lrfd-details-card">
+      <h2 class="lrfd-title">Refund Details</h2>
+      <div class="lrfd-table-wrap">
+        <table class="lrfd-table">
+          <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Patient Name</th>
+              <th>Patient ID</th>
+              <th>Invoice No.</th>
+              <th>Invoice Amount</th>
+              <th>Paid Amount</th>
+              <th>Created By</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>{{ c.patientName }}</td>
+              <td>{{ c.patientUhid }}</td>
+              <td>{{ c.invoiceNumber }}</td>
+              <td>{{ c.invoiceAmount | number: '1.0-2' }}</td>
+              <td>{{ c.paidAmount | number: '1.0-2' }}</td>
+              <td>{{ c.createdBy ?? '—' }}</td>
+              <td>
+                @if (!c.alreadyRefunded) {
+                  <button mat-flat-button color="primary" type="button" (click)="approveRefund()">Approve Refund</button>
+                }
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      @if (c.alreadyRefunded) {
+        <p class="lrfd-already-refunded">
+          This invoice was already refunded on {{ c.refundedAt | date: 'dd-MM-yyyy' }} (Refund No {{ c.refundNumber }}, Amount
+          {{ c.refundAmount | number: '1.0-2' }}).
+        </p>
+      } @else if (formVisible()) {
+        <div class="lrfd-refund-panel">
+          <div class="lrfd-refund-fields">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Refund Amount</mat-label>
+              <input matInput type="number" min="0" [max]="c.paidAmount ?? 0" name="refundAmount" [(ngModel)]="form.refundAmount" required />
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="lrfd-remarks-field">
+              <mat-label>Remarks</mat-label>
+              <input matInput name="reason" [(ngModel)]="form.reason" />
+            </mat-form-field>
+          </div>
+
+          @if (!isValid) {
+            <p class="lrfd-error">Refund amount must be greater than 0 and no more than the paid amount.</p>
+          }
+
+          @if (confirming()) {
+            <mat-progress-bar mode="indeterminate" />
+          }
+
+          <div class="lrfd-refund-actions">
+            <button mat-button type="button" (click)="cancelForm()">Cancel</button>
+            <button mat-flat-button color="primary" type="button" [disabled]="!isValid || confirming()" (click)="confirm()">
+              Confirm
+            </button>
+          </div>
+        </div>
+      }
+    </section>
+  }
+</div>

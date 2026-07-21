@@ -43,7 +43,7 @@ public class LabRequisition extends Auditable {
     @Column(name = "requisition_number", nullable = false, unique = true)
     private String requisitionNumber;
 
-    /** Fixed literal ("Labtest") - only Lab requisitions are modeled today, not X-Ray/Scan. */
+    /** "Labtest" (Lab Sub-Category items) or "Billing" (ad-hoc OP-Billing-Catalog items - the Investigations flow) - set in LabRequisitionService.create(). */
     @Column(name = "requisition_type", nullable = false)
     private String requisitionType = "Labtest";
 
@@ -84,6 +84,10 @@ public class LabRequisition extends Auditable {
 
     @Column(name = "discount_amount")
     private Double discountAmount;
+
+    /** Stamped by LabRefundService.create() - kept on the requisition itself (not just the LabRefund row) so Collection Report totals need no extra join. */
+    @Column(name = "refund_amount")
+    private Double refundAmount;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_mode", length = 32)

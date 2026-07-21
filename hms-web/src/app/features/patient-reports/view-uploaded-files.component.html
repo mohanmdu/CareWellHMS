@@ -1,0 +1,61 @@
+<div class="hms-page vuf-page">
+  <section class="hms-card-surface vuf-card">
+    <div class="vuf-header">
+      <h1 class="vuf-title">View Uploaded Files</h1>
+      <div class="vuf-name-search">
+        <span class="vuf-name-label">Name/Mobile.No:</span>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="vuf-name-field">
+          <input matInput aria-label="Name/Mobile.No:" [(ngModel)]="nameOrMobileQuery" (keydown.enter)="search()" />
+        </mat-form-field>
+        <button mat-flat-button color="primary" class="vuf-search-btn" type="button" (click)="search()">Search</button>
+      </div>
+    </div>
+
+    <div class="vuf-uhid-row">
+      <span class="vuf-uhid-label">Patient UHID :</span>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="vuf-uhid-field">
+        <input
+          matInput
+          aria-label="Patient UHID"
+          placeholder="Enter the Patient"
+          [ngModel]="patientIdInput()"
+          (ngModelChange)="onPatientIdChange($event)"
+        />
+      </mat-form-field>
+      <button mat-flat-button color="primary" class="vuf-get-files-btn" type="button" (click)="getFiles()">Get Files</button>
+    </div>
+  </section>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  <section class="hms-card-surface vuf-registry-card">
+    <div class="vuf-table-wrap">
+      <table class="vuf-table">
+        <thead>
+          <tr>
+            <th>Patient UHID</th>
+            <th>Name</th>
+            <th>Gender</th>
+            <th>Mobile</th>
+            <th>Address</th>
+            <th>Occupation</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of patients(); track p.id) {
+            <tr (click)="selectPatient(p)" class="vuf-registry-row">
+              <td>{{ p.registrationNumber }}</td>
+              <td>{{ p.firstName }} {{ p.lastName }}</td>
+              <td>{{ p.gender ?? '—' }}</td>
+              <td>{{ p.mobileNumber }}</td>
+              <td>{{ p.address ?? '—' }}</td>
+              <td>—</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

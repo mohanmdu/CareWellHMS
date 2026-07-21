@@ -422,6 +422,84 @@ export const routes: Routes = [
           import('./features/lab/test-entries/lab-test-report-print.component').then((m) => m.LabTestReportPrintComponent)
       },
       {
+        path: 'lab/reports/summary-collection',
+        loadComponent: () =>
+          import('./features/lab/reports/lab-summary-collection-report.component').then(
+            (m) => m.LabSummaryCollectionReportComponent
+          )
+      },
+      {
+        path: 'lab/reports/lab-detail-collection',
+        loadComponent: () =>
+          import('./features/lab/reports/lab-detail-collection-report.component').then(
+            (m) => m.LabDetailCollectionReportComponent
+          )
+      },
+      {
+        path: 'lab/reports/investigation-detail-collection',
+        loadComponent: () =>
+          import('./features/lab/reports/investigation-detail-collection-report.component').then(
+            (m) => m.InvestigationDetailCollectionReportComponent
+          )
+      },
+      {
+        path: 'lab/reports/cancelled',
+        loadComponent: () => import('./features/lab/reports/lab-cancelled-report.component').then((m) => m.LabCancelledReportComponent)
+      },
+      {
+        path: 'lab/refunds',
+        loadComponent: () => import('./features/lab/refunds/lab-refund.component').then((m) => m.LabRefundComponent)
+      },
+      {
+        path: 'lab/refunds/:id/receipt',
+        loadComponent: () =>
+          import('./features/lab/refunds/lab-refund-receipt.component').then((m) => m.LabRefundReceiptComponent)
+      },
+      {
+        path: 'lab/reports/refund',
+        loadComponent: () =>
+          import('./features/lab/refunds/lab-refund-report.component').then((m) => m.LabRefundReportComponent)
+      },
+      {
+        path: 'patient-reports/upload',
+        loadComponent: () =>
+          import('./features/patient-reports/report-upload-landing.component').then((m) => m.ReportUploadLandingComponent)
+      },
+      {
+        path: 'patient-reports/upload/patient',
+        loadComponent: () =>
+          import('./features/patient-reports/reports-upload-form.component').then((m) => m.ReportsUploadFormComponent)
+      },
+      {
+        path: 'patient-reports/upload/success/:id',
+        loadComponent: () =>
+          import('./features/patient-reports/report-upload-success.component').then((m) => m.ReportUploadSuccessComponent)
+      },
+      {
+        path: 'patient-reports/view',
+        loadComponent: () =>
+          import('./features/patient-reports/view-uploaded-files.component').then((m) => m.ViewUploadedFilesComponent)
+      },
+      {
+        path: 'patient-reports/view/:patientId',
+        loadComponent: () => import('./features/patient-reports/patient-files.component').then((m) => m.PatientFilesComponent)
+      },
+      {
+        path: 'patient-reports/audit-log',
+        loadComponent: () =>
+          import('./features/patient-reports/audit-log-landing.component').then((m) => m.AuditLogLandingComponent)
+      },
+      {
+        path: 'patient-reports/audit-log/patient',
+        loadComponent: () =>
+          import('./features/patient-reports/patient-audit-log.component').then((m) => m.PatientAuditLogComponent)
+      },
+      {
+        path: 'patient-reports/audit-log/doctor',
+        loadComponent: () =>
+          import('./features/patient-reports/doctor-audit-log.component').then((m) => m.DoctorAuditLogComponent)
+      },
+      {
         path: 'pharmacy/inventory-master',
         loadComponent: () =>
           import('./features/pharmacy/inventory-master/inventory-master.component').then(
