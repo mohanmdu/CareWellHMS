@@ -57,6 +57,17 @@
     <mat-label>Location</mat-label>
     <input matInput name="address" [(ngModel)]="form.address" required />
   </mat-form-field>
+
+  @if (!isEdit) {
+    <mat-form-field appearance="outline" class="patient-form-field" subscriptSizing="dynamic">
+      <mat-label>Registered Via</mat-label>
+      <mat-select name="originModule" [(ngModel)]="form.originModule" required>
+        @for (option of originModuleOptions; track option.value) {
+          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">

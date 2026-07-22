@@ -3,6 +3,8 @@ package com.pms.registration.entity;
 import com.pms.common.Auditable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -52,4 +54,9 @@ public class Patient extends Auditable {
 
     @Column(nullable = false)
     private boolean active = true;
+
+    /** Set once at creation in PatientService.register(); update() never touches this. */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "origin_module", nullable = false, length = 32)
+    private PatientOriginModule originModule = PatientOriginModule.FRONT_OFFICE;
 }

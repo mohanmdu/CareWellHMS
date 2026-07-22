@@ -160,6 +160,8 @@ test('Pharmacy: PO -> GRN -> stock credit -> billing -> sales return -> approval
     await dialog.getByLabel('Age').fill('35');
     await dialog.getByLabel('Mobile number').fill(mobileNumber);
     await dialog.getByLabel('Location').fill('Playwright Test Address');
+    await dialog.getByLabel('Registered Via').click();
+    await page.getByRole('option', { name: 'Front Office' }).click();
     await dialog.getByRole('button', { name: 'Add patient' }).click();
     await expect(page.getByRole('cell', { name: patientName, exact: true })).toBeVisible();
   });

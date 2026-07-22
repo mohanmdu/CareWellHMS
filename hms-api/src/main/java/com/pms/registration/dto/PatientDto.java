@@ -1,5 +1,6 @@
 package com.pms.registration.dto;
 
+import com.pms.registration.entity.PatientOriginModule;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -17,5 +18,7 @@ public record PatientDto(
         @NotBlank @Pattern(regexp = "\\d{10}", message = "Mobile number must be exactly 10 digits") String mobileNumber,
         String email,
         String address,
-        Boolean active) {
+        Boolean active,
+        // Required on create (register() defaults to FRONT_OFFICE if omitted); ignored on update - see PatientService.
+        PatientOriginModule originModule) {
 }

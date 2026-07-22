@@ -1,3 +1,14 @@
+export type PatientOriginModule = 'FRONT_OFFICE' | 'OP_APPOINTMENT' | 'IP_ADMISSION' | 'PHARMACY' | 'LAB' | 'INSURANCE';
+
+export const PATIENT_ORIGIN_MODULE_OPTIONS: { value: PatientOriginModule; label: string }[] = [
+  { value: 'FRONT_OFFICE', label: 'Front Office / Reception' },
+  { value: 'OP_APPOINTMENT', label: 'OP Appointment' },
+  { value: 'IP_ADMISSION', label: 'IP Admission' },
+  { value: 'PHARMACY', label: 'Pharmacy' },
+  { value: 'LAB', label: 'Lab / Investigations' },
+  { value: 'INSURANCE', label: 'Insurance' }
+];
+
 export interface Patient {
   id: number | null;
   registrationNumber: string | null;
@@ -10,6 +21,8 @@ export interface Patient {
   email?: string | null;
   address?: string | null;
   active?: boolean;
+  /** Set once at creation; never changed by later edits - see PatientOriginModule. */
+  originModule?: PatientOriginModule | null;
 }
 
 export interface PatientAuditLogEntry {

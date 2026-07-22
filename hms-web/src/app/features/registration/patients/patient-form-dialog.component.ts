@@ -6,7 +6,7 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { Patient } from './patient.model';
+import { PATIENT_ORIGIN_MODULE_OPTIONS, Patient, PatientOriginModule } from './patient.model';
 import { PatientInput } from './patient.service';
 
 export interface PatientFormDialogData {
@@ -45,6 +45,7 @@ export class PatientFormDialogComponent {
 
   readonly isEdit = !!this.data.patient;
   readonly ageOptions = Array.from({ length: 100 }, (_, i) => i + 1);
+  readonly originModuleOptions = PATIENT_ORIGIN_MODULE_OPTIONS;
   filteredAgeOptions = signal<number[]>(this.ageOptions);
 
   ageInput = this.data.patient?.age != null ? String(this.data.patient.age) : '';
@@ -54,7 +55,8 @@ export class PatientFormDialogComponent {
     gender: this.data.patient?.gender ?? '',
     age: this.data.patient?.age ?? (null as number | null),
     mobileNumber: this.data.patient?.mobileNumber ?? '',
-    address: this.data.patient?.address ?? ''
+    address: this.data.patient?.address ?? '',
+    originModule: null as PatientOriginModule | null
   };
 
   onMobileInput(event: Event): void {
@@ -85,7 +87,8 @@ export class PatientFormDialogComponent {
       !!this.form.gender &&
       !!this.form.age &&
       /^\d{10}$/.test(this.form.mobileNumber) &&
-      this.form.address.trim().length > 0
+      this.form.address.trim().length > 0 &&
+      (this.isEdit || !!this.form.originModule)
     );
   }
 
@@ -98,7 +101,8 @@ export class PatientFormDialogComponent {
       gender: this.form.gender,
       age: this.form.age,
       mobileNumber: this.form.mobileNumber,
-      address: this.form.address.trim()
+      address: this.form.address.trim(),
+      ...(this.isEdit ? {} : { originModule: this.form.originModule })
     });
   }
 }

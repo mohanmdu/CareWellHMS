@@ -5,6 +5,7 @@ import com.pms.registration.dto.PatientAuditLogDto;
 import com.pms.registration.dto.PatientDto;
 import com.pms.registration.entity.Patient;
 import com.pms.registration.entity.PatientAuditLog;
+import com.pms.registration.entity.PatientOriginModule;
 import com.pms.registration.repository.PatientAuditLogRepository;
 import com.pms.registration.repository.PatientRepository;
 import java.time.Year;
@@ -66,6 +67,7 @@ public class PatientService {
         Patient patient = new Patient();
         patient.setRegistrationNumber(nextRegistrationNumber());
         patient.setActive(true);
+        patient.setOriginModule(dto.originModule() != null ? dto.originModule() : PatientOriginModule.FRONT_OFFICE);
         applyFields(patient, dto);
         Patient saved = repository.save(patient);
         recordAudit("REGISTER", displayName(saved));
@@ -163,6 +165,7 @@ public class PatientService {
                 patient.getMobileNumber(),
                 patient.getEmail(),
                 patient.getAddress(),
-                patient.isActive());
+                patient.isActive(),
+                patient.getOriginModule());
     }
 }

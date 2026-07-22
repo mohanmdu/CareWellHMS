@@ -20,6 +20,8 @@ test('register a new patient and see it in the Active list', async ({ page }) =>
   await page.getByLabel('Age').fill('30');
   await page.getByLabel('Mobile number').fill(mobileNumber);
   await page.getByLabel('Location').fill('Playwright Test Address');
+  await page.getByLabel('Registered Via').click();
+  await page.getByRole('option', { name: 'Front Office' }).click();
 
   await page.getByRole('button', { name: 'Add patient' }).click();
 
