@@ -1,0 +1,68 @@
+@use '../../../shared/receipt/receipt';
+
+.ipr-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--hms-space-4);
+}
+
+.ipr-receipt {
+  width: 100%;
+  max-width: 560px;
+}
+
+.ipr-title {
+  text-align: center;
+  margin: 0;
+}
+
+.ipr-payment-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hms-space-3);
+  font-size: var(--hms-font-size-sm);
+}
+
+.ipr-payment-mode {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hms-space-1);
+  color: var(--hms-color-text-muted);
+
+  mat-icon {
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+  }
+}
+
+.ipr-payment-mode-active {
+  color: var(--hms-color-success, #2e7d32);
+  font-weight: 600;
+}
+
+.ipr-summary {
+  border-top: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
+  padding-top: var(--hms-space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-1);
+}
+
+.ipr-summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--hms-font-size-sm);
+}
+
+.ipr-actions {
+  display: flex;
+  gap: var(--hms-space-3);
+}
+
+@media print {
+  .ipr-actions {
+    display: none !important;
+  }
+}

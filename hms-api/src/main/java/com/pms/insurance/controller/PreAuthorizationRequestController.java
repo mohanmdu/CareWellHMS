@@ -43,6 +43,11 @@ public class PreAuthorizationRequestController {
         return service.findPending();
     }
 
+    @GetMapping("/by-admission/{admissionId}")
+    public List<PreAuthorizationRequestDto> byAdmission(@PathVariable Long admissionId) {
+        return service.findByAdmission(admissionId);
+    }
+
     @GetMapping("/approved")
     public List<PreAuthorizationRequestDto> approved(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,

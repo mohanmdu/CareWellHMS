@@ -1,0 +1,104 @@
+<div class="hms-page ipr-page">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!loading() && admission(); as admission) {
+    @if (payment(); as payment) {
+      <div class="ipr-layout">
+        <div class="receipt ipr-receipt" #receiptContent>
+          <div class="receipt-header">
+            @if (clinicSettings()?.logoUrl; as logo) {
+              <img [src]="logo" alt="" class="receipt-logo" />
+            }
+            <div class="receipt-clinic-info">
+              <strong class="receipt-clinic-name">{{ clinicSettings()?.name ?? 'Hospital' }}</strong>
+              @if (clinicSettings()?.address) {
+                <span>{{ clinicSettings()?.address }}</span>
+              }
+            </div>
+          </div>
+
+          <h2 class="ipr-title">Cash Bill</h2>
+
+          <div class="receipt-meta">
+            <span>Name: {{ admission.patientName }}</span>
+            <span>UHID: {{ admission.patientUhid ?? '—' }}</span>
+          </div>
+          <div class="receipt-meta">
+            <span>Age: {{ admission.patientAge ?? '—' }}</span>
+            <span>Gender: {{ admission.patientGender ?? '—' }}</span>
+          </div>
+          <div class="receipt-meta">
+            <span>Invoice No: {{ payment.receiptNumber }}</span>
+            <span>Invoice Date: {{ payment.paymentDate | date: 'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+
+          <table class="receipt-items-table">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Description</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>{{ payment.description || 'Amount' }}</td>
+                <td>{{ payment.netAmount | number: '1.0-2' }}</td>
+              </tr>
+              <tr class="receipt-total-row">
+                <td></td>
+                <td>Total</td>
+                <td>{{ payment.netAmount | number: '1.0-2' }}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p class="receipt-words">Received the sum of Rupees <strong>{{ amountInWords }}</strong> only.</p>
+
+          <div class="ipr-payment-modes">
+            @for (bucket of paymentModeBuckets; track bucket.label) {
+              <span class="ipr-payment-mode" [class.ipr-payment-mode-active]="isModeTicked(bucket)">
+                @if (isModeTicked(bucket)) {
+                  <mat-icon aria-hidden="true">check_box</mat-icon>
+                } @else {
+                  <mat-icon aria-hidden="true">check_box_outline_blank</mat-icon>
+                }
+                {{ bucket.label }}
+              </span>
+            }
+          </div>
+
+          <div class="ipr-summary">
+            <div class="ipr-summary-row">
+              <span>Total Amount Due</span>
+              <strong>{{ payment.netAmount | number: '1.0-2' }}</strong>
+            </div>
+            <div class="ipr-summary-row">
+              <span>Amount Received</span>
+              <strong>{{ payment.netAmount | number: '1.0-2' }}</strong>
+            </div>
+            <div class="ipr-summary-row">
+              <span>Balance Due</span>
+              <strong>0.00</strong>
+            </div>
+          </div>
+
+          <p class="receipt-signature">Cashier</p>
+        </div>
+
+        <div class="ipr-actions">
+          <button mat-stroked-button type="button" (click)="print()">
+            <mat-icon aria-hidden="true">print</mat-icon>
+            Print
+          </button>
+          <button mat-flat-button color="primary" type="button" (click)="goToBilling()">Go to Billing</button>
+        </div>
+      </div>
+    } @else {
+      <app-empty-state icon="receipt_long" title="Receipt not found" message="This payment could not be located." />
+    }
+  }
+</div>

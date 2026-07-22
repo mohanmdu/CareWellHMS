@@ -178,6 +178,27 @@ public class AdmissionService {
         return toDto(saved);
     }
 
+    /**
+     * Reopens an already-admitted admission's intake details for correction
+     * (Inpatient Admission Details edit form) - reuses applyIntakeFields() so
+     * it stays in sync with register()/admitRegistered(). Deliberately does
+     * NOT touch room/bed assignment - that stays exclusively in the dedicated
+     * Ward Change flow (changeRoom()) to avoid bypassing its availability checks.
+     */
+    @Transactional
+    public AdmissionDto updateIntake(Long id, AdmissionDto dto) {
+        Admission admission = getOrThrow(id);
+        applyIntakeFields(admission, dto);
+        Admission saved = repository.save(admission);
+        activityLogService.log(new ActivityLogEntry("Admission", "Update")
+                .content("Inpatient Admission Details updated")
+                .status("Success")
+                .patient(saved.getPatient().getRegistrationNumber(), patientDisplayName(saved.getPatient()))
+                .ipNumber(saved.getAdmissionNumber())
+                .screenName("Inpatient Admission Details"));
+        return toDto(saved);
+    }
+
     /** Step 1 of the Casualty/Emergency Admission flow: intake + room-type preference, no bed assigned yet. */
     @Transactional
     public AdmissionDto register(AdmissionDto dto) {

@@ -70,6 +70,10 @@ export class PreAuthorizationRequestService {
     return this.http.get<PreAuthorizationRequest[]>(`${this.baseUrl}/pending`);
   }
 
+  getByAdmission(admissionId: number): Observable<PreAuthorizationRequest[]> {
+    return this.http.get<PreAuthorizationRequest[]>(`${this.baseUrl}/by-admission/${admissionId}`);
+  }
+
   getApprovedReport(filters: PreAuthorizationReportFilters): Observable<PreAuthorizationRequest[]> {
     return this.http.get<PreAuthorizationRequest[]>(`${this.baseUrl}/approved`, { params: toParams(filters) });
   }

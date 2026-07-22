@@ -33,6 +33,10 @@ export class AdmissionService {
     return this.http.post<Admission>(`${this.baseUrl}/register`, input);
   }
 
+  updateIntake(id: number, input: Partial<AdmissionRegistrationInput> & { patientId: number }): Observable<Admission> {
+    return this.http.put<Admission>(`${this.baseUrl}/${id}`, input);
+  }
+
   uploadPhoto(id: number, file: File): Observable<Admission> {
     const formData = new FormData();
     formData.append('file', file);

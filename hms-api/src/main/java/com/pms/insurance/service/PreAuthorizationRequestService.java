@@ -53,6 +53,11 @@ public class PreAuthorizationRequestService {
         return repository.findByStatus(PreAuthorizationStatus.PENDING).stream().map(this::toDto).toList();
     }
 
+    /** Insurance Claim Bills section on the IP Billing workspace: every request tied to one admission. */
+    public List<PreAuthorizationRequestDto> findByAdmission(Long admissionId) {
+        return repository.findByAdmissionIdOrderByIdDesc(admissionId).stream().map(this::toDto).toList();
+    }
+
     /** Insurance Claim Report: requests already decided APPROVED, optionally filtered. */
     public List<PreAuthorizationRequestDto> findApprovedReport(LocalDate from, LocalDate to, String insurerName, String patientUhid) {
         LocalDateTime fromDateTime = from != null ? from.atStartOfDay() : null;

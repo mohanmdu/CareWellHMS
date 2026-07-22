@@ -264,7 +264,11 @@
                     <tr>
                       <td>{{ i + 1 }}</td>
                       <td>{{ payment.paymentDate | date: 'dd/MM/yyyy HH:mm' }}</td>
-                      <td>—</td>
+                      <td>
+                        <button mat-button type="button" class="ip-billing-invoice-link" (click)="viewPaymentReceipt(payment)">
+                          {{ payment.receiptNumber }}
+                        </button>
+                      </td>
                       <td>{{ payment.description ?? '—' }}</td>
                       <td>{{ payment.receiptNumber }}</td>
                       <td>{{ payment.paymentType ?? '—' }}</td>
@@ -277,8 +281,66 @@
                 </tbody>
               </table>
             </div>
+            <div class="ip-billing-summary-row">
+              <span>Net Amount Paid by Patient</span>
+              <strong>{{ netAmountPaidByPatient() | number: '1.0-2' }}</strong>
+            </div>
           }
         </section>
+
+        <!-- Insurance Claim Bills -->
+        @if (admission.insuranceType && admission.insuranceType !== 'None') {
+          <section class="hms-card-surface ip-billing-section">
+            <h2 class="ip-billing-ledger-title">Insurance Claim Bills</h2>
+            @if (insuranceClaims().length === 0) {
+              <p class="ip-billing-empty">No insurance claims raised yet.</p>
+            } @else {
+              <div class="ip-billing-table-wrap">
+                <table class="ip-billing-table">
+                  <thead>
+                    <tr>
+                      <th>S.No</th>
+                      <th>Raised Date</th>
+                      <th>Claim Date</th>
+                      <th>CCN.No</th>
+                      <th>Type</th>
+                      <th>Raised By</th>
+                      <th>Claimed By</th>
+                      <th>Estimated</th>
+                      <th>Pending</th>
+                      <th>Claim</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (claim of insuranceClaims(); track claim.id; let i = $index) {
+                      <tr>
+                        <td>{{ i + 1 }}</td>
+                        <td>{{ claim.raisedAt ? (claim.raisedAt | date: 'dd/MM/yyyy') : '—' }}</td>
+                        <td>{{ claim.decidedAt ? (claim.decidedAt | date: 'dd/MM/yyyy HH:mm') : '—' }}</td>
+                        <td>{{ claim.claimNumber ?? '—' }}</td>
+                        <td>Pre-Authorization</td>
+                        <td>{{ claim.raisedBy ?? '—' }}</td>
+                        <td>{{ claim.approvedBy ?? '—' }}</td>
+                        <td>{{ claim.requestedAmount | number: '1.0-2' }}</td>
+                        <td>{{ (claim.requestedAmount - (claim.approvedAmount ?? 0)) | number: '1.0-2' }}</td>
+                        <td>{{ (claim.approvedAmount ?? 0) | number: '1.0-2' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+              <div class="ip-billing-summary-row">
+                <span>Net Payments</span>
+                <strong>{{ netInsurancePayments() | number: '1.0-2' }}</strong>
+              </div>
+            }
+          </section>
+        }
+
+        <div class="ip-billing-balance-row hms-card-surface">
+          <span>Balance From Patient</span>
+          <strong>{{ balanceFromPatient() | number: '1.0-2' }}</strong>
+        </div>
 
         <!-- Discharge -->
         <section class="hms-card-surface ip-billing-section ip-discharge-section">
@@ -286,8 +348,14 @@
           @if (admission.status === 'ADMITTED') {
             <div class="ip-discharge-form">
               <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                <mat-label>Discharge Date &amp; Time</mat-label>
-                <input matInput type="datetime-local" [(ngModel)]="dischargeForm.dischargeDate" />
+                <mat-label>Discharge Date</mat-label>
+                <input matInput [matDatepicker]="dischargeDatePicker" [(ngModel)]="dischargeForm.dischargeDate" />
+                <mat-datepicker-toggle matIconSuffix [for]="dischargeDatePicker" />
+                <mat-datepicker #dischargeDatePicker />
+              </mat-form-field>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Discharge Time (optional)</mat-label>
+                <input matInput type="time" [(ngModel)]="dischargeForm.dischargeTime" />
               </mat-form-field>
               <mat-form-field appearance="outline" subscriptSizing="dynamic">
                 <mat-label>Discharge Type</mat-label>
@@ -330,7 +398,16 @@
         } @else {
           <div class="ip-billing-avatar ip-billing-avatar-placeholder" aria-hidden="true">{{ initials() }}</div>
         }
-        <div class="ip-billing-patient-name">{{ admission.patientName }}</div>
+        @if (admission.admissionNumber) {
+          <app-barcode [value]="admission.admissionNumber" class="ip-billing-barcode" />
+        }
+        <div class="ip-billing-patient-name">
+          {{ admission.patientName }}
+          <button mat-button type="button" class="ip-billing-edit-link" (click)="editAdmission()">
+            <mat-icon aria-hidden="true">edit</mat-icon>
+            Edit
+          </button>
+        </div>
         <div class="ip-billing-meta">{{ admission.patientGender }} / {{ admission.maritalStatus ?? '—' }}</div>
         <div class="ip-billing-meta">UHID: {{ admission.patientUhid ?? '—' }}</div>
         <div class="ip-billing-meta">Inpatient ID: <strong>{{ admission.admissionNumber }}</strong></div>

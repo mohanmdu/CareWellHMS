@@ -1,5 +1,8 @@
 <div class="hms-page">
-  <app-page-header title="Inpatient Admission Advice" subtitle="Register a new IP admission for the selected patient." />
+  <app-page-header
+    title="Inpatient Admission Details"
+    [subtitle]="isEditMode ? 'Review or correct this admission\'s intake details.' : 'Register a new IP admission for the selected patient.'"
+  />
 
   @if (loading()) {
     <mat-progress-bar mode="indeterminate" />
@@ -201,7 +204,9 @@
         </div>
 
         <div class="admission-submit-row">
-          <button mat-flat-button color="primary" type="submit" [disabled]="submitting() || !isRelationMobileValid">Create</button>
+          <button mat-flat-button color="primary" type="submit" [disabled]="submitting() || !isRelationMobileValid">
+            {{ isEditMode ? 'Save' : 'Create' }}
+          </button>
         </div>
       </form>
     </section>

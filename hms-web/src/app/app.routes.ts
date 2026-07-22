@@ -599,6 +599,13 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'ip/admissions/:id/edit',
+        loadComponent: () =>
+          import('./features/ip-admission/admissions/admission-registration-form.component').then(
+            (m) => m.AdmissionRegistrationFormComponent
+          )
+      },
+      {
         path: 'ip/admissions/:id/admit',
         loadComponent: () =>
           import('./features/ip-admission/admissions/admission-ward-allocation.component').then(
@@ -636,6 +643,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/ip-admission/ip-billing/ip-billing-workspace.component').then(
             (m) => m.IpBillingWorkspaceComponent
+          )
+      },
+      {
+        path: 'ip/admissions/:id/payments/:paymentId/receipt',
+        loadComponent: () =>
+          import('./features/ip-admission/ip-billing/ip-payment-receipt.component').then(
+            (m) => m.IpPaymentReceiptComponent
           )
       },
       {

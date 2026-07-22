@@ -56,6 +56,11 @@ public class AdmissionController {
         return service.admitRegistered(id, dto);
     }
 
+    @PutMapping("/{id}")
+    public AdmissionDto updateIntake(@PathVariable Long id, @Valid @RequestBody AdmissionDto dto) {
+        return service.updateIntake(id, dto);
+    }
+
     @PatchMapping("/{id}/advance-payment")
     public AdmissionDto addAdvancePayment(@PathVariable Long id, @RequestBody Map<String, Double> body) {
         return service.addAdvancePayment(id, body.getOrDefault("amount", 0.0));

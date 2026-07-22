@@ -2,6 +2,7 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -18,6 +19,9 @@ import { IpBillingCategory } from '../../masters-admin/ip-billing-categories/ip-
 import { IpBillingCategoryService } from '../../masters-admin/ip-billing-categories/ip-billing-category.service';
 import { IpBillingComponent as IpBillingComponentMaster } from '../../masters-admin/ip-billing-components/ip-billing-component.model';
 import { IpBillingComponentService } from '../../masters-admin/ip-billing-components/ip-billing-component.service';
+import { BarcodeComponent } from '../../../shared/ui/barcode/barcode.component';
+import { PreAuthorizationRequest } from '../../insurance/pre-authorization/pre-authorization-request.model';
+import { PreAuthorizationRequestService } from '../../insurance/pre-authorization/pre-authorization-request.service';
 import { Admission, DISCHARGE_TYPE_OPTIONS } from '../admissions/admission.model';
 import { AdmissionService } from '../admissions/admission.service';
 import { IpBillingLedger, IpBillingLedgerRow, IpBillingLineItem, IpPayment } from './ip-billing.model';
@@ -52,12 +56,14 @@ const UNIT_OPTIONS = ['Each', 'Day', 'Hour', 'Session'];
     DatePipe,
     DecimalPipe,
     FormsModule,
+    MatDatepickerModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressBarModule
+    MatProgressBarModule,
+    BarcodeComponent
   ],
   templateUrl: './ip-billing-workspace.component.html',
   styleUrl: './ip-billing-workspace.component.scss'
@@ -70,6 +76,7 @@ export class IpBillingWorkspaceComponent {
   private readonly categoryService = inject(IpBillingCategoryService);
   private readonly componentService = inject(IpBillingComponentService);
   private readonly consultantService = inject(ConsultantService);
+  private readonly preAuthorizationRequestService = inject(PreAuthorizationRequestService);
   private readonly notification = inject(NotificationService);
   private readonly promptDialog = inject(PromptDialogService);
   private readonly confirmDialog = inject(ConfirmDialogService);
@@ -78,8 +85,9 @@ export class IpBillingWorkspaceComponent {
   readonly dischargeTypeOptions = DISCHARGE_TYPE_OPTIONS;
   private readonly admissionId = Number(this.route.snapshot.paramMap.get('id'));
 
-  dischargeForm = {
-    dischargeDate: '',
+  dischargeForm: { dischargeDate: Date | null; dischargeTime: string; dischargeType: string } = {
+    dischargeDate: null,
+    dischargeTime: '',
     dischargeType: DISCHARGE_TYPE_OPTIONS[0]
   };
   initiatingDischarge = signal(false);
@@ -88,6 +96,7 @@ export class IpBillingWorkspaceComponent {
   admission = signal<Admission | null>(null);
   ledger = signal<IpBillingLedger | null>(null);
   payments = signal<IpPayment[]>([]);
+  insuranceClaims = signal<PreAuthorizationRequest[]>([]);
   categories = signal<IpBillingCategory[]>([]);
   components = signal<IpBillingComponentMaster[]>([]);
   consultants = signal<Consultant[]>([]);
@@ -118,6 +127,18 @@ export class IpBillingWorkspaceComponent {
     return Math.max((admission.advanceAmount ?? 0) - ledger.netTotal, 0);
   });
 
+  netAmountPaidByPatient = computed(() => this.payments().reduce((sum, p) => sum + p.netAmount, 0));
+
+  netInsurancePayments = computed(() => this.insuranceClaims().reduce((sum, c) => sum + (c.approvedAmount ?? 0), 0));
+
+  balanceFromPatient = computed(() => {
+    const ledger = this.ledger();
+    if (!ledger) {
+      return 0;
+    }
+    return ledger.netTotal - this.netAmountPaidByPatient() - this.netInsurancePayments();
+  });
+
   constructor() {
     this.refreshAll();
     this.categoryService.list().subscribe({ next: (categories) => this.categories.set(categories) });
@@ -142,11 +163,13 @@ export class IpBillingWorkspaceComponent {
   private refreshLedgerAndPayments(): void {
     forkJoin({
       ledger: this.billingService.getLedger(this.admissionId),
-      payments: this.billingService.listPayments(this.admissionId)
+      payments: this.billingService.listPayments(this.admissionId),
+      insuranceClaims: this.preAuthorizationRequestService.getByAdmission(this.admissionId)
     }).subscribe({
-      next: ({ ledger, payments }) => {
+      next: ({ ledger, payments, insuranceClaims }) => {
         this.ledger.set(ledger);
         this.payments.set(payments);
+        this.insuranceClaims.set(insuranceClaims);
         this.loading.set(false);
       },
       error: () => {
@@ -254,7 +277,8 @@ export class IpBillingWorkspaceComponent {
           { key: 'quantity', label: 'Quantity', type: 'number', required: true, min: 1, initialValue: item.quantity },
           { key: 'unitAmount', label: 'Rate', type: 'number', required: true, min: 0, initialValue: item.unitAmount },
           { key: 'discountAmount', label: 'Discount', type: 'number', min: 0, initialValue: item.discountAmount },
-          { key: 'discountReason', label: 'Discount Reason', type: 'text', initialValue: item.discountReason ?? '' }
+          { key: 'discountReason', label: 'Discount Reason', type: 'text', initialValue: item.discountReason ?? '' },
+          { key: 'refundAmount', label: 'Refund Amount', type: 'number', min: 0, initialValue: item.refundAmount }
         ],
         confirmLabel: 'Save'
       })
@@ -267,7 +291,8 @@ export class IpBillingWorkspaceComponent {
             quantity: values['quantity'] as number,
             unitAmount: values['unitAmount'] as number,
             discountAmount: values['discountAmount'] as number,
-            discountReason: values['discountReason'] as string
+            discountReason: values['discountReason'] as string,
+            refundAmount: values['refundAmount'] as number
           })
           .subscribe({
             next: () => {
@@ -304,6 +329,10 @@ export class IpBillingWorkspaceComponent {
       });
   }
 
+  viewPaymentReceipt(payment: IpPayment): void {
+    this.router.navigate(['/ip/admissions', this.admissionId, 'payments', payment.id, 'receipt']);
+  }
+
   amountReceived(): void {
     const admission = this.admission();
     if (!admission || admission.id === null) {
@@ -312,14 +341,36 @@ export class IpBillingWorkspaceComponent {
     this.router.navigate(['/ip/admissions', admission.id, 'payment-request']);
   }
 
+  editAdmission(): void {
+    const admission = this.admission();
+    if (!admission || admission.id === null) {
+      return;
+    }
+    this.router.navigate(['/ip/admissions', admission.id, 'edit']);
+  }
+
+  private buildDischargeDateTime(): string | null {
+    const date = this.dischargeForm.dischargeDate;
+    if (!date) {
+      return null;
+    }
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    const now = new Date();
+    const time = this.dischargeForm.dischargeTime || `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    return `${y}-${m}-${d}T${time}`;
+  }
+
   initiateDischarge(): void {
     const admission = this.admission();
-    if (!admission || admission.id === null || !this.dischargeForm.dischargeDate || this.initiatingDischarge()) {
+    const dischargeDateTime = this.buildDischargeDateTime();
+    if (!admission || admission.id === null || !dischargeDateTime || this.initiatingDischarge()) {
       return;
     }
     this.initiatingDischarge.set(true);
     this.admissionService
-      .initiateDischarge(admission.id, this.dischargeForm.dischargeDate, this.dischargeForm.dischargeType)
+      .initiateDischarge(admission.id, dischargeDateTime, this.dischargeForm.dischargeType)
       .subscribe({
         next: () => {
           this.initiatingDischarge.set(false);

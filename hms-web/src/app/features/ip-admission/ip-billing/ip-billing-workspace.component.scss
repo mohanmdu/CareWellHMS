@@ -123,6 +123,31 @@
   color: var(--hms-color-text-muted);
 }
 
+.ip-billing-invoice-link {
+  color: var(--hms-color-primary, #1565c0);
+  min-width: 0;
+  padding: 0;
+}
+
+.ip-billing-summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--hms-space-3);
+  padding-top: var(--hms-space-2);
+  border-top: 1px solid var(--hms-color-border, #e0e0e0);
+  font-size: var(--hms-font-size-md);
+}
+
+.ip-billing-balance-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--hms-space-3) var(--hms-space-5);
+  font-size: var(--hms-font-size-lg);
+  font-weight: 700;
+  color: var(--hms-color-primary, #1565c0);
+}
+
 .ip-discharge-form {
   display: flex;
   flex-wrap: wrap;
@@ -179,10 +204,37 @@
   font-weight: 700;
 }
 
+.ip-billing-barcode {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--hms-space-2);
+
+  canvas {
+    max-width: 100%;
+  }
+}
+
 .ip-billing-patient-name {
   font-weight: 700;
   color: var(--hms-color-primary, #1565c0);
   margin-bottom: var(--hms-space-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.ip-billing-edit-link {
+  min-width: 0;
+  padding: 0 4px;
+  font-size: var(--hms-font-size-sm);
+  font-weight: 400;
+
+  mat-icon {
+    font-size: 16px;
+    height: 16px;
+    width: 16px;
+  }
 }
 
 .ip-billing-meta {

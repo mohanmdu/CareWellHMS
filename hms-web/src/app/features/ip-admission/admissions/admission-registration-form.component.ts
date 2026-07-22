@@ -13,7 +13,7 @@ import { Patient } from '../../registration/patients/patient.model';
 import { PatientService } from '../../registration/patients/patient.service';
 import { RoomType } from '../rooms/room-type.model';
 import { RoomTypeService } from '../rooms/room-type.service';
-import { AdmissionPaymentType, AdmissionRegistrationInput } from './admission.model';
+import { Admission, AdmissionPaymentType, AdmissionRegistrationInput } from './admission.model';
 import { AdmissionService } from './admission.service';
 
 const MARITAL_STATUS_OPTIONS = ['Single', 'Married', 'Divorced', 'Widowed'];
@@ -36,6 +36,42 @@ function nowAsDatetimeLocal(): string {
   const now = new Date();
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+}
+
+/** ISO instant/local-datetime string -> datetime-local input value (truncates seconds/timezone). */
+function toDatetimeLocal(value: string | null): string {
+  return value ? value.slice(0, 16) : nowAsDatetimeLocal();
+}
+
+function toFormFromAdmission(admission: Admission): Omit<AdmissionRegistrationInput, 'patientId'> {
+  return {
+    admissionDate: toDatetimeLocal(admission.admissionDate),
+    roomTypeId: admission.roomTypeId,
+    attenderName: admission.attenderName,
+    relationType: admission.relationType,
+    fatherSpouseName: admission.fatherSpouseName,
+    relationMobileNo: admission.relationMobileNo,
+    occupation: admission.occupation,
+    maritalStatus: admission.maritalStatus,
+    periodOfStayDays: admission.periodOfStayDays,
+    descriptionOfCase: admission.descriptionOfCase ?? 'Non-Surgery',
+    referralDoctor: admission.referralDoctor,
+    primaryConsultant: admission.primaryConsultant,
+    secondaryConsultant: admission.secondaryConsultant,
+    paymentType: admission.paymentType ?? 'CASH',
+    heightCm: admission.heightCm,
+    weightKg: admission.weightKg,
+    mlc: admission.mlc,
+    insuranceType: admission.insuranceType ?? 'None',
+    corporateName: admission.corporateName,
+    tpaName: admission.tpaName,
+    insuranceCompany: admission.insuranceCompany,
+    patientType: admission.patientType ?? 'Normal',
+    remarks: admission.remarks,
+    aadhaarNumber: admission.aadhaarNumber,
+    ventilatorRequired: admission.ventilatorRequired,
+    monitorRequired: admission.monitorRequired
+  };
 }
 
 const EMPTY_FORM: Omit<AdmissionRegistrationInput, 'patientId'> = {
@@ -117,18 +153,45 @@ export class AdmissionRegistrationFormComponent {
     return this.form.insuranceType === 'Private TPA' || this.form.insuranceType === 'Govt Insurance';
   }
 
+  private readonly editingAdmissionId = this.route.snapshot.paramMap.has('id')
+    ? Number(this.route.snapshot.paramMap.get('id'))
+    : null;
+  readonly isEditMode = this.editingAdmissionId !== null;
+
   constructor() {
-    const patientId = Number(this.route.snapshot.paramMap.get('patientId'));
-    this.patientService.get(patientId).subscribe({
-      next: (patient) => {
-        this.patient.set(patient);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.loading.set(false);
-        this.notification.error('Failed to load patient details.');
-      }
-    });
+    if (this.editingAdmissionId !== null) {
+      this.admissionService.get(this.editingAdmissionId).subscribe({
+        next: (admission) => {
+          this.form = toFormFromAdmission(admission);
+          this.patientService.get(admission.patientId).subscribe({
+            next: (patient) => {
+              this.patient.set(patient);
+              this.loading.set(false);
+            },
+            error: () => {
+              this.loading.set(false);
+              this.notification.error('Failed to load patient details.');
+            }
+          });
+        },
+        error: () => {
+          this.loading.set(false);
+          this.notification.error('Failed to load the admission.');
+        }
+      });
+    } else {
+      const patientId = Number(this.route.snapshot.paramMap.get('patientId'));
+      this.patientService.get(patientId).subscribe({
+        next: (patient) => {
+          this.patient.set(patient);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.loading.set(false);
+          this.notification.error('Failed to load patient details.');
+        }
+      });
+    }
     this.roomTypeService.list().subscribe({ next: (types) => this.roomTypes.set(types) });
   }
 
@@ -158,6 +221,20 @@ export class AdmissionRegistrationFormComponent {
       return;
     }
     this.submitting.set(true);
+    if (this.editingAdmissionId !== null) {
+      this.admissionService.updateIntake(this.editingAdmissionId, { patientId: patient.id, ...this.form }).subscribe({
+        next: (admission) => {
+          this.submitting.set(false);
+          this.notification.success('Inpatient Admission Details updated.');
+          this.router.navigate(['/ip/admissions', admission.id, 'billing']);
+        },
+        error: (err) => {
+          this.submitting.set(false);
+          this.notification.error(err.error?.message ?? 'Failed to update the admission.');
+        }
+      });
+      return;
+    }
     this.admissionService.register({ patientId: patient.id, ...this.form }).subscribe({
       next: (admission) => {
         if (!this.photoFile || admission.id === null) {

@@ -13,6 +13,9 @@ public interface PreAuthorizationRequestRepository extends JpaRepository<PreAuth
 
     List<PreAuthorizationRequest> findAllByOrderByIdDesc();
 
+    // Backs the "Insurance Claim Bills" section on the IP Billing workspace.
+    List<PreAuthorizationRequest> findByAdmissionIdOrderByIdDesc(Long admissionId);
+
     // Backs the Insurance Claim Report - scoped to APPROVED requests only
     // (a "claim" only exists once a Pre-Authorization is actually approved),
     // filtered by an optional decidedAt range, insurer, and patient UHID.
