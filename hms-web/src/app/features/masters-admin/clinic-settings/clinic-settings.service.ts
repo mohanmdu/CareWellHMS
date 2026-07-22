@@ -22,6 +22,13 @@ export type ClinicSettingsInput = Pick<
   | 'socialInstagramUrl'
   | 'socialYoutubeUrl'
   | 'whatsappNumber'
+  | 'themeMode'
+  | 'themeTertiaryColor'
+  | 'fontFamily'
+  | 'cornerRadiusStyle'
+  | 'headerBackgroundColor'
+  | 'footerBackgroundColor'
+  | 'footerText'
 >;
 
 /**

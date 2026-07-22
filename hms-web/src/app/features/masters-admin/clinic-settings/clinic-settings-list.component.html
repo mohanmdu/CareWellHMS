@@ -73,14 +73,63 @@
           <input #faviconInput type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="onFaviconSelected($event)" />
         </div>
 
+        <h2 class="clinic-settings-section-title">Theme &amp; Appearance</h2>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Theme mode</mat-label>
+          <mat-select name="themeMode" [(ngModel)]="form.themeMode" (selectionChange)="previewTheme()">
+            @for (option of themeModeOptions; track option.value) {
+              <mat-option [value]="option.value">{{ option.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Theme primary color</mat-label>
-          <input matInput type="color" name="themePrimaryColor" [(ngModel)]="form.themePrimaryColor" />
+          <input matInput type="color" name="themePrimaryColor" [(ngModel)]="form.themePrimaryColor" (change)="previewTheme()" />
         </mat-form-field>
 
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Theme secondary color</mat-label>
-          <input matInput type="color" name="themeSecondaryColor" [(ngModel)]="form.themeSecondaryColor" />
+          <input matInput type="color" name="themeSecondaryColor" [(ngModel)]="form.themeSecondaryColor" (change)="previewTheme()" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Theme tertiary color</mat-label>
+          <input matInput type="color" name="themeTertiaryColor" [(ngModel)]="form.themeTertiaryColor" (change)="previewTheme()" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Font family</mat-label>
+          <mat-select name="fontFamily" [(ngModel)]="form.fontFamily" (selectionChange)="previewTheme()">
+            @for (option of fontFamilyOptions; track option.value) {
+              <mat-option [value]="option.value">{{ option.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Corner radius style</mat-label>
+          <mat-select name="cornerRadiusStyle" [(ngModel)]="form.cornerRadiusStyle" (selectionChange)="previewTheme()">
+            @for (option of cornerRadiusStyleOptions; track option.value) {
+              <mat-option [value]="option.value">{{ option.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Header background color</mat-label>
+          <input matInput type="color" name="headerBackgroundColor" [(ngModel)]="form.headerBackgroundColor" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Footer background color</mat-label>
+          <input matInput type="color" name="footerBackgroundColor" [(ngModel)]="form.footerBackgroundColor" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="clinic-address-field">
+          <mat-label>Footer text</mat-label>
+          <input matInput name="footerText" [(ngModel)]="form.footerText" placeholder="e.g. a copyright line shown on printed receipts" />
         </mat-form-field>
 
         <mat-form-field appearance="outline" subscriptSizing="dynamic">

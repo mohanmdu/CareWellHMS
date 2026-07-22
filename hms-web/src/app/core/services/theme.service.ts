@@ -1,0 +1,149 @@
+import { inject, Injectable } from '@angular/core';
+import { catchError, of } from 'rxjs';
+import { ClinicSettingsService } from '../../features/masters-admin/clinic-settings/clinic-settings.service';
+import { CornerRadiusStyle, ThemeMode } from '../../features/masters-admin/clinic-settings/clinic-settings.model';
+
+export interface ThemeSettings {
+  themePrimaryColor?: string | null;
+  themeSecondaryColor?: string | null;
+  themeTertiaryColor?: string | null;
+  fontFamily?: string | null;
+  cornerRadiusStyle?: CornerRadiusStyle;
+  themeMode?: ThemeMode;
+}
+
+/**
+ * Angular Material's M3 theme (see styles/_theme.scss) doesn't expose one
+ * small "--mat-sys-*" token layer in this Material version - it emits a
+ * fully-resolved hex value per component sub-property instead. These are
+ * every --mat- and --mdc- prefixed custom property confirmed (via the compiled
+ * production CSS) to hold the theme's resolved primary color - overriding
+ * all of them is how the brand color actually reaches Material chrome
+ * (buttons, checkboxes, radios, switches, tabs, sliders, text fields,
+ * stepper, datepicker) without a rebuild. This list only covers the
+ * *interactive primary* role - error/disabled/neutral colors are
+ * deliberately left alone.
+ */
+const MATERIAL_PRIMARY_VARS: readonly string[] = [
+  '--mat-datepicker-calendar-date-preview-state-outline-color',
+  '--mat-datepicker-calendar-date-selected-state-background-color',
+  '--mat-datepicker-calendar-date-today-outline-color',
+  '--mat-datepicker-calendar-date-today-selected-state-outline-color',
+  '--mat-form-field-focus-select-arrow-color',
+  '--mat-full-pseudo-checkbox-selected-icon-color',
+  '--mat-minimal-pseudo-checkbox-selected-checkmark-color',
+  '--mat-outlined-button-state-layer-color',
+  '--mat-protected-button-state-layer-color',
+  '--mat-radio-checked-ripple-color',
+  '--mat-select-focused-arrow-color',
+  '--mat-slider-ripple-color',
+  '--mat-stepper-header-edit-state-icon-background-color',
+  '--mat-stepper-header-selected-state-icon-background-color',
+  '--mat-tab-header-active-focus-indicator-color',
+  '--mat-tab-header-active-hover-indicator-color',
+  '--mat-text-button-state-layer-color',
+  '--mdc-checkbox-selected-focus-icon-color',
+  '--mdc-checkbox-selected-focus-state-layer-color',
+  '--mdc-checkbox-selected-hover-icon-color',
+  '--mdc-checkbox-selected-hover-state-layer-color',
+  '--mdc-checkbox-selected-icon-color',
+  '--mdc-checkbox-selected-pressed-icon-color',
+  '--mdc-checkbox-unselected-pressed-state-layer-color',
+  '--mdc-circular-progress-active-indicator-color',
+  '--mdc-filled-button-container-color',
+  '--mdc-filled-text-field-caret-color',
+  '--mdc-filled-text-field-focus-active-indicator-color',
+  '--mdc-filled-text-field-focus-label-text-color',
+  '--mdc-linear-progress-active-indicator-color',
+  '--mdc-list-list-item-selected-trailing-icon-color',
+  '--mdc-outlined-button-label-text-color',
+  '--mdc-outlined-text-field-caret-color',
+  '--mdc-outlined-text-field-focus-label-text-color',
+  '--mdc-outlined-text-field-focus-outline-color',
+  '--mdc-protected-button-label-text-color',
+  '--mdc-radio-selected-focus-icon-color',
+  '--mdc-radio-selected-hover-icon-color',
+  '--mdc-radio-selected-icon-color',
+  '--mdc-radio-selected-pressed-icon-color',
+  '--mdc-slider-active-track-color',
+  '--mdc-slider-focus-handle-color',
+  '--mdc-slider-handle-color',
+  '--mdc-slider-hover-handle-color',
+  '--mdc-slider-label-container-color',
+  '--mdc-switch-selected-focus-state-layer-color',
+  '--mdc-switch-selected-focus-track-color',
+  '--mdc-switch-selected-hover-state-layer-color',
+  '--mdc-switch-selected-hover-track-color',
+  '--mdc-switch-selected-pressed-state-layer-color',
+  '--mdc-switch-selected-pressed-track-color',
+  '--mdc-switch-selected-track-color',
+  '--mdc-tab-indicator-active-indicator-color',
+  '--mdc-text-button-label-text-color'
+];
+
+const CORNER_RADIUS_MAP: Record<CornerRadiusStyle, { sm: string; md: string; lg: string }> = {
+  SQUARE: { sm: '2px', md: '2px', lg: '4px' },
+  ROUNDED: { sm: '4px', md: '8px', lg: '12px' },
+  PILL: { sm: '999px', md: '999px', lg: '999px' }
+};
+
+@Injectable({ providedIn: 'root' })
+export class ThemeService {
+  private readonly clinicSettingsService = inject(ClinicSettingsService);
+
+  /** Called once from APP_INITIALIZER, before the shell renders - never blocks bootstrap on failure. */
+  loadInitialTheme(): Promise<void> {
+    return new Promise((resolve) => {
+      this.clinicSettingsService
+        .get()
+        .pipe(catchError(() => of(null)))
+        .subscribe((settings) => {
+          if (settings) {
+            this.applyTheme(settings);
+          }
+          resolve();
+        });
+    });
+  }
+
+  applyTheme(settings: ThemeSettings): void {
+    const root = document.documentElement.style;
+
+    if (settings.themePrimaryColor) {
+      root.setProperty('--hms-color-primary', settings.themePrimaryColor);
+      root.setProperty('--hms-color-info', settings.themePrimaryColor);
+      for (const cssVar of MATERIAL_PRIMARY_VARS) {
+        root.setProperty(cssVar, settings.themePrimaryColor);
+      }
+    }
+    if (settings.themeTertiaryColor) {
+      root.setProperty('--hms-color-tertiary', settings.themeTertiaryColor);
+    }
+    if (settings.fontFamily) {
+      root.setProperty('--hms-font-family', settings.fontFamily);
+    }
+
+    const radii = CORNER_RADIUS_MAP[settings.cornerRadiusStyle ?? 'ROUNDED'];
+    root.setProperty('--hms-radius-sm', radii.sm);
+    root.setProperty('--hms-radius-md', radii.md);
+    root.setProperty('--hms-radius-lg', radii.lg);
+
+    this.applyThemeMode(settings.themeMode);
+  }
+
+  private applyThemeMode(mode: ThemeMode | undefined): void {
+    const root = document.documentElement;
+    switch (mode) {
+      case 'DARK':
+        root.dataset['theme'] = 'dark';
+        break;
+      case 'LIGHT':
+      case 'CUSTOM':
+        root.dataset['theme'] = 'light';
+        break;
+      case 'AUTO':
+      default:
+        delete root.dataset['theme'];
+    }
+  }
+}

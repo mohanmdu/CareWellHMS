@@ -5,9 +5,18 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { NotificationService } from '../../../shared/services/notification.service';
 import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
+import { ThemeService } from '../../../core/services/theme.service';
+import {
+  CORNER_RADIUS_STYLE_OPTIONS,
+  CornerRadiusStyle,
+  FONT_FAMILY_OPTIONS,
+  THEME_MODE_OPTIONS,
+  ThemeMode
+} from './clinic-settings.model';
 import { ClinicSettingsService } from './clinic-settings.service';
 
 @Component({
@@ -20,6 +29,7 @@ import { ClinicSettingsService } from './clinic-settings.service';
     MatInputModule,
     MatIconModule,
     MatProgressBarModule,
+    MatSelectModule,
     MatSlideToggleModule,
     PageHeaderComponent
   ],
@@ -29,6 +39,11 @@ import { ClinicSettingsService } from './clinic-settings.service';
 export class ClinicSettingsListComponent {
   private readonly service = inject(ClinicSettingsService);
   private readonly notification = inject(NotificationService);
+  private readonly themeService = inject(ThemeService);
+
+  readonly themeModeOptions = THEME_MODE_OPTIONS;
+  readonly cornerRadiusStyleOptions = CORNER_RADIUS_STYLE_OPTIONS;
+  readonly fontFamilyOptions = FONT_FAMILY_OPTIONS;
 
   loading = signal(true);
   saving = signal(false);
@@ -53,7 +68,14 @@ export class ClinicSettingsListComponent {
     socialFacebookUrl: '',
     socialInstagramUrl: '',
     socialYoutubeUrl: '',
-    whatsappNumber: ''
+    whatsappNumber: '',
+    themeMode: 'LIGHT' as ThemeMode,
+    themeTertiaryColor: '',
+    fontFamily: '',
+    cornerRadiusStyle: 'ROUNDED' as CornerRadiusStyle,
+    headerBackgroundColor: '',
+    footerBackgroundColor: '',
+    footerText: ''
   };
 
   constructor() {
@@ -75,7 +97,14 @@ export class ClinicSettingsListComponent {
           socialFacebookUrl: settings.socialFacebookUrl ?? '',
           socialInstagramUrl: settings.socialInstagramUrl ?? '',
           socialYoutubeUrl: settings.socialYoutubeUrl ?? '',
-          whatsappNumber: settings.whatsappNumber ?? ''
+          whatsappNumber: settings.whatsappNumber ?? '',
+          themeMode: settings.themeMode,
+          themeTertiaryColor: settings.themeTertiaryColor ?? '',
+          fontFamily: settings.fontFamily ?? '',
+          cornerRadiusStyle: settings.cornerRadiusStyle,
+          headerBackgroundColor: settings.headerBackgroundColor ?? '',
+          footerBackgroundColor: settings.footerBackgroundColor ?? '',
+          footerText: settings.footerText ?? ''
         };
         this.logoUrl.set(settings.logoUrl);
         this.faviconUrl.set(settings.faviconUrl);
@@ -154,17 +183,37 @@ export class ClinicSettingsListComponent {
         socialFacebookUrl: this.form.socialFacebookUrl.trim() || null,
         socialInstagramUrl: this.form.socialInstagramUrl.trim() || null,
         socialYoutubeUrl: this.form.socialYoutubeUrl.trim() || null,
-        whatsappNumber: this.form.whatsappNumber.trim() || null
+        whatsappNumber: this.form.whatsappNumber.trim() || null,
+        themeMode: this.form.themeMode,
+        themeTertiaryColor: this.form.themeTertiaryColor.trim() || null,
+        fontFamily: this.form.fontFamily.trim() || null,
+        cornerRadiusStyle: this.form.cornerRadiusStyle,
+        headerBackgroundColor: this.form.headerBackgroundColor.trim() || null,
+        footerBackgroundColor: this.form.footerBackgroundColor.trim() || null,
+        footerText: this.form.footerText.trim() || null
       })
       .subscribe({
-        next: () => {
+        next: (settings) => {
           this.saving.set(false);
           this.notification.success('Clinic settings saved.');
+          this.themeService.applyTheme(settings);
         },
         error: () => {
           this.saving.set(false);
           this.notification.error('Failed to save clinic settings.');
         }
       });
+  }
+
+  /** Live preview - applies the in-progress form values immediately, without waiting for Save. */
+  previewTheme(): void {
+    this.themeService.applyTheme({
+      themePrimaryColor: this.form.themePrimaryColor || null,
+      themeSecondaryColor: this.form.themeSecondaryColor || null,
+      themeTertiaryColor: this.form.themeTertiaryColor || null,
+      fontFamily: this.form.fontFamily || null,
+      cornerRadiusStyle: this.form.cornerRadiusStyle,
+      themeMode: this.form.themeMode
+    });
   }
 }

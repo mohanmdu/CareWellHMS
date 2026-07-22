@@ -2,6 +2,8 @@ package com.pms.settings.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -77,4 +79,27 @@ public class ClinicSettings {
 
     @Column(name = "whatsapp_number", length = 20)
     private String whatsappNumber;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "theme_mode", nullable = false, length = 16)
+    private ThemeMode themeMode = ThemeMode.LIGHT;
+
+    @Column(name = "theme_tertiary_color", length = 9)
+    private String themeTertiaryColor;
+
+    @Column(name = "font_family", length = 120)
+    private String fontFamily;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "corner_radius_style", nullable = false, length = 16)
+    private CornerRadiusStyle cornerRadiusStyle = CornerRadiusStyle.ROUNDED;
+
+    @Column(name = "header_background_color", length = 9)
+    private String headerBackgroundColor;
+
+    @Column(name = "footer_background_color", length = 9)
+    private String footerBackgroundColor;
+
+    @Column(name = "footer_text", length = 500)
+    private String footerText;
 }

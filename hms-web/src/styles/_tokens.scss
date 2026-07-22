@@ -5,8 +5,12 @@
 // brand hues so Material chrome and hand-built components stay visually
 // consistent.
 
+// ---- Color tokens (light default, dark overrides below) ----------------
+// Redefined at the token level only (never inside a component's own SCSS)
+// so overrides always win regardless of load order. ThemeService overrides
+// --hms-color-primary/-tertiary at runtime on top of whichever branch below
+// is active, per-deployment (see ClinicSettings.themeMode).
 :root {
-  // ---- Brand color ---------------------------------------------------
   --hms-color-primary: #0b5fa6;
   --hms-color-primary-hover: #094c85;
   --hms-color-primary-container: #e3eefb;
@@ -16,7 +20,6 @@
   --hms-color-tertiary-container: #dcf3ef;
   --hms-color-on-tertiary-container: #0a5950;
 
-  // ---- Semantic status color ------------------------------------------
   --hms-color-success: #1e8e3e;
   --hms-color-success-container: #e6f4ea;
   --hms-color-on-success-container: #0f5223;
@@ -32,7 +35,6 @@
   --hms-color-info: #0b5fa6;
   --hms-color-info-container: #e3eefb;
 
-  // ---- Neutrals --------------------------------------------------------
   --hms-color-surface: #ffffff;
   --hms-color-surface-alt: #f6f8fa;
   --hms-color-surface-sunken: #eef1f4;
@@ -42,7 +44,125 @@
   --hms-color-text-muted: #5b6673;
   --hms-color-text-disabled: #97a1ac;
   --hms-color-on-primary: #ffffff;
+}
 
+// AUTO mode (ClinicSettings.themeMode, no explicit data-theme set): follow
+// the OS/browser preference. LIGHT/DARK/CUSTOM force one branch via
+// [data-theme] instead (see the overrides after this block), which always
+// wins since it's a more specific selector evaluated after the media query.
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --hms-color-primary: #6fa8dc;
+    --hms-color-primary-hover: #8cbce6;
+    --hms-color-primary-container: #123a5c;
+    --hms-color-on-primary-container: #cfe4f7;
+
+    --hms-color-tertiary: #4fbfae;
+    --hms-color-tertiary-container: #0f3d37;
+    --hms-color-on-tertiary-container: #b8ece3;
+
+    --hms-color-success: #6cc98a;
+    --hms-color-success-container: #123821;
+    --hms-color-on-success-container: #bfe8cd;
+
+    --hms-color-warning: #e0a94f;
+    --hms-color-warning-container: #402e0f;
+    --hms-color-on-warning-container: #f5d9ac;
+
+    --hms-color-danger: #e5726f;
+    --hms-color-danger-container: #401615;
+    --hms-color-on-danger-container: #f6c6c4;
+
+    --hms-color-info: #6fa8dc;
+    --hms-color-info-container: #123a5c;
+
+    --hms-color-surface: #16181d;
+    --hms-color-surface-alt: #1d2027;
+    --hms-color-surface-sunken: #101317;
+    --hms-color-border: #2c313a;
+    --hms-color-border-strong: #3c434e;
+    --hms-color-text: #e7e9ec;
+    --hms-color-text-muted: #a1a9b4;
+    --hms-color-text-disabled: #6a7178;
+    --hms-color-on-primary: #06263f;
+  }
+}
+
+// Explicit LIGHT/DARK/CUSTOM (ClinicSettings.themeMode via ThemeService) -
+// wins in both directions regardless of the OS preference above.
+:root[data-theme='dark'] {
+  --hms-color-primary: #6fa8dc;
+  --hms-color-primary-hover: #8cbce6;
+  --hms-color-primary-container: #123a5c;
+  --hms-color-on-primary-container: #cfe4f7;
+
+  --hms-color-tertiary: #4fbfae;
+  --hms-color-tertiary-container: #0f3d37;
+  --hms-color-on-tertiary-container: #b8ece3;
+
+  --hms-color-success: #6cc98a;
+  --hms-color-success-container: #123821;
+  --hms-color-on-success-container: #bfe8cd;
+
+  --hms-color-warning: #e0a94f;
+  --hms-color-warning-container: #402e0f;
+  --hms-color-on-warning-container: #f5d9ac;
+
+  --hms-color-danger: #e5726f;
+  --hms-color-danger-container: #401615;
+  --hms-color-on-danger-container: #f6c6c4;
+
+  --hms-color-info: #6fa8dc;
+  --hms-color-info-container: #123a5c;
+
+  --hms-color-surface: #16181d;
+  --hms-color-surface-alt: #1d2027;
+  --hms-color-surface-sunken: #101317;
+  --hms-color-border: #2c313a;
+  --hms-color-border-strong: #3c434e;
+  --hms-color-text: #e7e9ec;
+  --hms-color-text-muted: #a1a9b4;
+  --hms-color-text-disabled: #6a7178;
+  --hms-color-on-primary: #06263f;
+}
+
+:root[data-theme='light'] {
+  --hms-color-primary: #0b5fa6;
+  --hms-color-primary-hover: #094c85;
+  --hms-color-primary-container: #e3eefb;
+  --hms-color-on-primary-container: #063f6e;
+
+  --hms-color-tertiary: #0e8074;
+  --hms-color-tertiary-container: #dcf3ef;
+  --hms-color-on-tertiary-container: #0a5950;
+
+  --hms-color-success: #1e8e3e;
+  --hms-color-success-container: #e6f4ea;
+  --hms-color-on-success-container: #0f5223;
+
+  --hms-color-warning: #b26a00;
+  --hms-color-warning-container: #fef3e3;
+  --hms-color-on-warning-container: #6b3f00;
+
+  --hms-color-danger: #c5221f;
+  --hms-color-danger-container: #fbe7e6;
+  --hms-color-on-danger-container: #7a1512;
+
+  --hms-color-info: #0b5fa6;
+  --hms-color-info-container: #e3eefb;
+
+  --hms-color-surface: #ffffff;
+  --hms-color-surface-alt: #f6f8fa;
+  --hms-color-surface-sunken: #eef1f4;
+  --hms-color-border: #dde3ea;
+  --hms-color-border-strong: #c2cbd6;
+  --hms-color-text: #1b1f24;
+  --hms-color-text-muted: #5b6673;
+  --hms-color-text-disabled: #97a1ac;
+  --hms-color-on-primary: #ffffff;
+}
+
+:root {
   // ---- Typography --------------------------------------------------------
   --hms-font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
   --hms-font-size-xs: 0.75rem; // 12px

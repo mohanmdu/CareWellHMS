@@ -1,5 +1,7 @@
 package com.pms.settings.dto;
 
+import com.pms.settings.entity.CornerRadiusStyle;
+import com.pms.settings.entity.ThemeMode;
 import jakarta.validation.constraints.NotBlank;
 
 public record ClinicSettingsDto(
@@ -20,5 +22,12 @@ public record ClinicSettingsDto(
         String socialFacebookUrl,
         String socialInstagramUrl,
         String socialYoutubeUrl,
-        String whatsappNumber) {
+        String whatsappNumber,
+        ThemeMode themeMode,
+        String themeTertiaryColor,
+        String fontFamily,
+        CornerRadiusStyle cornerRadiusStyle,
+        String headerBackgroundColor,
+        String footerBackgroundColor,
+        String footerText) {
 }
