@@ -24,8 +24,9 @@ export interface NavGroup {
  * Three groups (Cashier Module, ICD Codes Module, Website CMS) don't appear
  * in that reference screenshot at all - they're placed at the most
  * defensible adjacent position (Cashier right after IP Admission, ICD right
- * after Discharge Summary, Website CMS near the end with other back-office
- * concerns) rather than guessed into an exact legacy slot. Five legacy
+ * after Discharge Summary, Website CMS as the very last group since it's a
+ * modern addition with no legacy equivalent) rather than guessed into an
+ * exact legacy slot. Five legacy
  * modules with no equivalent screen yet (Pharmacy MIS, CEO/MD Dashboard as
  * its own module, FAQ/How to use HMS, OP/IP Case Sheet) are intentionally
  * left out rather than stubbed - see moduleKey/package-config.ts for how
@@ -183,21 +184,6 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [{ label: 'Dashboard', route: '/dashboard', icon: 'dashboard' }]
   },
   {
-    label: 'Website CMS',
-    moduleKey: 'website-cms',
-    items: [
-      { label: 'Site Content', route: '/masters/cms/site-content', icon: 'article' },
-      { label: 'Banner Slides', route: '/masters/cms/banner-slides', icon: 'wallpaper' },
-      { label: 'Gallery', route: '/masters/cms/gallery-items', icon: 'photo_library' },
-      { label: 'News & Events', route: '/masters/cms/news-events', icon: 'campaign' },
-      { label: 'Testimonials', route: '/masters/cms/testimonials', icon: 'format_quote' },
-      { label: 'FAQs', route: '/masters/cms/faqs', icon: 'quiz' },
-      { label: 'Health Packages', route: '/masters/cms/health-packages', icon: 'medical_information' },
-      { label: 'Blog Posts', route: '/masters/cms/blog-posts', icon: 'article' },
-      { label: 'Career Openings', route: '/masters/cms/career-openings', icon: 'work' }
-    ]
-  },
-  {
     label: 'Masters',
     moduleKey: 'masters',
     items: [
@@ -216,6 +202,21 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: 'General Users', route: '/masters/general-users', icon: 'group' },
       { label: 'Master Audit Logs', route: '/masters/general-users/logs', icon: 'history' },
       { label: 'Clinic Settings', route: '/masters/clinic-settings', icon: 'settings' }
+    ]
+  },
+  {
+    label: 'Website CMS',
+    moduleKey: 'website-cms',
+    items: [
+      { label: 'Site Content', route: '/masters/cms/site-content', icon: 'article' },
+      { label: 'Banner Slides', route: '/masters/cms/banner-slides', icon: 'wallpaper' },
+      { label: 'Gallery', route: '/masters/cms/gallery-items', icon: 'photo_library' },
+      { label: 'News & Events', route: '/masters/cms/news-events', icon: 'campaign' },
+      { label: 'Testimonials', route: '/masters/cms/testimonials', icon: 'format_quote' },
+      { label: 'FAQs', route: '/masters/cms/faqs', icon: 'quiz' },
+      { label: 'Health Packages', route: '/masters/cms/health-packages', icon: 'medical_information' },
+      { label: 'Blog Posts', route: '/masters/cms/blog-posts', icon: 'article' },
+      { label: 'Career Openings', route: '/masters/cms/career-openings', icon: 'work' }
     ]
   }
 ];
