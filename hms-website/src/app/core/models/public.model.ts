@@ -1,3 +1,6 @@
+export type ThemeMode = 'LIGHT' | 'DARK' | 'CUSTOM' | 'AUTO';
+export type CornerRadiusStyle = 'SQUARE' | 'ROUNDED' | 'PILL';
+
 export interface PublicConfig {
   name: string;
   logoUrl: string | null;
@@ -15,6 +18,13 @@ export interface PublicConfig {
   phone: string | null;
   email: string | null;
   address: string | null;
+  themeMode: ThemeMode;
+  themeTertiaryColor: string | null;
+  fontFamily: string | null;
+  cornerRadiusStyle: CornerRadiusStyle;
+  headerBackgroundColor: string | null;
+  footerBackgroundColor: string | null;
+  footerText: string | null;
 }
 
 export interface PublicDepartment {

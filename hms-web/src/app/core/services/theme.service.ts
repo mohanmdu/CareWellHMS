@@ -10,6 +10,8 @@ export interface ThemeSettings {
   fontFamily?: string | null;
   cornerRadiusStyle?: CornerRadiusStyle;
   themeMode?: ThemeMode;
+  headerBackgroundColor?: string | null;
+  footerBackgroundColor?: string | null;
 }
 
 /**
@@ -121,6 +123,12 @@ export class ThemeService {
     }
     if (settings.fontFamily) {
       root.setProperty('--hms-font-family', settings.fontFamily);
+    }
+    if (settings.headerBackgroundColor) {
+      root.setProperty('--hms-header-bg', settings.headerBackgroundColor);
+    }
+    if (settings.footerBackgroundColor) {
+      root.setProperty('--hms-footer-bg', settings.footerBackgroundColor);
     }
 
     const radii = CORNER_RADIUS_MAP[settings.cornerRadiusStyle ?? 'ROUNDED'];

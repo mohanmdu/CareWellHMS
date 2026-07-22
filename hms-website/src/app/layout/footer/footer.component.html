@@ -44,6 +44,10 @@
   </div>
 
   <div class="container footer-bottom">
-    <p>&copy; {{ currentYear }} {{ config()?.name ?? 'Hospital' }}. All rights reserved.</p>
+    @if (config()?.footerText) {
+      <p>{{ config()?.footerText }}</p>
+    } @else {
+      <p>&copy; {{ currentYear }} {{ config()?.name ?? 'Hospital' }}. All rights reserved.</p>
+    }
   </div>
 </footer>

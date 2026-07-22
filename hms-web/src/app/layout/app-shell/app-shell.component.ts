@@ -9,8 +9,9 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { map } from 'rxjs';
+import { catchError, map, of } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
+import { ClinicSettingsService } from '../../features/masters-admin/clinic-settings/clinic-settings.service';
 import { getVisibleNavGroups } from '../package-config';
 
 /**
@@ -41,8 +42,20 @@ export class AppShellComponent {
   private readonly auth = inject(AuthService);
   private readonly breakpointObserver = inject(BreakpointObserver);
   private readonly router = inject(Router);
+  private readonly clinicSettingsService = inject(ClinicSettingsService);
 
   readonly navGroups = getVisibleNavGroups();
+
+  // Footer only renders when a client has actually set custom footer text -
+  // ThemeService already applies header/footer colors at bootstrap regardless,
+  // so an unconfigured deployment shows no footer at all (today's look).
+  readonly footerText = toSignal(
+    this.clinicSettingsService.get().pipe(
+      map((settings) => settings.footerText),
+      catchError(() => of(null))
+    ),
+    { initialValue: null }
+  );
 
   readonly isHandset = toSignal(
     this.breakpointObserver.observe(Breakpoints.Handset).pipe(map((result) => result.matches)),

@@ -207,6 +207,13 @@
   --hms-shell-sidenav-width-collapsed: 72px;
   --hms-content-max-width: 1440px;
 
+  // Header/footer background default to the brand primary/surface colors -
+  // ClinicSettings.headerBackgroundColor/footerBackgroundColor (ThemeService)
+  // override these independently of the primary brand color when a client
+  // sets them, so a deployment with no customization looks unchanged.
+  --hms-header-bg: var(--hms-color-primary);
+  --hms-footer-bg: var(--hms-color-surface-alt);
+
   // ---- Motion --------------------------------------------------------
   --hms-transition-fast: 120ms ease;
   --hms-transition-base: 200ms ease;

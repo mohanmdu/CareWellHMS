@@ -4,7 +4,14 @@ import { inject, Injectable, signal } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { PublicConfig } from '../models/public.model';
+import { CornerRadiusStyle, PublicConfig } from '../models/public.model';
+
+/** Mirrors hms-web's ThemeService CORNER_RADIUS_MAP, collapsed to this app's single --radius token. */
+const CORNER_RADIUS_PX: Record<CornerRadiusStyle, string> = {
+  SQUARE: '2px',
+  ROUNDED: '8px',
+  PILL: '999px'
+};
 
 /**
  * Fetches the hospital's public branding/config once per app render (server
@@ -39,6 +46,19 @@ export class SiteConfigService {
     if (config.themeSecondaryColor) {
       root.style.setProperty('--theme-secondary', config.themeSecondaryColor);
     }
+    if (config.themeTertiaryColor) {
+      root.style.setProperty('--theme-tertiary', config.themeTertiaryColor);
+    }
+    if (config.fontFamily) {
+      root.style.setProperty('--font-body', config.fontFamily);
+    }
+    if (config.headerBackgroundColor) {
+      root.style.setProperty('--theme-header-bg', config.headerBackgroundColor);
+    }
+    if (config.footerBackgroundColor) {
+      root.style.setProperty('--theme-footer-bg', config.footerBackgroundColor);
+    }
+    root.style.setProperty('--radius', CORNER_RADIUS_PX[config.cornerRadiusStyle ?? 'ROUNDED']);
     if (config.seoDefaultTitle) {
       this.titleService.setTitle(config.seoDefaultTitle);
     } else if (config.name) {

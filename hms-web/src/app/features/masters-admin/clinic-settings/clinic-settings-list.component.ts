@@ -213,7 +213,9 @@ export class ClinicSettingsListComponent {
       themeTertiaryColor: this.form.themeTertiaryColor || null,
       fontFamily: this.form.fontFamily || null,
       cornerRadiusStyle: this.form.cornerRadiusStyle,
-      themeMode: this.form.themeMode
+      themeMode: this.form.themeMode,
+      headerBackgroundColor: this.form.headerBackgroundColor || null,
+      footerBackgroundColor: this.form.footerBackgroundColor || null
     });
   }
 }

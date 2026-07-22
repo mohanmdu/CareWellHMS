@@ -41,6 +41,13 @@ public class PublicConfigService {
                 settings.getWhatsappNumber(),
                 settings.getPhone(),
                 settings.getEmail(),
-                settings.getAddress());
+                settings.getAddress(),
+                settings.getThemeMode(),
+                settings.getThemeTertiaryColor(),
+                settings.getFontFamily(),
+                settings.getCornerRadiusStyle(),
+                settings.getHeaderBackgroundColor(),
+                settings.getFooterBackgroundColor(),
+                settings.getFooterText());
     }
 }

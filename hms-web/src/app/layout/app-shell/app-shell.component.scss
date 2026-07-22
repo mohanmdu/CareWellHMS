@@ -42,6 +42,24 @@
   position: sticky;
   top: 0;
   z-index: 10;
+  // Explicit override (not just Material's own color="primary") so
+  // ClinicSettings.headerBackgroundColor can differ from the brand primary
+  // color - see ThemeService. Falls back to --hms-color-primary (today's
+  // look) when a client hasn't customized it.
+  background-color: var(--hms-header-bg) !important;
+  color: var(--hms-color-on-primary) !important;
+}
+
+.shell-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--hms-space-3) var(--hms-space-6);
+  background: var(--hms-footer-bg);
+  color: var(--hms-color-text-muted);
+  font-size: var(--hms-font-size-sm);
+  text-align: center;
+  border-top: 1px solid var(--hms-color-border);
 }
 
 .shell-title {

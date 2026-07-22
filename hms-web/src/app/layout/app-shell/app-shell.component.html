@@ -52,5 +52,9 @@
     <main id="main-content" class="shell-main">
       <router-outlet />
     </main>
+
+    @if (footerText()) {
+      <footer class="shell-footer">{{ footerText() }}</footer>
+    }
   </mat-sidenav-content>
 </mat-sidenav-container>

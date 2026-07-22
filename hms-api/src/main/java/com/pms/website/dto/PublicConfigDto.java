@@ -1,5 +1,8 @@
 package com.pms.website.dto;
 
+import com.pms.settings.entity.CornerRadiusStyle;
+import com.pms.settings.entity.ThemeMode;
+
 /**
  * Public-safe projection of ClinicSettings - deliberately excludes tinNo/dlNo
  * (internal tax/license identifiers) and anything else not meant to appear in
@@ -21,5 +24,12 @@ public record PublicConfigDto(
         String whatsappNumber,
         String phone,
         String email,
-        String address) {
+        String address,
+        ThemeMode themeMode,
+        String themeTertiaryColor,
+        String fontFamily,
+        CornerRadiusStyle cornerRadiusStyle,
+        String headerBackgroundColor,
+        String footerBackgroundColor,
+        String footerText) {
 }
