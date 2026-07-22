@@ -11,7 +11,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { map } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
-import { NAV_GROUPS } from '../nav-config';
+import { getVisibleNavGroups } from '../package-config';
 
 /**
  * App-wide shell: responsive sidenav + top toolbar, replacing the flat
@@ -42,7 +42,7 @@ export class AppShellComponent {
   private readonly breakpointObserver = inject(BreakpointObserver);
   private readonly router = inject(Router);
 
-  readonly navGroups = NAV_GROUPS;
+  readonly navGroups = getVisibleNavGroups();
 
   readonly isHandset = toSignal(
     this.breakpointObserver.observe(Breakpoints.Handset).pipe(map((result) => result.matches)),
