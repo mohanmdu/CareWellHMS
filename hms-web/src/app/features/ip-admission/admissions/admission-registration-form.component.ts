@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,6 +10,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NotificationService } from '../../../shared/services/notification.service';
 import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
+import { Consultant } from '../../masters-admin/consultants/consultant.model';
+import { ConsultantService } from '../../masters-admin/consultants/consultant.service';
 import { Patient } from '../../registration/patients/patient.model';
 import { PatientService } from '../../registration/patients/patient.service';
 import { RoomType } from '../rooms/room-type.model';
@@ -109,6 +112,7 @@ const EMPTY_FORM: Omit<AdmissionRegistrationInput, 'patientId'> = {
   standalone: true,
   imports: [
     FormsModule,
+    MatAutocompleteModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
@@ -125,6 +129,7 @@ export class AdmissionRegistrationFormComponent {
   private readonly router = inject(Router);
   private readonly patientService = inject(PatientService);
   private readonly roomTypeService = inject(RoomTypeService);
+  private readonly consultantService = inject(ConsultantService);
   private readonly admissionService = inject(AdmissionService);
   private readonly notification = inject(NotificationService);
 
@@ -137,6 +142,9 @@ export class AdmissionRegistrationFormComponent {
 
   patient = signal<Patient | null>(null);
   roomTypes = signal<RoomType[]>([]);
+  consultants = signal<Consultant[]>([]);
+  filteredPrimaryConsultants = signal<Consultant[]>([]);
+  filteredSecondaryConsultants = signal<Consultant[]>([]);
   loading = signal(true);
   submitting = signal(false);
 
@@ -193,6 +201,13 @@ export class AdmissionRegistrationFormComponent {
       });
     }
     this.roomTypeService.list().subscribe({ next: (types) => this.roomTypes.set(types) });
+    this.consultantService.list().subscribe({
+      next: (consultants) => {
+        this.consultants.set(consultants);
+        this.filteredPrimaryConsultants.set(consultants);
+        this.filteredSecondaryConsultants.set(consultants);
+      }
+    });
   }
 
   onRelationMobileInput(event: Event): void {
@@ -202,6 +217,19 @@ export class AdmissionRegistrationFormComponent {
 
   get isRelationMobileValid(): boolean {
     return !this.form.relationMobileNo || /^\d{10}$/.test(this.form.relationMobileNo);
+  }
+
+  filterPrimaryConsultants(event: Event): void {
+    this.filteredPrimaryConsultants.set(this.filterConsultants((event.target as HTMLInputElement).value));
+  }
+
+  filterSecondaryConsultants(event: Event): void {
+    this.filteredSecondaryConsultants.set(this.filterConsultants((event.target as HTMLInputElement).value));
+  }
+
+  private filterConsultants(query: string): Consultant[] {
+    const q = query.trim().toLowerCase();
+    return q ? this.consultants().filter((c) => c.name.toLowerCase().includes(q)) : this.consultants();
   }
 
   onPhotoSelected(event: Event): void {

@@ -122,11 +122,37 @@
         </mat-form-field>
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Primary Consultant/Surgeon</mat-label>
-          <input matInput name="primaryConsultant" [(ngModel)]="form.primaryConsultant" placeholder="Enter the Name" />
+          <input
+            matInput
+            name="primaryConsultant"
+            autocomplete="off"
+            [matAutocomplete]="primaryConsultantAuto"
+            [(ngModel)]="form.primaryConsultant"
+            (input)="filterPrimaryConsultants($event)"
+            placeholder="Enter the Name"
+          />
+          <mat-autocomplete #primaryConsultantAuto="matAutocomplete">
+            @for (consultant of filteredPrimaryConsultants(); track consultant.id) {
+              <mat-option [value]="consultant.name">{{ consultant.name }}</mat-option>
+            }
+          </mat-autocomplete>
         </mat-form-field>
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Secondary Consultant</mat-label>
-          <input matInput name="secondaryConsultant" [(ngModel)]="form.secondaryConsultant" placeholder="Enter the Name" />
+          <input
+            matInput
+            name="secondaryConsultant"
+            autocomplete="off"
+            [matAutocomplete]="secondaryConsultantAuto"
+            [(ngModel)]="form.secondaryConsultant"
+            (input)="filterSecondaryConsultants($event)"
+            placeholder="Enter the Name"
+          />
+          <mat-autocomplete #secondaryConsultantAuto="matAutocomplete">
+            @for (consultant of filteredSecondaryConsultants(); track consultant.id) {
+              <mat-option [value]="consultant.name">{{ consultant.name }}</mat-option>
+            }
+          </mat-autocomplete>
         </mat-form-field>
 
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
