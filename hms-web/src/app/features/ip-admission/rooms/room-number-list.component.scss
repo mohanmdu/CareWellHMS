@@ -35,3 +35,79 @@
   width: 0;
   white-space: nowrap;
 }
+
+// A Room Number with more than one bed becomes an accordion row - clicking
+// anywhere on it (or the chevron) reveals its beds in the row below.
+.room-number-group-row-expandable {
+  cursor: pointer;
+
+  &:hover {
+    background: var(--hms-color-surface-alt);
+  }
+}
+
+.room-number-bed-count {
+  display: inline-block;
+  padding: 0.1rem 0.6rem;
+  border-radius: var(--hms-radius-full);
+  background: var(--hms-color-primary-container);
+  color: var(--hms-color-on-primary-container);
+  font-size: var(--hms-font-size-xs);
+  font-weight: var(--hms-font-weight-semibold);
+}
+
+// Always present in the DOM (Material's expandable-row pattern needs a row
+// per data item), collapsed to zero height via this class until expanded.
+.room-number-detail-row {
+  height: auto;
+
+  td {
+    border-bottom: 1px solid var(--hms-color-border);
+    padding: 0;
+  }
+}
+
+.room-number-detail-row-collapsed td {
+  padding: 0;
+  border-bottom: none;
+  height: 0;
+  overflow: hidden;
+}
+
+.room-number-detail-cell {
+  padding: 0;
+}
+
+.room-number-detail {
+  padding: var(--hms-space-4) var(--hms-space-4) var(--hms-space-4) var(--hms-space-8);
+  background: var(--hms-color-surface-alt);
+}
+
+.room-number-bed-table {
+  width: 100%;
+  background: var(--hms-color-surface);
+  border-collapse: collapse;
+
+  th {
+    text-align: left;
+    font-size: var(--hms-font-size-xs);
+    color: var(--hms-color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: var(--hms-space-2) var(--hms-space-3);
+    border-bottom: 1px solid var(--hms-color-border);
+  }
+
+  td {
+    padding: var(--hms-space-2) var(--hms-space-3);
+    border-bottom: 1px solid var(--hms-color-border);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.room-number-add-bed-btn {
+  margin-top: var(--hms-space-3);
+}

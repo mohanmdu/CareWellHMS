@@ -45,42 +45,131 @@
       <app-empty-state icon="bed" title="No rooms yet" message="Add the first room above." />
     } @else if (activeRooms().length > 0) {
       <div class="room-number-table-wrap">
-        <table mat-table [dataSource]="activeRooms()" class="room-number-table">
+        <table mat-table [dataSource]="activeGroups()" multiTemplateDataRows class="room-number-table">
+          <ng-container matColumnDef="expand">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let group">
+              @if (group.beds.length > 1) {
+                <button
+                  mat-icon-button
+                  type="button"
+                  [attr.aria-label]="(expandedRoomNumber() === group.roomNumber ? 'Collapse' : 'Expand') + ' room ' + group.roomNumber"
+                  (click)="$event.stopPropagation(); toggleExpand(group)"
+                >
+                  <mat-icon aria-hidden="true">{{ expandedRoomNumber() === group.roomNumber ? 'expand_less' : 'expand_more' }}</mat-icon>
+                </button>
+              }
+            </td>
+          </ng-container>
+
           <ng-container matColumnDef="roomType">
             <th mat-header-cell *matHeaderCellDef>Room Type</th>
-            <td mat-cell *matCellDef="let room">{{ room.roomTypeName }}</td>
+            <td mat-cell *matCellDef="let group">{{ group.roomTypeName }}</td>
           </ng-container>
           <ng-container matColumnDef="rentCash">
             <th mat-header-cell *matHeaderCellDef>Rent</th>
-            <td mat-cell *matCellDef="let room">{{ room.rentCash | number: '1.0-2' }}</td>
+            <td mat-cell *matCellDef="let group">{{ group.rentCash | number: '1.0-2' }}</td>
           </ng-container>
           <ng-container matColumnDef="roomNumber">
             <th mat-header-cell *matHeaderCellDef>Room Number</th>
-            <td mat-cell *matCellDef="let room">{{ room.roomNumber }}</td>
+            <td mat-cell *matCellDef="let group">{{ group.roomNumber }}</td>
           </ng-container>
           <ng-container matColumnDef="bedNumber">
             <th mat-header-cell *matHeaderCellDef>Bed Number</th>
-            <td mat-cell *matCellDef="let room">{{ room.bedNumber ?? '-' }}</td>
+            <td mat-cell *matCellDef="let group">
+              @if (group.beds.length > 1) {
+                <span class="room-number-bed-count">{{ group.beds.length }} beds</span>
+              } @else {
+                {{ group.beds[0].bedNumber ?? '-' }}
+              }
+            </td>
           </ng-container>
           <ng-container matColumnDef="createdBy">
             <th mat-header-cell *matHeaderCellDef>Created By</th>
-            <td mat-cell *matCellDef="let room">{{ room.createdBy ?? '-' }}</td>
+            <td mat-cell *matCellDef="let group">{{ group.createdBy ?? '-' }}</td>
           </ng-container>
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef class="room-number-actions-header"></th>
-            <td mat-cell *matCellDef="let room" class="room-number-actions-cell">
-              <div class="room-number-actions-row">
-                <button mat-icon-button type="button" [attr.aria-label]="'Edit ' + room.roomNumber" (click)="edit(room)">
-                  <mat-icon aria-hidden="true">edit</mat-icon>
-                </button>
-                <button mat-icon-button type="button" color="warn" [attr.aria-label]="'Deactivate ' + room.roomNumber" (click)="deactivate(room)">
-                  <mat-icon aria-hidden="true">delete</mat-icon>
-                </button>
-              </div>
+            <td mat-cell *matCellDef="let group" class="room-number-actions-cell">
+              @if (group.beds.length === 1) {
+                <div class="room-number-actions-row">
+                  <button mat-icon-button type="button" [attr.aria-label]="'Edit ' + group.roomNumber" (click)="edit(group.beds[0])">
+                    <mat-icon aria-hidden="true">edit</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    type="button"
+                    color="warn"
+                    [attr.aria-label]="'Deactivate ' + group.roomNumber"
+                    (click)="deactivate(group.beds[0])"
+                  >
+                    <mat-icon aria-hidden="true">delete</mat-icon>
+                  </button>
+                </div>
+              }
             </td>
           </ng-container>
+
+          <ng-container matColumnDef="expandedDetail">
+            <td mat-cell *matCellDef="let group" [attr.colspan]="activeColumns.length" class="room-number-detail-cell">
+              @if (expandedRoomNumber() === group.roomNumber) {
+                <div class="room-number-detail">
+                  <table class="room-number-bed-table">
+                    <thead>
+                      <tr>
+                        <th>Bed Number</th>
+                        <th>Created By</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (bed of group.beds; track bed.id) {
+                        <tr>
+                          <td>{{ bed.bedNumber ?? '-' }}</td>
+                          <td>{{ bed.createdBy ?? '-' }}</td>
+                          <td class="room-number-actions-cell">
+                            <div class="room-number-actions-row">
+                              <button mat-icon-button type="button" [attr.aria-label]="'Edit bed ' + bed.bedNumber" (click)="edit(bed)">
+                                <mat-icon aria-hidden="true">edit</mat-icon>
+                              </button>
+                              <button
+                                mat-icon-button
+                                type="button"
+                                color="warn"
+                                [attr.aria-label]="'Deactivate bed ' + bed.bedNumber"
+                                (click)="deactivate(bed)"
+                              >
+                                <mat-icon aria-hidden="true">delete</mat-icon>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                  <button mat-stroked-button color="primary" type="button" class="room-number-add-bed-btn" (click)="addBedToGroup(group)">
+                    <mat-icon aria-hidden="true">add</mat-icon>
+                    Add another bed to room {{ group.roomNumber }}
+                  </button>
+                </div>
+              }
+            </td>
+          </ng-container>
+
           <tr mat-header-row *matHeaderRowDef="activeColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: activeColumns"></tr>
+          <tr
+            mat-row
+            *matRowDef="let group; columns: activeColumns"
+            class="room-number-group-row"
+            [class.room-number-group-row-expandable]="group.beds.length > 1"
+            (click)="toggleExpand(group)"
+          ></tr>
+          <tr
+            mat-row
+            *matRowDef="let group; columns: ['expandedDetail']"
+            class="room-number-detail-row"
+            [class.room-number-detail-row-collapsed]="expandedRoomNumber() !== group.roomNumber"
+          ></tr>
         </table>
       </div>
     }
@@ -95,35 +184,101 @@
       <app-empty-state icon="inbox" title="No deactivated rooms" message="Deactivated rooms will appear here." />
     } @else if (inactiveRooms().length > 0) {
       <div class="room-number-table-wrap">
-        <table mat-table [dataSource]="inactiveRooms()" class="room-number-table">
+        <table mat-table [dataSource]="inactiveGroups()" multiTemplateDataRows class="room-number-table">
+          <ng-container matColumnDef="expand">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let group">
+              @if (group.beds.length > 1) {
+                <button
+                  mat-icon-button
+                  type="button"
+                  [attr.aria-label]="(expandedRoomNumber() === group.roomNumber ? 'Collapse' : 'Expand') + ' room ' + group.roomNumber"
+                  (click)="$event.stopPropagation(); toggleExpand(group)"
+                >
+                  <mat-icon aria-hidden="true">{{ expandedRoomNumber() === group.roomNumber ? 'expand_less' : 'expand_more' }}</mat-icon>
+                </button>
+              }
+            </td>
+          </ng-container>
+
           <ng-container matColumnDef="roomType">
             <th mat-header-cell *matHeaderCellDef>Room Type</th>
-            <td mat-cell *matCellDef="let room">{{ room.roomTypeName }}</td>
+            <td mat-cell *matCellDef="let group">{{ group.roomTypeName }}</td>
           </ng-container>
           <ng-container matColumnDef="rentCash">
             <th mat-header-cell *matHeaderCellDef>Rent</th>
-            <td mat-cell *matCellDef="let room">{{ room.rentCash | number: '1.0-2' }}</td>
+            <td mat-cell *matCellDef="let group">{{ group.rentCash | number: '1.0-2' }}</td>
           </ng-container>
           <ng-container matColumnDef="roomNumber">
             <th mat-header-cell *matHeaderCellDef>Room Number</th>
-            <td mat-cell *matCellDef="let room">{{ room.roomNumber }}</td>
+            <td mat-cell *matCellDef="let group">{{ group.roomNumber }}</td>
           </ng-container>
           <ng-container matColumnDef="bedNumber">
             <th mat-header-cell *matHeaderCellDef>Bed Number</th>
-            <td mat-cell *matCellDef="let room">{{ room.bedNumber ?? '-' }}</td>
+            <td mat-cell *matCellDef="let group">
+              @if (group.beds.length > 1) {
+                <span class="room-number-bed-count">{{ group.beds.length }} beds</span>
+              } @else {
+                {{ group.beds[0].bedNumber ?? '-' }}
+              }
+            </td>
           </ng-container>
           <ng-container matColumnDef="deactivatedBy">
             <th mat-header-cell *matHeaderCellDef>Deactivated By</th>
-            <td mat-cell *matCellDef="let room">{{ room.deactivatedBy ?? '-' }}</td>
+            <td mat-cell *matCellDef="let group">{{ group.beds[0].deactivatedBy ?? '-' }}</td>
           </ng-container>
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef class="room-number-actions-header"></th>
-            <td mat-cell *matCellDef="let room" class="room-number-actions-cell">
-              <button mat-stroked-button color="primary" type="button" (click)="restore(room)">Activate</button>
+            <td mat-cell *matCellDef="let group" class="room-number-actions-cell">
+              @if (group.beds.length === 1) {
+                <button mat-stroked-button color="primary" type="button" (click)="restore(group.beds[0])">Activate</button>
+              }
             </td>
           </ng-container>
+
+          <ng-container matColumnDef="expandedDetail">
+            <td mat-cell *matCellDef="let group" [attr.colspan]="inactiveColumns.length" class="room-number-detail-cell">
+              @if (expandedRoomNumber() === group.roomNumber) {
+                <div class="room-number-detail">
+                  <table class="room-number-bed-table">
+                    <thead>
+                      <tr>
+                        <th>Bed Number</th>
+                        <th>Deactivated By</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (bed of group.beds; track bed.id) {
+                        <tr>
+                          <td>{{ bed.bedNumber ?? '-' }}</td>
+                          <td>{{ bed.deactivatedBy ?? '-' }}</td>
+                          <td class="room-number-actions-cell">
+                            <button mat-stroked-button color="primary" type="button" (click)="restore(bed)">Activate</button>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            </td>
+          </ng-container>
+
           <tr mat-header-row *matHeaderRowDef="inactiveColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: inactiveColumns"></tr>
+          <tr
+            mat-row
+            *matRowDef="let group; columns: inactiveColumns"
+            class="room-number-group-row"
+            [class.room-number-group-row-expandable]="group.beds.length > 1"
+            (click)="toggleExpand(group)"
+          ></tr>
+          <tr
+            mat-row
+            *matRowDef="let group; columns: ['expandedDetail']"
+            class="room-number-detail-row"
+            [class.room-number-detail-row-collapsed]="expandedRoomNumber() !== group.roomNumber"
+          ></tr>
         </table>
       </div>
     }

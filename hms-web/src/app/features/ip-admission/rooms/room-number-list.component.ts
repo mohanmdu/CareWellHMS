@@ -1,5 +1,5 @@
 import { DecimalPipe } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -10,6 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { ConfirmDialogService } from '../../../shared/services/confirm-dialog.service';
 import { NotificationService } from '../../../shared/services/notification.service';
+import { PromptDialogService } from '../../../shared/services/prompt-dialog.service';
 import { EmptyStateComponent } from '../../../shared/ui/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
 import { RoomType } from './room-type.model';
@@ -19,10 +20,47 @@ import { RoomService } from './room.service';
 
 const EMPTY_FORM: RoomInput = { roomNumber: '', bedNumber: null, roomTypeId: 0 };
 
+/** One Room Number, with every bed row filed under it (usually just one). */
+interface RoomGroup {
+  roomNumber: string;
+  roomTypeId: number;
+  roomTypeName: string | null;
+  rentCash: number | null;
+  createdBy: string | null;
+  beds: Room[];
+}
+
+/** Rooms sharing a Room Number (multiple beds in one physical room, e.g. a General ward) become one group. */
+function groupByRoomNumber(rooms: Room[]): RoomGroup[] {
+  const byRoomNumber = new Map<string, Room[]>();
+  for (const room of rooms) {
+    const beds = byRoomNumber.get(room.roomNumber) ?? [];
+    beds.push(room);
+    byRoomNumber.set(room.roomNumber, beds);
+  }
+  return [...byRoomNumber.entries()]
+    .map(([roomNumber, beds]) => {
+      const sortedBeds = [...beds].sort((a, b) => (a.bedNumber ?? '').localeCompare(b.bedNumber ?? ''));
+      const first = sortedBeds[0];
+      return {
+        roomNumber,
+        roomTypeId: first.roomTypeId,
+        roomTypeName: first.roomTypeName,
+        rentCash: first.rentCash,
+        createdBy: first.createdBy,
+        beds: sortedBeds
+      };
+    })
+    .sort((a, b) => a.roomNumber.localeCompare(b.roomNumber));
+}
+
 /**
- * Room Numbers master: inline Room Type/Room Number Add/Update/Clear form
- * (matching the legacy screen's layout) plus separate Active/Deactivated
- * tables below. Room Availability status is managed on its own screen.
+ * Room Numbers master: inline Room Type/Room Number/Bed Number Add/Update/
+ * Clear form, plus separate Active/Deactivated tables below. Rooms sharing a
+ * Room Number (multiple beds in one physical room) collapse into a single
+ * accordion row that expands to list each bed - a single-bed room (the
+ * common case) just shows as a plain row, unchanged from before Bed Number
+ * existed. Room Availability status is managed on its own screen.
  */
 @Component({
   selector: 'app-room-number-list',
@@ -48,9 +86,10 @@ export class RoomNumberListComponent {
   private readonly roomTypeService = inject(RoomTypeService);
   private readonly notification = inject(NotificationService);
   private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly promptDialog = inject(PromptDialogService);
 
-  readonly activeColumns = ['roomType', 'rentCash', 'roomNumber', 'bedNumber', 'createdBy', 'actions'];
-  readonly inactiveColumns = ['roomType', 'rentCash', 'roomNumber', 'bedNumber', 'deactivatedBy', 'actions'];
+  readonly activeColumns = ['expand', 'roomType', 'rentCash', 'roomNumber', 'bedNumber', 'createdBy', 'actions'];
+  readonly inactiveColumns = ['expand', 'roomType', 'rentCash', 'roomNumber', 'bedNumber', 'deactivatedBy', 'actions'];
 
   roomTypes = signal<RoomType[]>([]);
   activeRooms = signal<Room[]>([]);
@@ -58,6 +97,12 @@ export class RoomNumberListComponent {
   loadingActive = signal(false);
   loadingInactive = signal(false);
   saving = signal(false);
+
+  readonly activeGroups = computed(() => groupByRoomNumber(this.activeRooms()));
+  readonly inactiveGroups = computed(() => groupByRoomNumber(this.inactiveRooms()));
+
+  /** Room Number of the currently expanded accordion row, if any - only ever set for multi-bed groups. */
+  expandedRoomNumber = signal<string | null>(null);
 
   editingId = signal<number | null>(null);
   form: RoomInput = { ...EMPTY_FORM };
@@ -99,6 +144,13 @@ export class RoomNumberListComponent {
     });
   }
 
+  toggleExpand(group: RoomGroup): void {
+    if (group.beds.length <= 1) {
+      return;
+    }
+    this.expandedRoomNumber.set(this.expandedRoomNumber() === group.roomNumber ? null : group.roomNumber);
+  }
+
   edit(room: Room): void {
     if (room.id === null) {
       return;
@@ -131,6 +183,32 @@ export class RoomNumberListComponent {
         this.notification.error(err.error?.message ?? 'Failed to save room.');
       }
     });
+  }
+
+  /** Adds one more bed under an already-expanded Room Number, without retyping its Room Type/Room Number. */
+  addBedToGroup(group: RoomGroup): void {
+    this.promptDialog
+      .prompt({
+        title: `Add bed to room ${group.roomNumber}`,
+        fields: [{ key: 'bedNumber', label: 'Bed number', type: 'text', required: true }]
+      })
+      .subscribe((values) => {
+        if (!values) {
+          return;
+        }
+        this.saving.set(true);
+        this.service.create({ roomNumber: group.roomNumber, bedNumber: values['bedNumber'] as string, roomTypeId: group.roomTypeId }).subscribe({
+          next: () => {
+            this.saving.set(false);
+            this.notification.success('Bed added.');
+            this.refreshActive();
+          },
+          error: (err) => {
+            this.saving.set(false);
+            this.notification.error(err.error?.message ?? 'Failed to add bed.');
+          }
+        });
+      });
   }
 
   deactivate(room: Room): void {
