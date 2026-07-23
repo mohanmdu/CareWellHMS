@@ -44,6 +44,16 @@ export interface WardStay {
   invoicedAmount: number;
 }
 
+/** One Lab/Investigation charge pulled in from the Lab module for the "Lab & Investigation Charges" row. */
+export interface IpBillingLabCharge {
+  categoryName: string;
+  subCategoryName: string;
+  requestedOn: string | null;
+  invoicedAmount: number;
+  requisitionNumber: string;
+  createdBy: string | null;
+}
+
 export interface IpBillingLedger {
   rows: IpBillingLedgerRow[];
   netInvoiced: number;
@@ -51,6 +61,7 @@ export interface IpBillingLedger {
   netRefund: number;
   netTotal: number;
   wardStays: WardStay[];
+  labCharges: IpBillingLabCharge[];
 }
 
 export interface IpPayment {

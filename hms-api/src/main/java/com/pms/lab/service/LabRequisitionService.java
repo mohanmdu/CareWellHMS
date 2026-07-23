@@ -3,6 +3,8 @@ package com.pms.lab.service;
 import com.pms.activitylog.service.ActivityLogEntry;
 import com.pms.activitylog.service.ActivityLogService;
 import com.pms.common.EntityNotFoundException;
+import com.pms.ipadmission.entity.Admission;
+import com.pms.ipadmission.entity.AdmissionStatus;
 import com.pms.ipadmission.repository.AdmissionRepository;
 import com.pms.lab.dto.LabCategoryTestGroupDto;
 import com.pms.lab.dto.LabRequisitionAdHocItemDto;
@@ -119,6 +121,7 @@ public class LabRequisitionService {
         // "Billing" mirrors the Investigations flow's ad-hoc OP Billing Catalog items; "Labtest" is the Lab Sub-Category flow's default.
         requisition.setRequisitionType(adHocItems.isEmpty() ? "Labtest" : "Billing");
         requisition.setPatient(patient);
+        requisition.setAdmission(resolveActiveAdmission(patient.getId()));
         requisition.setConsultant(consultant);
         requisition.setPatientType(patientType);
         requisition.setBillingType(dto.billingType());
@@ -216,6 +219,13 @@ public class LabRequisitionService {
                 .status("Cancelled")
                 .patient(patient.getRegistrationNumber(), patientDisplayName(patient))
                 .screenName("Lab & X-Ray/Scan Billing"));
+    }
+
+    /** The patient's currently-admitted admission, if any - see LabRequisition.admission's Javadoc. */
+    private Admission resolveActiveAdmission(Long patientId) {
+        return admissionRepository
+                .findFirstByPatientIdAndStatusOrderByAdmissionDateDesc(patientId, AdmissionStatus.ADMITTED)
+                .orElse(null);
     }
 
     private String computePatientType(Long patientId) {

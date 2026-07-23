@@ -254,6 +254,9 @@ export class IpBillingWorkspaceComponent {
     if (row.category === 'Ward/Bed Charges') {
       return (this.ledger()?.wardStays.length ?? 0) > 0;
     }
+    if (row.category === 'Lab & Investigation Charges') {
+      return (this.ledger()?.labCharges.length ?? 0) > 0;
+    }
     return row.lineItems.length > 0;
   }
 

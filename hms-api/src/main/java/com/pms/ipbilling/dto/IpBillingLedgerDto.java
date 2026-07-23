@@ -8,5 +8,6 @@ public record IpBillingLedgerDto(
         double netDiscount,
         double netRefund,
         double netTotal,
-        List<WardStayDto> wardStays) {
+        List<WardStayDto> wardStays,
+        List<IpBillingLabChargeDto> labCharges) {
 }

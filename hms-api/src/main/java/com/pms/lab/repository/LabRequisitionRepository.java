@@ -13,6 +13,9 @@ import org.springframework.data.repository.query.Param;
 public interface LabRequisitionRepository extends JpaRepository<LabRequisition, Long> {
     List<LabRequisition> findByStatusOrderByRequisitionDateDesc(LabRequisitionStatus status);
 
+    // IP Billing ledger sync: every non-cancelled Lab/Investigations charge linked to this admission.
+    List<LabRequisition> findByAdmissionIdAndStatusNotOrderByRequisitionDateAsc(Long admissionId, LabRequisitionStatus excludedStatus);
+
     // Requisition numbers are fixed-width (LABREQ00001), so lexicographic and
     // numeric ordering agree - mirrors PatientService.nextRegistrationNumber's
     // derive-from-the-table approach rather than a row count.

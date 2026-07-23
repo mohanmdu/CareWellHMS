@@ -18,12 +18,16 @@ import com.pms.ipbilling.dto.IpBillingLedgerDto;
 import com.pms.ipbilling.dto.IpBillingLedgerRowDto;
 import com.pms.ipbilling.dto.IpBillingLineItemDto;
 import com.pms.ipbilling.dto.IpConsultantWiseReportRowDto;
+import com.pms.ipbilling.dto.IpBillingLabChargeDto;
 import com.pms.ipbilling.dto.IpPaymentDto;
 import com.pms.ipbilling.dto.WardStayDto;
 import com.pms.ipbilling.entity.IpBillingLineItem;
 import com.pms.ipbilling.entity.IpPayment;
 import com.pms.ipbilling.repository.IpBillingLineItemRepository;
 import com.pms.ipbilling.repository.IpPaymentRepository;
+import com.pms.lab.entity.LabRequisition;
+import com.pms.lab.entity.LabRequisitionStatus;
+import com.pms.lab.repository.LabRequisitionRepository;
 import com.pms.masters.entity.Consultant;
 import com.pms.masters.entity.IpBillingCategory;
 import com.pms.masters.entity.IpBillingComponent;
@@ -57,6 +61,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class IpBillingService {
 
     private static final String WARD_BED_CHARGES = "Ward/Bed Charges";
+    private static final String LAB_INVESTIGATION_CHARGES = "Lab & Investigation Charges";
 
     private final IpBillingLineItemRepository lineItemRepository;
     private final IpPaymentRepository paymentRepository;
@@ -65,6 +70,7 @@ public class IpBillingService {
     private final IpBillingCategoryRepository categoryRepository;
     private final IpBillingComponentRepository componentRepository;
     private final ConsultantRepository consultantRepository;
+    private final LabRequisitionRepository labRequisitionRepository;
     private final ActivityLogService activityLogService;
 
     public IpBillingService(
@@ -75,6 +81,7 @@ public class IpBillingService {
             IpBillingCategoryRepository categoryRepository,
             IpBillingComponentRepository componentRepository,
             ConsultantRepository consultantRepository,
+            LabRequisitionRepository labRequisitionRepository,
             ActivityLogService activityLogService) {
         this.lineItemRepository = lineItemRepository;
         this.paymentRepository = paymentRepository;
@@ -83,6 +90,7 @@ public class IpBillingService {
         this.categoryRepository = categoryRepository;
         this.componentRepository = componentRepository;
         this.consultantRepository = consultantRepository;
+        this.labRequisitionRepository = labRequisitionRepository;
         this.activityLogService = activityLogService;
     }
 
@@ -197,12 +205,20 @@ public class IpBillingService {
         Admission admission = admissionRepository.findById(admissionId)
                 .orElseThrow(() -> new EntityNotFoundException("Admission not found: " + admissionId));
         List<IpBillingLineItem> items = lineItemRepository.findByAdmissionIdOrderByRequestedOnAsc(admissionId);
+        List<LabRequisition> labRequisitions = labRequisitionRepository
+                .findByAdmissionIdAndStatusNotOrderByRequisitionDateAsc(admissionId, LabRequisitionStatus.CANCELLED);
 
         List<WardStayDto> wardStays = computeWardStays(admission);
         double wardBedTotal = wardStays.stream().mapToDouble(WardStayDto::invoicedAmount).sum();
 
         List<IpBillingLedgerRowDto> rows = new ArrayList<>();
         rows.add(new IpBillingLedgerRowDto(WARD_BED_CHARGES, wardBedTotal, 0, 0, wardBedTotal, List.of()));
+
+        List<IpBillingLabChargeDto> labCharges = List.of();
+        if (!labRequisitions.isEmpty()) {
+            rows.add(labChargesRow(labRequisitions));
+            labCharges = labRequisitions.stream().flatMap(this::toLabChargeDtos).toList();
+        }
 
         Map<String, List<IpBillingLineItem>> byCategory = new LinkedHashMap<>();
         for (IpBillingLineItem item : items) {
@@ -217,7 +233,31 @@ public class IpBillingService {
         double netRefund = rows.stream().mapToDouble(IpBillingLedgerRowDto::refund).sum();
         double netTotal = rows.stream().mapToDouble(IpBillingLedgerRowDto::net).sum();
 
-        return new IpBillingLedgerDto(rows, netInvoiced, netDiscount, netRefund, netTotal, wardStays);
+        return new IpBillingLedgerDto(rows, netInvoiced, netDiscount, netRefund, netTotal, wardStays, labCharges);
+    }
+
+    /** Aggregate row for every Lab/Investigation charge linked to this admission - see LabRequisition.admission. */
+    private IpBillingLedgerRowDto labChargesRow(List<LabRequisition> requisitions) {
+        double invoiced = requisitions.stream().mapToDouble(LabRequisition::getTotalAmount).sum();
+        double discount = requisitions.stream().mapToDouble(r -> nullToZero(r.getDiscountAmount())).sum();
+        double refund = requisitions.stream().mapToDouble(r -> nullToZero(r.getRefundAmount())).sum();
+        double net = invoiced - discount - refund;
+        return new IpBillingLedgerRowDto(LAB_INVESTIGATION_CHARGES, invoiced, discount, refund, net, List.of());
+    }
+
+    private java.util.stream.Stream<IpBillingLabChargeDto> toLabChargeDtos(LabRequisition requisition) {
+        return requisition.getItems().stream()
+                .map(item -> new IpBillingLabChargeDto(
+                        item.getCategoryName(),
+                        item.getSubCategoryName(),
+                        requisition.getRequisitionDate(),
+                        item.getAmount(),
+                        requisition.getRequisitionNumber(),
+                        requisition.getCreatedBy()));
+    }
+
+    private double nullToZero(Double value) {
+        return value != null ? value : 0;
     }
 
     /** IP Consultant Wise Report: net billed amount (invoiced - discount - refund) per consultant, over a date range. */
@@ -421,9 +461,18 @@ public class IpBillingService {
         double wardBed = computeWardStays(admission).stream().mapToDouble(WardStayDto::invoicedAmount).sum();
         List<IpBillingLineItem> items = lineItemRepository.findByAdmissionIdOrderByRequestedOnAsc(admission.getId());
         double lineInvoiced = items.stream().mapToDouble(IpBillingLineItem::getLineTotal).sum();
-        double discount = items.stream().mapToDouble(IpBillingLineItem::getDiscountAmount).sum();
-        double refund = items.stream().mapToDouble(IpBillingLineItem::getRefundAmount).sum();
-        double invoiced = wardBed + lineInvoiced;
+        double lineDiscount = items.stream().mapToDouble(IpBillingLineItem::getDiscountAmount).sum();
+        double lineRefund = items.stream().mapToDouble(IpBillingLineItem::getRefundAmount).sum();
+
+        List<LabRequisition> labRequisitions = labRequisitionRepository
+                .findByAdmissionIdAndStatusNotOrderByRequisitionDateAsc(admission.getId(), LabRequisitionStatus.CANCELLED);
+        double labInvoiced = labRequisitions.stream().mapToDouble(LabRequisition::getTotalAmount).sum();
+        double labDiscount = labRequisitions.stream().mapToDouble(r -> nullToZero(r.getDiscountAmount())).sum();
+        double labRefund = labRequisitions.stream().mapToDouble(r -> nullToZero(r.getRefundAmount())).sum();
+
+        double invoiced = wardBed + lineInvoiced + labInvoiced;
+        double discount = lineDiscount + labDiscount;
+        double refund = lineRefund + labRefund;
         return new BillingBreakdown(invoiced, discount, refund, invoiced - discount - refund);
     }
 

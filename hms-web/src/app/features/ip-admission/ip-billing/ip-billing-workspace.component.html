@@ -166,6 +166,29 @@
                                 }
                               </tbody>
                             </table>
+                          } @else if (row.category === 'Lab & Investigation Charges') {
+                            <table class="ip-billing-table ip-billing-breakdown-table">
+                              <thead>
+                                <tr>
+                                  <th>Category</th>
+                                  <th>Requested On</th>
+                                  <th>Invoiced Amount</th>
+                                  <th>Requisition No</th>
+                                  <th>Created By</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                @for (charge of ledger.labCharges; track $index) {
+                                  <tr>
+                                    <td>{{ charge.categoryName }} - {{ charge.subCategoryName }}</td>
+                                    <td>{{ charge.requestedOn | date: 'dd/MM/yyyy HH:mm' }}</td>
+                                    <td>{{ charge.invoicedAmount | number: '1.0-2' }}</td>
+                                    <td>{{ charge.requisitionNumber }}</td>
+                                    <td>{{ charge.createdBy ?? '—' }}</td>
+                                  </tr>
+                                }
+                              </tbody>
+                            </table>
                           } @else {
                             <table class="ip-billing-table ip-billing-breakdown-table">
                               <thead>

@@ -1,6 +1,7 @@
 package com.pms.lab.entity;
 
 import com.pms.common.Auditable;
+import com.pms.ipadmission.entity.Admission;
 import com.pms.masters.entity.Consultant;
 import com.pms.registration.entity.Patient;
 import jakarta.persistence.CascadeType;
@@ -50,6 +51,17 @@ public class LabRequisition extends Auditable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
+
+    /**
+     * The patient's currently-active (ADMITTED) admission at the moment this
+     * requisition was created, if any - lets IP Billing pull this charge into
+     * that specific admission's ledger. Null for OP requisitions. Set once at
+     * creation (LabRequisitionService.create()); independent of the separate
+     * patientType heuristic below, which only affects OP/IP pricing.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "admission_id")
+    private Admission admission;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "consultant_id")

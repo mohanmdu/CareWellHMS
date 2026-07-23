@@ -14,6 +14,10 @@ public interface AdmissionRepository extends JpaRepository<Admission, Long> {
     // ICD Code Search's patient-visit-summary column (most recent IP visit).
     java.util.Optional<Admission> findFirstByPatientIdOrderByAdmissionDateDesc(Long patientId);
 
+    // Resolves the specific admission a Lab Requisition should link to (LabRequisitionService.create()) -
+    // deliberately scoped to ADMITTED only, not "most recent regardless of status" like the method above.
+    java.util.Optional<Admission> findFirstByPatientIdAndStatusOrderByAdmissionDateDesc(Long patientId, AdmissionStatus status);
+
     @Query("""
             SELECT a FROM Admission a
             WHERE (:fromDate IS NULL OR a.admissionDate >= :fromDate)
