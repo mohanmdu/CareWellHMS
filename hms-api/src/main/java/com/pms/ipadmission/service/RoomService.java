@@ -51,9 +51,7 @@ public class RoomService {
 
     @Transactional
     public RoomDto create(RoomDto dto) {
-        if (repository.existsByRoomNumberIgnoreCase(dto.roomNumber())) {
-            throw new IllegalArgumentException("Room number already exists: " + dto.roomNumber());
-        }
+        requireUniqueRoomNumber(dto, null);
         Room room = new Room();
         applyFields(room, dto);
         room.setActive(true);
@@ -65,9 +63,7 @@ public class RoomService {
 
     @Transactional
     public RoomDto update(Long id, RoomDto dto) {
-        if (repository.existsByRoomNumberIgnoreCaseAndIdNot(dto.roomNumber(), id)) {
-            throw new IllegalArgumentException("Room number already exists: " + dto.roomNumber());
-        }
+        requireUniqueRoomNumber(dto, id);
         Room room = getOrThrow(id);
         applyFields(room, dto);
         Room saved = repository.save(room);
@@ -109,10 +105,33 @@ public class RoomService {
         return toDtos(List.of(saved)).get(0);
     }
 
+    /**
+     * A blank bedNumber keeps today's exact guarantee: roomNumber alone must
+     * be globally unique. A bedNumber lets the same roomNumber repeat across
+     * multiple beds (e.g. a General ward's room "101" catalogued as beds
+     * "101"/A, "101"/B, "101"/C) - only that exact room+bed pair must be
+     * unique. Existing rooms that never set a bedNumber are unaffected.
+     */
+    private void requireUniqueRoomNumber(RoomDto dto, Long excludingId) {
+        boolean hasBedNumber = dto.bedNumber() != null && !dto.bedNumber().isBlank();
+        boolean duplicate = hasBedNumber
+                ? (excludingId == null
+                        ? repository.existsByRoomNumberIgnoreCaseAndBedNumberIgnoreCase(dto.roomNumber(), dto.bedNumber())
+                        : repository.existsByRoomNumberIgnoreCaseAndBedNumberIgnoreCaseAndIdNot(dto.roomNumber(), dto.bedNumber(), excludingId))
+                : (excludingId == null
+                        ? repository.existsByRoomNumberIgnoreCase(dto.roomNumber())
+                        : repository.existsByRoomNumberIgnoreCaseAndIdNot(dto.roomNumber(), excludingId));
+        if (duplicate) {
+            String label = hasBedNumber ? dto.roomNumber() + " / bed " + dto.bedNumber() : dto.roomNumber();
+            throw new IllegalArgumentException("Room already exists: " + label);
+        }
+    }
+
     private void applyFields(Room room, RoomDto dto) {
         RoomType roomType = roomTypeRepository.findById(dto.roomTypeId())
                 .orElseThrow(() -> new EntityNotFoundException("Room type not found: " + dto.roomTypeId()));
         room.setRoomNumber(dto.roomNumber());
+        room.setBedNumber(dto.bedNumber() != null && !dto.bedNumber().isBlank() ? dto.bedNumber() : null);
         room.setRoomType(roomType);
     }
 
@@ -149,6 +168,7 @@ public class RoomService {
         return new RoomDto(
                 room.getId(),
                 room.getRoomNumber(),
+                room.getBedNumber(),
                 room.getRoomType().getId(),
                 room.getRoomType().getName(),
                 room.getRoomType().getRentCash(),

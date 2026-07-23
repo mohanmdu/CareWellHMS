@@ -8,6 +8,7 @@ import java.time.Instant;
 public record RoomDto(
         Long id,
         @NotBlank String roomNumber,
+        String bedNumber,
         @NotNull Long roomTypeId,
         String roomTypeName,
         Double rentCash,

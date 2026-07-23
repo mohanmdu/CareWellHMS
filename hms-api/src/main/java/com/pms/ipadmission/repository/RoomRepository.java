@@ -14,4 +14,9 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     boolean existsByRoomNumberIgnoreCase(String roomNumber);
 
     boolean existsByRoomNumberIgnoreCaseAndIdNot(String roomNumber, Long id);
+
+    /** Used when bedNumber is provided - allows the same room_number to repeat across different beds. */
+    boolean existsByRoomNumberIgnoreCaseAndBedNumberIgnoreCase(String roomNumber, String bedNumber);
+
+    boolean existsByRoomNumberIgnoreCaseAndBedNumberIgnoreCaseAndIdNot(String roomNumber, String bedNumber, Long id);
 }

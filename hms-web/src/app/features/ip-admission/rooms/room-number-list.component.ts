@@ -17,7 +17,7 @@ import { RoomTypeService } from './room-type.service';
 import { Room, RoomInput } from './room.model';
 import { RoomService } from './room.service';
 
-const EMPTY_FORM: RoomInput = { roomNumber: '', roomTypeId: 0 };
+const EMPTY_FORM: RoomInput = { roomNumber: '', bedNumber: null, roomTypeId: 0 };
 
 /**
  * Room Numbers master: inline Room Type/Room Number Add/Update/Clear form
@@ -49,8 +49,8 @@ export class RoomNumberListComponent {
   private readonly notification = inject(NotificationService);
   private readonly confirmDialog = inject(ConfirmDialogService);
 
-  readonly activeColumns = ['roomType', 'rentCash', 'roomNumber', 'createdBy', 'actions'];
-  readonly inactiveColumns = ['roomType', 'rentCash', 'roomNumber', 'deactivatedBy', 'actions'];
+  readonly activeColumns = ['roomType', 'rentCash', 'roomNumber', 'bedNumber', 'createdBy', 'actions'];
+  readonly inactiveColumns = ['roomType', 'rentCash', 'roomNumber', 'bedNumber', 'deactivatedBy', 'actions'];
 
   roomTypes = signal<RoomType[]>([]);
   activeRooms = signal<Room[]>([]);
@@ -104,7 +104,7 @@ export class RoomNumberListComponent {
       return;
     }
     this.editingId.set(room.id);
-    this.form = { roomNumber: room.roomNumber, roomTypeId: room.roomTypeId };
+    this.form = { roomNumber: room.roomNumber, bedNumber: room.bedNumber, roomTypeId: room.roomTypeId };
   }
 
   clear(): void {

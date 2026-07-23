@@ -15,6 +15,17 @@
         <mat-label>Room Number</mat-label>
         <input matInput name="roomNumber" [(ngModel)]="form.roomNumber" required />
       </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Bed Number</mat-label>
+        <input
+          matInput
+          name="bedNumber"
+          placeholder="Optional - for multi-bed rooms"
+          [ngModel]="form.bedNumber"
+          (ngModelChange)="form.bedNumber = $event.trim() === '' ? null : $event"
+        />
+        <mat-hint>Leave blank for a single-bed room. Add the same Room Number again with a different Bed Number for wards like General with several beds.</mat-hint>
+      </mat-form-field>
       <button mat-flat-button color="primary" type="submit" [disabled]="saving() || !form.roomNumber.trim() || !form.roomTypeId">
         <mat-icon aria-hidden="true">{{ editingId() !== null ? 'save' : 'add' }}</mat-icon>
         {{ editingId() !== null ? 'Update' : 'Add' }}
@@ -46,6 +57,10 @@
           <ng-container matColumnDef="roomNumber">
             <th mat-header-cell *matHeaderCellDef>Room Number</th>
             <td mat-cell *matCellDef="let room">{{ room.roomNumber }}</td>
+          </ng-container>
+          <ng-container matColumnDef="bedNumber">
+            <th mat-header-cell *matHeaderCellDef>Bed Number</th>
+            <td mat-cell *matCellDef="let room">{{ room.bedNumber ?? '-' }}</td>
           </ng-container>
           <ng-container matColumnDef="createdBy">
             <th mat-header-cell *matHeaderCellDef>Created By</th>
@@ -92,6 +107,10 @@
           <ng-container matColumnDef="roomNumber">
             <th mat-header-cell *matHeaderCellDef>Room Number</th>
             <td mat-cell *matCellDef="let room">{{ room.roomNumber }}</td>
+          </ng-container>
+          <ng-container matColumnDef="bedNumber">
+            <th mat-header-cell *matHeaderCellDef>Bed Number</th>
+            <td mat-cell *matCellDef="let room">{{ room.bedNumber ?? '-' }}</td>
           </ng-container>
           <ng-container matColumnDef="deactivatedBy">
             <th mat-header-cell *matHeaderCellDef>Deactivated By</th>

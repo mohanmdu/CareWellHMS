@@ -28,8 +28,12 @@ public class Room extends Auditable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "room_number", nullable = false, unique = true)
+    @Column(name = "room_number", nullable = false)
     private String roomNumber;
+
+    /** Optional - lets a hospital catalog multiple beds sharing one room_number (e.g. a General ward). Null for single-bed rooms. */
+    @Column(name = "bed_number", length = 50)
+    private String bedNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_type_id", nullable = false)

@@ -3,6 +3,7 @@ export type RoomStatus = 'AVAILABLE' | 'ALLOCATED' | 'MAINTENANCE';
 export interface Room {
   id: number | null;
   roomNumber: string;
+  bedNumber: string | null;
   roomTypeId: number;
   roomTypeName: string | null;
   rentCash: number | null;
@@ -16,4 +17,4 @@ export interface Room {
   deactivatedBy: string | null;
 }
 
-export type RoomInput = Pick<Room, 'roomNumber' | 'roomTypeId'>;
+export type RoomInput = Pick<Room, 'roomNumber' | 'bedNumber' | 'roomTypeId'>;
