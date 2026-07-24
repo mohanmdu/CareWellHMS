@@ -5,6 +5,25 @@
 .shell-sidenav {
   width: var(--hms-shell-sidenav-width);
   border-right: 1px solid var(--hms-color-border);
+
+  // Smooth, subtle scrolling when the group list is taller than the viewport.
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--hms-color-border-strong) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--hms-color-border-strong);
+    border-radius: var(--hms-radius-full);
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }
 
 .shell-brand {
@@ -17,12 +36,9 @@
   color: var(--hms-color-primary);
 }
 
-.shell-nav-heading {
-  color: var(--hms-color-text-muted);
-  font-size: var(--hms-font-size-xs);
-  font-weight: var(--hms-font-weight-semibold);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+.shell-nav-list {
+  padding-top: 0;
+  padding-bottom: var(--hms-space-3);
 }
 
 .shell-nav-active {
@@ -32,6 +48,95 @@
   mat-icon {
     color: var(--hms-color-primary);
   }
+}
+
+.shell-nav-flat-link {
+  font-weight: var(--hms-font-weight-medium);
+}
+
+// A group header toggles its panel below it - visually similar weight to a
+// mat-list-item so the whole list reads as one consistent rhythm, but it's a
+// real <button> since it's a toggle control, not a navigation link.
+.shell-nav-group-header {
+  display: flex;
+  align-items: center;
+  width: calc(100% - var(--hms-space-4));
+  gap: var(--hms-space-3);
+  margin: 0 var(--hms-space-2);
+  padding: var(--hms-space-3) var(--hms-space-3);
+  border: none;
+  background: transparent;
+  color: var(--hms-color-text);
+  font: inherit;
+  font-size: var(--hms-font-size-md);
+  font-weight: var(--hms-font-weight-medium);
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--hms-radius-md);
+  transition: background-color var(--hms-transition-fast);
+
+  &:hover {
+    background: var(--hms-color-surface-alt);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--hms-color-primary);
+    outline-offset: -2px;
+  }
+}
+
+.shell-nav-group-header-active {
+  color: var(--hms-color-primary);
+
+  .shell-nav-group-icon {
+    color: var(--hms-color-primary);
+  }
+}
+
+.shell-nav-group-icon {
+  flex-shrink: 0;
+  color: var(--hms-color-text-muted);
+}
+
+// Wraps to a second line rather than ellipsis-truncating - several group
+// names (e.g. "Appointments / Direct Visit") don't fit on one line at this
+// sidenav width, and a clean two-line label reads more finished than "...".
+.shell-nav-group-label {
+  flex: 1 1 auto;
+  display: -webkit-box;
+  overflow: hidden;
+  line-height: var(--hms-line-height-tight);
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.shell-nav-chevron {
+  flex-shrink: 0;
+  color: var(--hms-color-text-muted);
+  transition: transform var(--hms-transition-base);
+}
+
+.shell-nav-chevron-expanded {
+  transform: rotate(180deg);
+}
+
+// CSS grid-rows trick for a smooth height animation without measuring
+// content height in JS - the panel's own row track animates from 0fr to 1fr
+// while its inner wrapper clips overflow, so items never need to be removed
+// from the DOM (routerLinkActive keeps working while collapsed).
+.shell-nav-group-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--hms-transition-base);
+}
+
+.shell-nav-group-panel-expanded {
+  grid-template-rows: 1fr;
+}
+
+.shell-nav-group-panel-inner {
+  overflow: hidden;
+  min-height: 0;
 }
 
 .shell-content {

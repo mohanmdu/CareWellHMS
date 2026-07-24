@@ -4,11 +4,15 @@ export interface NavItem {
   label: string;
   route: string;
   icon: string;
+  /** Overrides the parent group's moduleKey for package-tier filtering - see getVisibleNavGroups(). Only needed when a group mixes items from different tiers, e.g. Overview below. */
+  moduleKey?: ModuleKey;
 }
 
 export interface NavGroup {
   label: string;
   moduleKey: ModuleKey;
+  /** Shown on the group's own collapsible header row (or the flat row, for a single-item group). */
+  icon: string;
   items: NavItem[];
 }
 
@@ -16,26 +20,44 @@ export interface NavGroup {
  * Grouped primary navigation shown in the app shell sidenav. Mirrors the
  * feature module boundaries in src/app/features (migration doc §6.1).
  *
- * Group ORDER follows the legacy system's own menu sequence (screenshot
- * reference, 2026-07-22) as closely as this app's actual module boundaries
- * allow. Two legacy entries were finer-grained than our existing groups, so
- * they're split here to preserve that ordering: "Billing & Insurance" ->
- * Billing + Insurance Module; "Masters & Admin" -> Masters + Administration.
- * Three groups (Cashier Module, ICD Codes Module, Website CMS) don't appear
- * in that reference screenshot at all - they're placed at the most
- * defensible adjacent position (Cashier right after IP Admission, ICD right
- * after Discharge Summary, Website CMS as the very last group since it's a
- * modern addition with no legacy equivalent) rather than guessed into an
- * exact legacy slot. Five legacy
- * modules with no equivalent screen yet (Pharmacy MIS, CEO/MD Dashboard as
- * its own module, FAQ/How to use HMS, OP/IP Case Sheet) are intentionally
- * left out rather than stubbed - see moduleKey/package-config.ts for how
- * this list is filtered per package tier.
+ * Group ORDER follows the sidebar redesign requested 2026-07-24: Overview,
+ * Patient Registration, Appointments / Direct Visit, IP Admission Module,
+ * Room / Ward Management, Lab & Investigations, Upload Reports, Pharmacy,
+ * Insurance Module, IP Billing Master, Masters, Administration, Website CMS -
+ * with three groups that request didn't mention (Discharge Summary Module,
+ * ICD Codes Module, the general Billing group) kept as their own sections at
+ * the most logical adjacent slot (confirmed with the user rather than
+ * silently hiding them) - Discharge Summary right after IP Admission, ICD
+ * Codes right after Lab & Investigations, Billing right after IP Billing
+ * Master.
+ *
+ * Overview bundles Dashboard and Cashier Module together (both are
+ * metrics-only landing screens, per the user's 2026-07-24 follow-up) rather
+ * than each being its own top-level entry - its Cashier Module item carries
+ * an explicit moduleKey override since Overview itself is always-on but
+ * Cashier is a PREMIUM-tier feature (see package-config.ts).
+ *
+ * A group with exactly one item renders as a flat, non-collapsible link in
+ * the shell rather than a single-child accordion - see AppShellComponent.
+ * Five legacy modules with no equivalent screen yet (Pharmacy MIS, CEO/MD
+ * Dashboard as its own module, FAQ/How to use HMS, OP/IP Case Sheet) are
+ * intentionally left out rather than stubbed - see moduleKey/package-config.ts
+ * for how this list is filtered per package tier.
  */
 export const NAV_GROUPS: NavGroup[] = [
   {
+    label: 'Overview',
+    moduleKey: 'overview',
+    icon: 'dashboard',
+    items: [
+      { label: 'Dashboard', route: '/dashboard', icon: 'dashboard' },
+      { label: 'Cashier Module', route: '/cashier/dashboard', icon: 'point_of_sale', moduleKey: 'cashier' }
+    ]
+  },
+  {
     label: 'Patient Registration',
     moduleKey: 'patient-registration',
+    icon: 'how_to_reg',
     items: [
       { label: 'Patients', route: '/registration/patients', icon: 'person_add' },
       { label: 'Patient Past History', route: '/registration/patients/history', icon: 'history_edu' },
@@ -44,8 +66,9 @@ export const NAV_GROUPS: NavGroup[] = [
     ]
   },
   {
-    label: 'Appointments',
+    label: 'Appointments / Direct Visit',
     moduleKey: 'appointments',
+    icon: 'calendar_month',
     items: [
       { label: 'Book Appointment', route: '/appointments/book', icon: 'event_available' },
       { label: 'OP Direct Billing', route: '/appointments/direct-billing', icon: 'point_of_sale' },
@@ -57,8 +80,39 @@ export const NAV_GROUPS: NavGroup[] = [
     ]
   },
   {
-    label: 'Lab & Investigations',
+    label: 'IP Admission Module',
+    moduleKey: 'ip-admission',
+    icon: 'assignment_ind',
+    items: [
+      { label: 'New Admission', route: '/ip/admissions/new', icon: 'person_add' },
+      { label: 'IP Admissions', route: '/ip/admissions', icon: 'local_hospital' },
+      { label: 'In Patient List', route: '/ip/inpatient-list', icon: 'groups' },
+      { label: 'Discharge List', route: '/ip/discharge-list', icon: 'assignment_turned_in' }
+    ]
+  },
+  {
+    label: 'Discharge Summary Module',
+    moduleKey: 'discharge-summary',
+    icon: 'exit_to_app',
+    items: [
+      { label: 'Discharge Initiated List', route: '/ip/discharge-summary/initiated', icon: 'pending_actions' },
+      { label: 'Discharge List', route: '/ip/discharge-summary', icon: 'assignment' }
+    ]
+  },
+  {
+    label: 'Room / Ward Management',
+    moduleKey: 'room-ward',
+    icon: 'king_bed',
+    items: [
+      { label: 'Room Types', route: '/ip/room-types', icon: 'apartment' },
+      { label: 'Room Numbers', route: '/ip/rooms', icon: 'bed' },
+      { label: 'Room Availability', route: '/ip/room-availability', icon: 'meeting_room' }
+    ]
+  },
+  {
+    label: 'Lab & Investigations Module',
     moduleKey: 'lab',
+    icon: 'biotech',
     items: [
       { label: 'Lab Requisition', route: '/lab/requisitions', icon: 'assignment_add' },
       { label: 'Lab & X-Ray/Scan Billing', route: '/lab/billing', icon: 'point_of_sale' },
@@ -81,8 +135,18 @@ export const NAV_GROUPS: NavGroup[] = [
     ]
   },
   {
+    label: 'ICD Codes Module',
+    moduleKey: 'icd-codes',
+    icon: 'tag',
+    items: [
+      { label: 'ICD Code Search', route: '/icd/search', icon: 'travel_explore' },
+      { label: 'ICD Code Master', route: '/icd/master', icon: 'menu_book' }
+    ]
+  },
+  {
     label: 'Upload Reports',
     moduleKey: 'upload-reports',
+    icon: 'cloud_upload',
     items: [
       { label: 'Upload Reports', route: '/patient-reports/upload', icon: 'upload_file' },
       { label: 'View Files/Reports share to WhatsApp', route: '/patient-reports/view', icon: 'folder_shared' },
@@ -90,23 +154,36 @@ export const NAV_GROUPS: NavGroup[] = [
     ]
   },
   {
-    label: 'IP Admission',
-    moduleKey: 'ip-admission',
+    label: 'Pharmacy',
+    moduleKey: 'pharmacy',
+    icon: 'medication',
     items: [
-      { label: 'New Admission', route: '/ip/admissions/new', icon: 'person_add' },
-      { label: 'IP Admissions', route: '/ip/admissions', icon: 'local_hospital' },
-      { label: 'In Patient List', route: '/ip/inpatient-list', icon: 'groups' },
-      { label: 'Discharge List', route: '/ip/discharge-list', icon: 'assignment_turned_in' }
+      { label: 'Inventory Master', route: '/pharmacy/inventory-master', icon: 'inventory_2' },
+      { label: 'Purchase Management', route: '/pharmacy/purchase-management', icon: 'shopping_cart' },
+      { label: 'Pharmacy Billing', route: '/pharmacy/billing', icon: 'point_of_sale' },
+      { label: 'Sales Return', route: '/pharmacy/returns/new', icon: 'assignment_return' },
+      { label: 'Sales Return Approval', route: '/pharmacy/returns/approval', icon: 'fact_check' },
+      { label: 'Stock Adjustment', route: '/pharmacy/stock-adjustment', icon: 'tune' },
+      { label: 'Purchase Return', route: '/pharmacy/purchase-return', icon: 'undo' },
+      { label: 'Pharmacy Reports', route: '/pharmacy/reports', icon: 'summarize' }
     ]
   },
   {
-    label: 'Cashier Module',
-    moduleKey: 'cashier',
-    items: [{ label: 'Approvals/Refund', route: '/cashier/dashboard', icon: 'fact_check' }]
+    label: 'Insurance Module',
+    moduleKey: 'insurance',
+    icon: 'shield',
+    items: [
+      { label: 'Pre Authorization Requests', route: '/insurance/pre-authorization', icon: 'health_and_safety' },
+      { label: 'Insurance Approval Queue', route: '/insurance/approval-queue', icon: 'fact_check' },
+      { label: 'Insurance Claim Report', route: '/insurance/claim-report', icon: 'request_quote' },
+      { label: 'Insurance Rejected Report', route: '/insurance/rejected-report', icon: 'cancel' },
+      { label: 'Insurance Companies', route: '/insurance/companies', icon: 'domain' }
+    ]
   },
   {
     label: 'IP Billing Master',
     moduleKey: 'ip-billing-master',
+    icon: 'account_balance',
     items: [
       { label: 'IP Billing Categories', route: '/masters/ip-billing-categories', icon: 'category' },
       { label: 'IP Billing Components', route: '/masters/ip-billing-components', icon: 'sell' },
@@ -120,33 +197,9 @@ export const NAV_GROUPS: NavGroup[] = [
     ]
   },
   {
-    label: 'Discharge Summary Module',
-    moduleKey: 'discharge-summary',
-    items: [
-      { label: 'Discharge Initiated List', route: '/ip/discharge-summary/initiated', icon: 'pending_actions' },
-      { label: 'Discharge List', route: '/ip/discharge-summary', icon: 'assignment' }
-    ]
-  },
-  {
-    label: 'ICD Codes Module',
-    moduleKey: 'icd-codes',
-    items: [
-      { label: 'ICD Code Search', route: '/icd/search', icon: 'travel_explore' },
-      { label: 'ICD Code Master', route: '/icd/master', icon: 'menu_book' }
-    ]
-  },
-  {
-    label: 'Room / Ward Management',
-    moduleKey: 'room-ward',
-    items: [
-      { label: 'Room Types', route: '/ip/room-types', icon: 'apartment' },
-      { label: 'Room Numbers', route: '/ip/rooms', icon: 'bed' },
-      { label: 'Room Availability', route: '/ip/room-availability', icon: 'meeting_room' }
-    ]
-  },
-  {
     label: 'Billing',
     moduleKey: 'billing',
+    icon: 'receipt_long',
     items: [
       { label: 'Billing Catalog', route: '/billing/catalog', icon: 'sell' },
       { label: 'New Invoice', route: '/billing/invoices/new', icon: 'receipt_long' },
@@ -154,38 +207,9 @@ export const NAV_GROUPS: NavGroup[] = [
     ]
   },
   {
-    label: 'Insurance Module',
-    moduleKey: 'insurance',
-    items: [
-      { label: 'Pre Authorization Requests', route: '/insurance/pre-authorization', icon: 'health_and_safety' },
-      { label: 'Insurance Approval Queue', route: '/insurance/approval-queue', icon: 'fact_check' },
-      { label: 'Insurance Claim Report', route: '/insurance/claim-report', icon: 'request_quote' },
-      { label: 'Insurance Rejected Report', route: '/insurance/rejected-report', icon: 'cancel' },
-      { label: 'Insurance Companies', route: '/insurance/companies', icon: 'domain' }
-    ]
-  },
-  {
-    label: 'Pharmacy',
-    moduleKey: 'pharmacy',
-    items: [
-      { label: 'Inventory Master', route: '/pharmacy/inventory-master', icon: 'inventory_2' },
-      { label: 'Purchase Management', route: '/pharmacy/purchase-management', icon: 'shopping_cart' },
-      { label: 'Pharmacy Billing', route: '/pharmacy/billing', icon: 'point_of_sale' },
-      { label: 'Sales Return', route: '/pharmacy/returns/new', icon: 'assignment_return' },
-      { label: 'Sales Return Approval', route: '/pharmacy/returns/approval', icon: 'fact_check' },
-      { label: 'Stock Adjustment', route: '/pharmacy/stock-adjustment', icon: 'tune' },
-      { label: 'Purchase Return', route: '/pharmacy/purchase-return', icon: 'undo' },
-      { label: 'Pharmacy Reports', route: '/pharmacy/reports', icon: 'summarize' }
-    ]
-  },
-  {
-    label: 'Overview',
-    moduleKey: 'overview',
-    items: [{ label: 'Dashboard', route: '/dashboard', icon: 'dashboard' }]
-  },
-  {
     label: 'Masters',
     moduleKey: 'masters',
+    icon: 'settings_applications',
     items: [
       { label: 'Departments', route: '/masters/departments', icon: 'apartment' },
       { label: 'Consultants', route: '/masters/consultants', icon: 'medical_services' },
@@ -197,6 +221,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Administration',
     moduleKey: 'administration',
+    icon: 'manage_accounts',
     items: [
       { label: 'Roles', route: '/masters/roles', icon: 'admin_panel_settings' },
       { label: 'General Users', route: '/masters/general-users', icon: 'group' },
@@ -207,6 +232,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Website CMS',
     moduleKey: 'website-cms',
+    icon: 'language',
     items: [
       { label: 'Site Content', route: '/masters/cms/site-content', icon: 'article' },
       { label: 'Banner Slides', route: '/masters/cms/banner-slides', icon: 'wallpaper' },

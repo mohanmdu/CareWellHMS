@@ -70,8 +70,17 @@ function activeModuleKeys(): ModuleKey[] {
   return PACKAGES[tier] ?? PACKAGES.PREMIUM;
 }
 
-/** Sidenav groups for the deployment's active package, in nav-config.ts's defined order. */
+/**
+ * Sidenav groups for the deployment's active package, in nav-config.ts's
+ * defined order. Most groups are all-or-nothing (filtered by their own
+ * moduleKey), but a group whose items carry their own moduleKey override
+ * (e.g. Overview, which mixes an always-on Dashboard with a PREMIUM-only
+ * Cashier Module) is filtered per item instead, so the group still shows
+ * with just its enabled items rather than being all-or-nothing.
+ */
 export function getVisibleNavGroups(): NavGroup[] {
   const enabled = new Set(activeModuleKeys());
-  return NAV_GROUPS.filter((group) => enabled.has(group.moduleKey));
+  return NAV_GROUPS.filter((group) => enabled.has(group.moduleKey))
+    .map((group) => ({ ...group, items: group.items.filter((item) => enabled.has(item.moduleKey ?? group.moduleKey)) }))
+    .filter((group) => group.items.length > 0);
 }
