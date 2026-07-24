@@ -117,18 +117,32 @@ export class ThemeService {
       for (const cssVar of MATERIAL_PRIMARY_VARS) {
         root.setProperty(cssVar, settings.themePrimaryColor);
       }
+    } else {
+      root.removeProperty('--hms-color-primary');
+      root.removeProperty('--hms-color-info');
+      for (const cssVar of MATERIAL_PRIMARY_VARS) {
+        root.removeProperty(cssVar);
+      }
     }
     if (settings.themeTertiaryColor) {
       root.setProperty('--hms-color-tertiary', settings.themeTertiaryColor);
+    } else {
+      root.removeProperty('--hms-color-tertiary');
     }
     if (settings.fontFamily) {
       root.setProperty('--hms-font-family', settings.fontFamily);
+    } else {
+      root.removeProperty('--hms-font-family');
     }
     if (settings.headerBackgroundColor) {
       root.setProperty('--hms-header-bg', settings.headerBackgroundColor);
+    } else {
+      root.removeProperty('--hms-header-bg');
     }
     if (settings.footerBackgroundColor) {
       root.setProperty('--hms-footer-bg', settings.footerBackgroundColor);
+    } else {
+      root.removeProperty('--hms-footer-bg');
     }
 
     const radii = CORNER_RADIUS_MAP[settings.cornerRadiusStyle ?? 'ROUNDED'];

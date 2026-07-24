@@ -7,17 +7,19 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { ConfirmDialogService } from '../../../shared/services/confirm-dialog.service';
 import { NotificationService } from '../../../shared/services/notification.service';
 import { PageHeaderComponent } from '../../../shared/ui/page-header/page-header.component';
 import { ThemeService } from '../../../core/services/theme.service';
 import {
   CORNER_RADIUS_STYLE_OPTIONS,
   CornerRadiusStyle,
+  DEFAULT_THEME_SETTINGS,
   FONT_FAMILY_OPTIONS,
   THEME_MODE_OPTIONS,
   ThemeMode
 } from './clinic-settings.model';
-import { ClinicSettingsService } from './clinic-settings.service';
+import { ClinicSettingsInput, ClinicSettingsService } from './clinic-settings.service';
 
 @Component({
   selector: 'app-clinic-settings-list',
@@ -40,6 +42,7 @@ export class ClinicSettingsListComponent {
   private readonly service = inject(ClinicSettingsService);
   private readonly notification = inject(NotificationService);
   private readonly themeService = inject(ThemeService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
 
   readonly themeModeOptions = THEME_MODE_OPTIONS;
   readonly cornerRadiusStyleOptions = CORNER_RADIUS_STYLE_OPTIONS;
@@ -166,43 +169,17 @@ export class ClinicSettingsListComponent {
       return;
     }
     this.saving.set(true);
-    this.service
-      .update({
-        name: this.form.name.trim(),
-        address: this.form.address.trim() || null,
-        phone: this.form.phone.trim() || null,
-        email: this.form.email.trim() || null,
-        tinNo: this.form.tinNo.trim() || null,
-        dlNo: this.form.dlNo.trim() || null,
-        websiteEnabled: this.form.websiteEnabled,
-        domain: this.form.domain.trim() || null,
-        themePrimaryColor: this.form.themePrimaryColor.trim() || null,
-        themeSecondaryColor: this.form.themeSecondaryColor.trim() || null,
-        seoDefaultTitle: this.form.seoDefaultTitle.trim() || null,
-        seoDefaultDescription: this.form.seoDefaultDescription.trim() || null,
-        socialFacebookUrl: this.form.socialFacebookUrl.trim() || null,
-        socialInstagramUrl: this.form.socialInstagramUrl.trim() || null,
-        socialYoutubeUrl: this.form.socialYoutubeUrl.trim() || null,
-        whatsappNumber: this.form.whatsappNumber.trim() || null,
-        themeMode: this.form.themeMode,
-        themeTertiaryColor: this.form.themeTertiaryColor.trim() || null,
-        fontFamily: this.form.fontFamily.trim() || null,
-        cornerRadiusStyle: this.form.cornerRadiusStyle,
-        headerBackgroundColor: this.form.headerBackgroundColor.trim() || null,
-        footerBackgroundColor: this.form.footerBackgroundColor.trim() || null,
-        footerText: this.form.footerText.trim() || null
-      })
-      .subscribe({
-        next: (settings) => {
-          this.saving.set(false);
-          this.notification.success('Clinic settings saved.');
-          this.themeService.applyTheme(settings);
-        },
-        error: () => {
-          this.saving.set(false);
-          this.notification.error('Failed to save clinic settings.');
-        }
-      });
+    this.service.update(this.buildPayload()).subscribe({
+      next: (settings) => {
+        this.saving.set(false);
+        this.notification.success('Clinic settings saved.');
+        this.themeService.applyTheme(settings);
+      },
+      error: () => {
+        this.saving.set(false);
+        this.notification.error('Failed to save clinic settings.');
+      }
+    });
   }
 
   /** Live preview - applies the in-progress form values immediately, without waiting for Save. */
@@ -217,5 +194,73 @@ export class ClinicSettingsListComponent {
       headerBackgroundColor: this.form.headerBackgroundColor || null,
       footerBackgroundColor: this.form.footerBackgroundColor || null
     });
+  }
+
+  /** Restores the Theme & Appearance section to the application's default look and persists it - hospital name/address/logo/website fields are untouched. */
+  resetTheme(): void {
+    this.confirmDialog
+      .confirm({
+        title: 'Reset Theme & Appearance?',
+        message:
+          'This restores the default theme mode, colors, font, corner style, and header/footer styling, and clears any custom footer text. Hospital name, address, logo, and website settings are not affected.',
+        confirmLabel: 'Reset to default',
+        destructive: true
+      })
+      .subscribe((confirmed) => {
+        if (!confirmed) {
+          return;
+        }
+        this.form.themeMode = DEFAULT_THEME_SETTINGS.themeMode;
+        this.form.themePrimaryColor = DEFAULT_THEME_SETTINGS.themePrimaryColor ?? '';
+        this.form.themeSecondaryColor = DEFAULT_THEME_SETTINGS.themeSecondaryColor ?? '';
+        this.form.themeTertiaryColor = DEFAULT_THEME_SETTINGS.themeTertiaryColor ?? '';
+        this.form.fontFamily = DEFAULT_THEME_SETTINGS.fontFamily ?? '';
+        this.form.cornerRadiusStyle = DEFAULT_THEME_SETTINGS.cornerRadiusStyle;
+        this.form.headerBackgroundColor = DEFAULT_THEME_SETTINGS.headerBackgroundColor ?? '';
+        this.form.footerBackgroundColor = DEFAULT_THEME_SETTINGS.footerBackgroundColor ?? '';
+        this.form.footerText = DEFAULT_THEME_SETTINGS.footerText ?? '';
+        this.previewTheme();
+
+        this.saving.set(true);
+        this.service.update(this.buildPayload()).subscribe({
+          next: (settings) => {
+            this.saving.set(false);
+            this.notification.success('Theme & Appearance reset to default.');
+            this.themeService.applyTheme(settings);
+          },
+          error: () => {
+            this.saving.set(false);
+            this.notification.error('Failed to reset theme.');
+          }
+        });
+      });
+  }
+
+  private buildPayload(): ClinicSettingsInput {
+    return {
+      name: this.form.name.trim(),
+      address: this.form.address.trim() || null,
+      phone: this.form.phone.trim() || null,
+      email: this.form.email.trim() || null,
+      tinNo: this.form.tinNo.trim() || null,
+      dlNo: this.form.dlNo.trim() || null,
+      websiteEnabled: this.form.websiteEnabled,
+      domain: this.form.domain.trim() || null,
+      themePrimaryColor: this.form.themePrimaryColor.trim() || null,
+      themeSecondaryColor: this.form.themeSecondaryColor.trim() || null,
+      seoDefaultTitle: this.form.seoDefaultTitle.trim() || null,
+      seoDefaultDescription: this.form.seoDefaultDescription.trim() || null,
+      socialFacebookUrl: this.form.socialFacebookUrl.trim() || null,
+      socialInstagramUrl: this.form.socialInstagramUrl.trim() || null,
+      socialYoutubeUrl: this.form.socialYoutubeUrl.trim() || null,
+      whatsappNumber: this.form.whatsappNumber.trim() || null,
+      themeMode: this.form.themeMode,
+      themeTertiaryColor: this.form.themeTertiaryColor.trim() || null,
+      fontFamily: this.form.fontFamily.trim() || null,
+      cornerRadiusStyle: this.form.cornerRadiusStyle,
+      headerBackgroundColor: this.form.headerBackgroundColor.trim() || null,
+      footerBackgroundColor: this.form.footerBackgroundColor.trim() || null,
+      footerText: this.form.footerText.trim() || null
+    };
   }
 }

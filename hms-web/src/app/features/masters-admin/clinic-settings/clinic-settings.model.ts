@@ -23,6 +23,36 @@ export const FONT_FAMILY_OPTIONS: { value: string; label: string }[] = [
   { value: "'Courier New', monospace", label: 'Courier New (monospace)' }
 ];
 
+/**
+ * The application's out-of-the-box theme - restored by "Reset Theme & Appearance".
+ * Colors/font are null (inherit the compiled stylesheet defaults in
+ * styles/_tokens.scss) rather than hardcoded hex values, so this reset stays
+ * correct even if that palette changes later; themeMode/cornerRadiusStyle
+ * are non-nullable columns and get their DB/entity default explicitly.
+ */
+export const DEFAULT_THEME_SETTINGS: Pick<
+  ClinicSettings,
+  | 'themeMode'
+  | 'themePrimaryColor'
+  | 'themeSecondaryColor'
+  | 'themeTertiaryColor'
+  | 'fontFamily'
+  | 'cornerRadiusStyle'
+  | 'headerBackgroundColor'
+  | 'footerBackgroundColor'
+  | 'footerText'
+> = {
+  themeMode: 'LIGHT',
+  themePrimaryColor: null,
+  themeSecondaryColor: null,
+  themeTertiaryColor: null,
+  fontFamily: null,
+  cornerRadiusStyle: 'ROUNDED',
+  headerBackgroundColor: null,
+  footerBackgroundColor: null,
+  footerText: null
+};
+
 export interface ClinicSettings {
   name: string;
   address: string | null;

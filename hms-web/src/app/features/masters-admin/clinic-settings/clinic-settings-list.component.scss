@@ -38,6 +38,25 @@
   border-top: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
 }
 
+// Wraps a .clinic-settings-section-title h2 together with an action button
+// (e.g. "Reset Theme & Appearance") on the same row - the wrapper takes over
+// the grid-column/border/padding so the nested h2 doesn't double them up.
+.clinic-settings-section-heading {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hms-space-3);
+  padding-top: var(--hms-space-3);
+  border-top: 1px solid var(--hms-color-border, rgba(0, 0, 0, 0.12));
+
+  .clinic-settings-section-title {
+    grid-column: unset;
+    padding-top: 0;
+    border-top: none;
+  }
+}
+
 .clinic-website-toggle {
   grid-column: 1 / -1;
 }

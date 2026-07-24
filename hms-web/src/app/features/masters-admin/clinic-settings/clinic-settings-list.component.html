@@ -73,7 +73,18 @@
           <input #faviconInput type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="onFaviconSelected($event)" />
         </div>
 
-        <h2 class="clinic-settings-section-title">Theme &amp; Appearance</h2>
+        <div class="clinic-settings-section-heading">
+          <h2 class="clinic-settings-section-title">Theme &amp; Appearance</h2>
+          <button
+            mat-stroked-button
+            type="button"
+            [disabled]="saving()"
+            (click)="resetTheme()"
+          >
+            <mat-icon aria-hidden="true">restart_alt</mat-icon>
+            Reset Theme &amp; Appearance
+          </button>
+        </div>
 
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Theme mode</mat-label>
