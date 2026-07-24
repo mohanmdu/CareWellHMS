@@ -70,6 +70,42 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             @Param("consultantId") Long consultantId,
             @Param("paymentMode") PaymentMode paymentMode);
 
+    // CEO/MD Dashboard OP Revenue's Consulting Fee slice - same billedAt-based
+    // date semantic as collectionReport() above (revenue is recognized when
+    // collected, not when the appointment happened).
+    @Query("""
+            SELECT COALESCE(SUM(a.paidAmount), 0) FROM Appointment a
+            WHERE a.status = com.pms.registration.entity.AppointmentStatus.COMPLETED
+              AND (:fromInstant IS NULL OR a.billedAt >= :fromInstant)
+              AND (:toInstant IS NULL OR a.billedAt < :toInstant)
+            """)
+    double sumPaidAmountForDashboard(@Param("fromInstant") Instant fromInstant, @Param("toInstant") Instant toInstant);
+
+    // CEO/MD Dashboard OP Dashboard's Total/New/Repeat Appointments - "New" is
+    // a patient's chronologically first-ever appointment (any status but
+    // CANCELLED), regardless of how long ago that first visit actually was.
+    // Filtered by appointment_date (the visit itself), not billed_at (see
+    // sumPaidAmountForDashboard) - this is an operational count, not revenue.
+    @Query(value = """
+            SELECT COUNT(*) AS total,
+              COALESCE(SUM(CASE WHEN NOT EXISTS (
+                SELECT 1 FROM appointment a2 WHERE a2.patient_id = a.patient_id AND a2.status <> 'CANCELLED'
+                  AND (a2.appointment_date < a.appointment_date OR (a2.appointment_date = a.appointment_date AND a2.id < a.id))
+              ) THEN 1 ELSE 0 END), 0) AS newCount
+            FROM appointment a
+            WHERE a.status <> 'CANCELLED'
+              AND (:fromDate IS NULL OR a.appointment_date >= :fromDate)
+              AND (:toDate IS NULL OR a.appointment_date <= :toDate)
+            """, nativeQuery = true)
+    NewRepeatProjection countNewVsRepeat(@Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate);
+
+    /** Projection for countNewVsRepeat() - repeat = total - newCount, computed in the service. */
+    interface NewRepeatProjection {
+        long getTotal();
+
+        long getNewCount();
+    }
+
     // Patient Prescription worklist - excludes CANCELLED (nothing to document
     // for a cancelled visit) and matches free text against name/PID/mobile,
     // the same three fields PatientRepository.searchActive() matches.

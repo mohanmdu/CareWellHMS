@@ -68,4 +68,16 @@ public interface PharmacySaleRepository extends JpaRepository<PharmacySale, Long
             @Param("nameOrMobile") String nameOrMobile,
             @Param("fromInstant") Instant fromInstant,
             @Param("toInstant") Instant toInstant);
+
+    // CEO/MD Dashboard IP/OP Revenue's Pharmacy slice - source distinguishes
+    // the two (a manually-selected field at billing time, not derived from
+    // an admission/appointment FK).
+    @Query("""
+            SELECT COALESCE(SUM(s.totalAmount - COALESCE(s.discountAmount, 0)), 0) FROM PharmacySale s
+            WHERE s.source = :source
+              AND (:fromInstant IS NULL OR s.billedAt >= :fromInstant)
+              AND (:toInstant IS NULL OR s.billedAt < :toInstant)
+            """)
+    double sumTotalAmountForDashboard(
+            @Param("fromInstant") Instant fromInstant, @Param("toInstant") Instant toInstant, @Param("source") PharmacySaleSource source);
 }

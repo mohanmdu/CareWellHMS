@@ -1,0 +1,42 @@
+<div class="ceo-quadrant-header">
+  <h2 class="ceo-quadrant-title">OP Dashboard</h2>
+</div>
+
+@if (loading() && !data() && !error()) {
+  <mat-progress-bar mode="indeterminate" />
+} @else if (error()) {
+  <app-empty-state icon="error_outline" title="Couldn't load OP Dashboard" message="Something went wrong fetching this data.">
+    <button mat-stroked-button type="button" (click)="retry()">Retry</button>
+  </app-empty-state>
+} @else if (isEmpty()) {
+  <app-empty-state icon="event_busy" title="No OP activity" message="No appointments for this period." />
+} @else {
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  <div class="ceo-quadrant-kpis">
+    <div class="ceo-quadrant-kpi">
+      <span class="ceo-quadrant-kpi-value">{{ data()?.totalAppointments }}</span>
+      <span class="ceo-quadrant-kpi-label">Total Appointments</span>
+    </div>
+    <div class="ceo-quadrant-kpi">
+      <span class="ceo-quadrant-kpi-value">{{ data()?.newAppointments }}</span>
+      <span class="ceo-quadrant-kpi-label">New</span>
+    </div>
+    <div class="ceo-quadrant-kpi">
+      <span class="ceo-quadrant-kpi-value">{{ data()?.repeatAppointments }}</span>
+      <span class="ceo-quadrant-kpi-label">Repeat</span>
+    </div>
+  </div>
+
+  <div class="ceo-quadrant-chart" [class.ceo-quadrant-chart-loading]="loading()">
+    <canvas baseChart [type]="'bar'" [data]="chartData()" [options]="chartOptions"></canvas>
+  </div>
+}
+
+<div class="ceo-quadrant-footer">
+  <a mat-button color="primary" routerLink="/masters/consultants">
+    View Consultant Master
+  </a>
+</div>

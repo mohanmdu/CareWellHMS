@@ -1,9 +1,12 @@
+import { RevenueBucket } from '../../shared/revenue-bucket.model';
+
 export interface LabCategory {
   id: number;
   name: string;
   opAmount: number;
   ipAmount: number;
   orderingNo: number;
+  revenueBucket: RevenueBucket;
   subCategoryCount: number;
   componentCount: number;
 }
@@ -13,6 +16,7 @@ export interface LabCategoryInput {
   opAmount: number;
   ipAmount: number;
   orderingNo: number;
+  revenueBucket: RevenueBucket;
 }
 
 export interface LabSubCategory {

@@ -32,4 +32,17 @@ export interface MasterCrudConfig<T> {
   /** Overrides the tabbed view's tab labels (default 'Active'/'Inactive') - e.g. Pharmacy's masters use 'Activate'/'DeActivated'. */
   activeTabLabel?: string;
   inactiveTabLabel?: string;
+  /**
+   * Optional - adds a second inline-editable select column (e.g. the CEO/MD
+   * Dashboard's "Revenue Bucket" tag on IP/OP Billing Category) to the
+   * ACTIVE table only, saved immediately on selection (no separate Edit
+   * step). Omitting it preserves today's name/status/actions-only table for
+   * existing consumers.
+   */
+  extraColumn?: {
+    header: string;
+    getValue: (item: T) => string;
+    options: { value: string; label: string }[];
+    update: (id: number, value: string) => Observable<T>;
+  };
 }

@@ -1,9 +1,12 @@
 package com.pms.lab.entity;
 
 import com.pms.common.Auditable;
+import com.pms.masters.entity.RevenueBucket;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -40,6 +43,11 @@ public class LabCategory extends Auditable {
 
     @Column(name = "ordering_no", nullable = false)
     private int orderingNo;
+
+    /** Which CEO/MD Dashboard revenue slice this category rolls up into - see RevenueBucket. Typically LAB or RADIOLOGY. */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "revenue_bucket", nullable = false)
+    private RevenueBucket revenueBucket = RevenueBucket.LAB;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("orderingNo ASC")

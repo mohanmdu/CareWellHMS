@@ -3,6 +3,7 @@ package com.pms.masters.service;
 import com.pms.common.EntityNotFoundException;
 import com.pms.masters.dto.OpBillingCategoryDto;
 import com.pms.masters.entity.OpBillingCategory;
+import com.pms.masters.entity.RevenueBucket;
 import com.pms.masters.repository.OpBillingCategoryRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -34,13 +35,23 @@ public class OpBillingCategoryService {
         OpBillingCategory category = new OpBillingCategory();
         category.setName(dto.name());
         category.setActive(true);
+        category.setRevenueBucket(dto.revenueBucket() != null ? dto.revenueBucket() : RevenueBucket.OTHER);
         return toDto(repository.save(category));
     }
 
+    // Deliberately does not touch revenueBucket - see the identical note in
+    // IpBillingCategoryService.update().
     @Transactional
     public OpBillingCategoryDto update(Long id, OpBillingCategoryDto dto) {
         OpBillingCategory category = getOrThrow(id);
         category.setName(dto.name());
+        return toDto(repository.save(category));
+    }
+
+    @Transactional
+    public OpBillingCategoryDto updateRevenueBucket(Long id, RevenueBucket revenueBucket) {
+        OpBillingCategory category = getOrThrow(id);
+        category.setRevenueBucket(revenueBucket);
         return toDto(repository.save(category));
     }
 
@@ -64,6 +75,6 @@ public class OpBillingCategoryService {
     }
 
     private OpBillingCategoryDto toDto(OpBillingCategory category) {
-        return new OpBillingCategoryDto(category.getId(), category.getName(), category.isActive());
+        return new OpBillingCategoryDto(category.getId(), category.getName(), category.isActive(), category.getRevenueBucket());
     }
 }

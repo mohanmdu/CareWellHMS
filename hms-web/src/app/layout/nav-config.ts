@@ -51,6 +51,7 @@ export const NAV_GROUPS: NavGroup[] = [
     icon: 'dashboard',
     items: [
       { label: 'Dashboard', route: '/dashboard', icon: 'dashboard' },
+      { label: 'CEO/MD Dashboard', route: '/ceo-dashboard', icon: 'insights', moduleKey: 'ceo-dashboard' },
       { label: 'Cashier Module', route: '/cashier/dashboard', icon: 'point_of_sale', moduleKey: 'cashier' }
     ]
   },

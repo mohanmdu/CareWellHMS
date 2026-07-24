@@ -6,6 +6,7 @@ import com.pms.lab.entity.LabCategory;
 import com.pms.lab.repository.LabCategoryRepository;
 import com.pms.lab.repository.LabComponentRepository;
 import com.pms.lab.repository.LabSubCategoryRepository;
+import com.pms.masters.entity.RevenueBucket;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -78,6 +79,7 @@ public class LabCategoryService {
         category.setOpAmount(dto.opAmount() != null ? dto.opAmount() : 0);
         category.setIpAmount(dto.ipAmount() != null ? dto.ipAmount() : 0);
         category.setOrderingNo(dto.orderingNo() != null ? dto.orderingNo() : 0);
+        category.setRevenueBucket(dto.revenueBucket() != null ? dto.revenueBucket() : RevenueBucket.LAB);
     }
 
     private LabCategory getOrThrow(Long id) {
@@ -93,6 +95,7 @@ public class LabCategoryService {
                 category.getOpAmount(),
                 category.getIpAmount(),
                 category.getOrderingNo(),
+                category.getRevenueBucket(),
                 subCategoryCount,
                 componentCount);
     }

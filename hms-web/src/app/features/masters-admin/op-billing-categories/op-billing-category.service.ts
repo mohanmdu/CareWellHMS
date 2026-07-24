@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { RevenueBucket } from '../../../shared/revenue-bucket.model';
 import { OpBillingCategory } from './op-billing-category.model';
 
 @Injectable({ providedIn: 'root' })
@@ -23,6 +24,10 @@ export class OpBillingCategoryService {
 
   update(id: number, name: string): Observable<OpBillingCategory> {
     return this.http.put<OpBillingCategory>(`${this.baseUrl}/${id}`, { name });
+  }
+
+  updateRevenueBucket(id: number, revenueBucket: RevenueBucket): Observable<OpBillingCategory> {
+    return this.http.patch<OpBillingCategory>(`${this.baseUrl}/${id}/revenue-bucket`, { revenueBucket });
   }
 
   deactivate(id: number): Observable<void> {

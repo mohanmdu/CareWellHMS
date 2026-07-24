@@ -26,6 +26,16 @@ public interface AdmissionRepository extends JpaRepository<Admission, Long> {
             """)
     List<Admission> findForAdmissionReport(@Param("fromDate") LocalDateTime fromDate, @Param("toDate") LocalDateTime toDate);
 
+    // CEO/MD Dashboard Patients Admitted - a real COUNT twin of findForAdmissionReport
+    // above (same WHERE clause), so the dashboard's hot path never fetches a full list
+    // just to call .size() on it.
+    @Query("""
+            SELECT COUNT(a) FROM Admission a
+            WHERE (:fromDate IS NULL OR a.admissionDate >= :fromDate)
+              AND (:toDate IS NULL OR a.admissionDate < :toDate)
+            """)
+    long countForAdmissionReport(@Param("fromDate") LocalDateTime fromDate, @Param("toDate") LocalDateTime toDate);
+
     @Query("""
             SELECT a FROM Admission a
             WHERE a.status = com.pms.ipadmission.entity.AdmissionStatus.DISCHARGED
@@ -34,6 +44,15 @@ public interface AdmissionRepository extends JpaRepository<Admission, Long> {
             ORDER BY a.dischargeDate DESC
             """)
     List<Admission> findDischargedForList(@Param("fromDate") LocalDateTime fromDate, @Param("toDate") LocalDateTime toDate);
+
+    // CEO/MD Dashboard Patients Discharged - COUNT twin of findDischargedForList above.
+    @Query("""
+            SELECT COUNT(a) FROM Admission a
+            WHERE a.status = com.pms.ipadmission.entity.AdmissionStatus.DISCHARGED
+              AND (:fromDate IS NULL OR a.dischargeDate >= :fromDate)
+              AND (:toDate IS NULL OR a.dischargeDate < :toDate)
+            """)
+    long countDischargedForList(@Param("fromDate") LocalDateTime fromDate, @Param("toDate") LocalDateTime toDate);
 
     @Query("""
             SELECT a FROM Admission a

@@ -19,7 +19,8 @@ export type ModuleKey =
   | 'ip-billing-master'
   | 'website-cms'
   | 'masters'
-  | 'administration';
+  | 'administration'
+  | 'ceo-dashboard';
 
 export type PackageTier = 'BASIC' | 'STANDARD' | 'PREMIUM';
 
@@ -61,7 +62,8 @@ export const PACKAGES: Record<PackageTier, ModuleKey[]> = {
     'cashier',
     'discharge-summary',
     'ip-billing-master',
-    'website-cms'
+    'website-cms',
+    'ceo-dashboard'
   ]
 };
 

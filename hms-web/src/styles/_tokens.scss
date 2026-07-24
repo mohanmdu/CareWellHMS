@@ -44,6 +44,18 @@
   --hms-color-text-muted: #5b6673;
   --hms-color-text-disabled: #97a1ac;
   --hms-color-on-primary: #ffffff;
+
+  // ---- Chart series (CEO/MD Dashboard bar/pie/donut charts) --------------
+  // A categorical 5-slot palette validated for adjacent-pair distinguishability
+  // (the case that matters for a pie/donut ring, where only true neighbors
+  // touch) - --hms-color-* were never validated as a mutually-distinguishable
+  // set, so charts use this instead. Slot assignment is fixed per category
+  // (never reassigned by value) - see ceo-dashboard chart components.
+  --hms-chart-series-1: #2a78d6;
+  --hms-chart-series-2: #008300;
+  --hms-chart-series-3: #e87ba4;
+  --hms-chart-series-4: #eda100;
+  --hms-chart-series-5: #1baf7a;
 }
 
 // AUTO mode (ClinicSettings.themeMode, no explicit data-theme set): follow
@@ -85,6 +97,12 @@
     --hms-color-text-muted: #a1a9b4;
     --hms-color-text-disabled: #6a7178;
     --hms-color-on-primary: #06263f;
+
+    --hms-chart-series-1: #3987e5;
+    --hms-chart-series-2: #008300;
+    --hms-chart-series-3: #d55181;
+    --hms-chart-series-4: #c98500;
+    --hms-chart-series-5: #199e70;
   }
 }
 
@@ -124,6 +142,12 @@
   --hms-color-text-muted: #a1a9b4;
   --hms-color-text-disabled: #6a7178;
   --hms-color-on-primary: #06263f;
+
+  --hms-chart-series-1: #3987e5;
+  --hms-chart-series-2: #008300;
+  --hms-chart-series-3: #d55181;
+  --hms-chart-series-4: #c98500;
+  --hms-chart-series-5: #199e70;
 }
 
 :root[data-theme='light'] {
@@ -160,6 +184,12 @@
   --hms-color-text-muted: #5b6673;
   --hms-color-text-disabled: #97a1ac;
   --hms-color-on-primary: #ffffff;
+
+  --hms-chart-series-1: #2a78d6;
+  --hms-chart-series-2: #008300;
+  --hms-chart-series-3: #e87ba4;
+  --hms-chart-series-4: #eda100;
+  --hms-chart-series-5: #1baf7a;
 }
 
 :root {

@@ -237,6 +237,7 @@ export class LabComponentListComponent {
       opAmount: 0,
       ipAmount: 0,
       orderingNo: 0,
+      revenueBucket: 'LAB',
       subCategoryCount: 0,
       componentCount: 0
     });

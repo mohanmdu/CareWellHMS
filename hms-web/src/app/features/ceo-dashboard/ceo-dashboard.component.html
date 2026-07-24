@@ -1,0 +1,26 @@
+<div class="hms-page">
+  <app-page-header title="CEO/MD Dashboard" subtitle="Cross-module snapshot of hospital activity and revenue." />
+
+  <section class="hms-card-surface ceo-dashboard-filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>From date</mat-label>
+      <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" />
+      <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+      <mat-datepicker #fromPicker />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>To date</mat-label>
+      <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" />
+      <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+      <mat-datepicker #toPicker />
+    </mat-form-field>
+    <button mat-flat-button color="primary" type="button" (click)="find()">Find</button>
+  </section>
+
+  <div class="ceo-dashboard-grid">
+    <app-ip-summary-quadrant [fromDate]="appliedFrom()" [toDate]="appliedTo()" />
+    <app-op-summary-quadrant [fromDate]="appliedFrom()" [toDate]="appliedTo()" />
+    <app-ip-revenue-quadrant [fromDate]="appliedFrom()" [toDate]="appliedTo()" />
+    <app-op-revenue-quadrant [fromDate]="appliedFrom()" [toDate]="appliedTo()" />
+  </div>
+</div>

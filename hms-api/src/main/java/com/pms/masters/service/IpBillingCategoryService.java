@@ -3,6 +3,7 @@ package com.pms.masters.service;
 import com.pms.common.EntityNotFoundException;
 import com.pms.masters.dto.IpBillingCategoryDto;
 import com.pms.masters.entity.IpBillingCategory;
+import com.pms.masters.entity.RevenueBucket;
 import com.pms.masters.repository.IpBillingCategoryRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -34,13 +35,26 @@ public class IpBillingCategoryService {
         IpBillingCategory category = new IpBillingCategory();
         category.setName(dto.name());
         category.setActive(true);
+        category.setRevenueBucket(dto.revenueBucket() != null ? dto.revenueBucket() : RevenueBucket.OTHER);
         return toDto(repository.save(category));
     }
 
+    // Deliberately does not touch revenueBucket - the frontend's rename flow
+    // (shared MasterCrudComponent) only ever sends a name, so accepting
+    // dto.revenueBucket() here would silently reset an admin's earlier
+    // CEO/MD Dashboard tagging back to OTHER on every plain rename. Setting
+    // the bucket goes through updateRevenueBucket() instead.
     @Transactional
     public IpBillingCategoryDto update(Long id, IpBillingCategoryDto dto) {
         IpBillingCategory category = getOrThrow(id);
         category.setName(dto.name());
+        return toDto(repository.save(category));
+    }
+
+    @Transactional
+    public IpBillingCategoryDto updateRevenueBucket(Long id, RevenueBucket revenueBucket) {
+        IpBillingCategory category = getOrThrow(id);
+        category.setRevenueBucket(revenueBucket);
         return toDto(repository.save(category));
     }
 
@@ -64,6 +78,6 @@ public class IpBillingCategoryService {
     }
 
     private IpBillingCategoryDto toDto(IpBillingCategory category) {
-        return new IpBillingCategoryDto(category.getId(), category.getName(), category.isActive());
+        return new IpBillingCategoryDto(category.getId(), category.getName(), category.isActive(), category.getRevenueBucket());
     }
 }

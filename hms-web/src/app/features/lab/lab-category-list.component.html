@@ -18,6 +18,14 @@
         <span>Category Ordering No:</span>
         <input class="lcat-input" type="number" [(ngModel)]="form.orderingNo" name="orderingNo" />
       </label>
+      <label>
+        <span>Revenue Bucket:</span>
+        <select class="lcat-input" [(ngModel)]="form.revenueBucket" name="revenueBucket">
+          @for (option of revenueBucketOptions; track option.value) {
+            <option [ngValue]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </label>
     </div>
     <div class="lcat-form-actions">
       <button mat-flat-button color="primary" type="button" [disabled]="!isValid" (click)="submit()">
@@ -66,6 +74,7 @@
               <th>OP Amount</th>
               <th>IP Amount</th>
               <th>Ordering No</th>
+              <th>Revenue Bucket</th>
               <th>Edit</th>
               <th>Delete</th>
             </tr>
@@ -80,6 +89,7 @@
                 <td>{{ c.opAmount }}</td>
                 <td>{{ c.ipAmount }}</td>
                 <td>{{ c.orderingNo }}</td>
+                <td>{{ revenueBucketLabel(c) }}</td>
                 <td>
                   <button mat-icon-button color="primary" type="button" [attr.aria-label]="'Edit ' + c.name" (click)="edit(c)">
                     <mat-icon aria-hidden="true">edit</mat-icon>

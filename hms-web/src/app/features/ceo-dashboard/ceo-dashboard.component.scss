@@ -1,0 +1,18 @@
+.ceo-dashboard-filters {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--hms-space-4);
+  padding: var(--hms-space-5);
+  flex-wrap: wrap;
+}
+
+.ceo-dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--hms-space-5);
+  margin-top: var(--hms-space-5);
+
+  @media (max-width: 959px) {
+    grid-template-columns: 1fr;
+  }
+}

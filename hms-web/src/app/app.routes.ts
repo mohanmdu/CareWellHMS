@@ -45,6 +45,11 @@ export const routes: Routes = [
           import('./features/reports-mis/dashboard/dashboard.component').then((m) => m.DashboardComponent)
       },
       {
+        path: 'ceo-dashboard',
+        loadComponent: () =>
+          import('./features/ceo-dashboard/ceo-dashboard.component').then((m) => m.CeoDashboardComponent)
+      },
+      {
         path: 'masters/departments',
         loadComponent: () =>
           import('./features/masters-admin/departments/department-list.component').then(

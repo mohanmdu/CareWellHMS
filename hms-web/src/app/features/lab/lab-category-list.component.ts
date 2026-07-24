@@ -6,12 +6,13 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ConfirmDialogService } from '../../shared/services/confirm-dialog.service';
 import { NotificationService } from '../../shared/services/notification.service';
+import { REVENUE_BUCKET_OPTIONS } from '../../shared/revenue-bucket.model';
 import { TablePagination } from '../../shared/table/table-pagination';
 import { EmptyStateComponent } from '../../shared/ui/empty-state/empty-state.component';
 import { LabCategory, LabCategoryInput } from './lab.model';
 import { LabCategoryService } from './lab-category.service';
 
-const BLANK_FORM: LabCategoryInput = { name: '', opAmount: 0, ipAmount: 0, orderingNo: 0 };
+const BLANK_FORM: LabCategoryInput = { name: '', opAmount: 0, ipAmount: 0, orderingNo: 0, revenueBucket: 'LAB' };
 
 /**
  * Lab Category master (top of Category -> Sub-Category -> Component). One
@@ -31,6 +32,8 @@ export class LabCategoryListComponent {
   private readonly service = inject(LabCategoryService);
   private readonly notification = inject(NotificationService);
   private readonly confirmDialog = inject(ConfirmDialogService);
+
+  readonly revenueBucketOptions = REVENUE_BUCKET_OPTIONS;
 
   categories = signal<LabCategory[]>([]);
   loading = signal(false);
@@ -81,6 +84,10 @@ export class LabCategoryListComponent {
     return this.form.name.trim().length > 0;
   }
 
+  revenueBucketLabel(category: LabCategory): string {
+    return this.revenueBucketOptions.find((option) => option.value === category.revenueBucket)?.label ?? category.revenueBucket;
+  }
+
   submit(): void {
     if (!this.isValid) {
       return;
@@ -103,7 +110,8 @@ export class LabCategoryListComponent {
       name: category.name,
       opAmount: category.opAmount,
       ipAmount: category.ipAmount,
-      orderingNo: category.orderingNo
+      orderingNo: category.orderingNo,
+      revenueBucket: category.revenueBucket
     };
   }
 

@@ -70,8 +70,8 @@
                   </td>
                 </ng-container>
 
-                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+                <tr mat-header-row *matHeaderRowDef="inactiveDisplayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: inactiveDisplayedColumns"></tr>
               </table>
               <mat-paginator
                 [length]="inactivePagination.length()"
@@ -129,6 +129,22 @@
         </td>
       </ng-container>
 
+      <ng-container matColumnDef="extra">
+        <th mat-header-cell *matHeaderCellDef>{{ config().extraColumn?.header }}</th>
+        <td mat-cell *matCellDef="let item">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="master-crud-extra-field">
+            <mat-select
+              [value]="config().extraColumn!.getValue(item)"
+              (selectionChange)="updateExtra(item, $event.value)"
+            >
+              @for (option of config().extraColumn!.options; track option.value) {
+                <mat-option [value]="option.value">{{ option.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </td>
+      </ng-container>
+
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef>Status</th>
         <td mat-cell *matCellDef="let item">
@@ -158,8 +174,8 @@
         </td>
       </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns()"></tr>
     </table>
     <mat-paginator
       [length]="pagination.length()"

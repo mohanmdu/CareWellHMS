@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ConfirmDialogService } from '../services/confirm-dialog.service';
@@ -36,6 +37,7 @@ import { MasterCrudConfig } from './master-crud.model';
     MatIconModule,
     MatProgressBarModule,
     MatPaginatorModule,
+    MatSelectModule,
     MatTabsModule,
     PageHeaderComponent,
     EmptyStateComponent,
@@ -53,7 +55,11 @@ export class MasterCrudComponent<T> implements OnInit {
   /** Renders as a panel (no outer page wrapper/H1) for composition inside a larger page - e.g. Billing Catalog's two-column layout. */
   embedded = input(false);
 
-  readonly displayedColumns = ['name', 'status', 'actions'];
+  /** Inactive table never shows the optional extra column - correcting it there is an edge case not worth the complexity. */
+  readonly inactiveDisplayedColumns = ['name', 'status', 'actions'];
+  readonly displayedColumns = computed(() =>
+    this.config().extraColumn ? ['name', 'extra', 'status', 'actions'] : ['name', 'status', 'actions']
+  );
   items = signal<T[]>([]);
   loading = signal(false);
   saving = signal(false);
@@ -148,6 +154,21 @@ export class MasterCrudComponent<T> implements OnInit {
       next: () => {
         this.notification.success(`${this.capitalize(cfg.entityLabel)} updated.`);
         this.cancelEdit();
+        this.refresh();
+      },
+      error: () => this.notification.error(`Failed to update ${cfg.entityLabel}.`)
+    });
+  }
+
+  updateExtra(item: T, value: string): void {
+    const cfg = this.config();
+    const id = cfg.getId(item);
+    if (id === null || !cfg.extraColumn) {
+      return;
+    }
+    cfg.extraColumn.update(id, value).subscribe({
+      next: () => {
+        this.notification.success(`${this.capitalize(cfg.entityLabel)} updated.`);
         this.refresh();
       },
       error: () => this.notification.error(`Failed to update ${cfg.entityLabel}.`)

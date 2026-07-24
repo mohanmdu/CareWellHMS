@@ -1,0 +1,34 @@
+<div class="ceo-quadrant-header">
+  <h2 class="ceo-quadrant-title">OP Revenue</h2>
+  @if (data(); as d) {
+    <span class="ceo-quadrant-kpi-value">{{ d.total | number: '1.0-2' }}</span>
+  }
+</div>
+
+@if (loading() && !data() && !error()) {
+  <mat-progress-bar mode="indeterminate" />
+} @else if (error()) {
+  <app-empty-state icon="error_outline" title="Couldn't load OP Revenue" message="Something went wrong fetching this data.">
+    <button mat-stroked-button type="button" (click)="retry()">Retry</button>
+  </app-empty-state>
+} @else if (isEmpty()) {
+  <app-empty-state icon="donut_small" title="No OP revenue" message="No OP billing activity for this period." />
+} @else {
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  <div class="ceo-quadrant-chart" [class.ceo-quadrant-chart-loading]="loading()">
+    <canvas baseChart [type]="'doughnut'" [data]="chartData()" [options]="chartOptions"></canvas>
+  </div>
+
+  <div class="ceo-quadrant-legend">
+    @for (row of legendRows(); track row.label) {
+      <div class="ceo-quadrant-legend-row">
+        <span class="ceo-quadrant-legend-swatch" [style.background]="row.color"></span>
+        <span class="ceo-quadrant-legend-label">{{ row.label }}</span>
+        <span class="ceo-quadrant-legend-value">{{ row.value | number: '1.0-2' }} ({{ row.percent }}%)</span>
+      </div>
+    }
+  </div>
+}

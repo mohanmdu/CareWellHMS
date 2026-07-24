@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { MasterCrudComponent } from '../../../shared/master-crud/master-crud.component';
 import { MasterCrudConfig } from '../../../shared/master-crud/master-crud.model';
+import { REVENUE_BUCKET_OPTIONS, RevenueBucket } from '../../../shared/revenue-bucket.model';
 import { OpBillingCategory } from './op-billing-category.model';
 import { OpBillingCategoryService } from './op-billing-category.service';
 
@@ -25,6 +26,12 @@ export class OpBillingCategoryListComponent {
     create: (name) => this.service.create(name),
     update: (id, name) => this.service.update(id, name),
     deactivate: (id) => this.service.deactivate(id),
-    restore: (id) => this.service.restore(id)
+    restore: (id) => this.service.restore(id),
+    extraColumn: {
+      header: 'Revenue Bucket',
+      getValue: (category) => category.revenueBucket,
+      options: REVENUE_BUCKET_OPTIONS,
+      update: (id, value) => this.service.updateRevenueBucket(id, value as RevenueBucket)
+    }
   };
 }

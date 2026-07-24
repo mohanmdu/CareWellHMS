@@ -1,0 +1,97 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-4);
+  padding: var(--hms-space-5);
+  background: var(--hms-color-surface);
+  border: 1px solid var(--hms-color-border);
+  border-radius: var(--hms-radius-lg);
+  min-height: 360px;
+}
+
+.ceo-quadrant-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hms-space-3);
+}
+
+.ceo-quadrant-title {
+  margin: 0;
+  font-size: var(--hms-font-size-lg);
+  font-weight: var(--hms-font-weight-semibold);
+}
+
+.ceo-quadrant-kpis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hms-space-5);
+}
+
+.ceo-quadrant-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-1);
+}
+
+.ceo-quadrant-kpi-value {
+  font-size: var(--hms-font-size-2xl);
+  font-weight: var(--hms-font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.ceo-quadrant-kpi-label {
+  font-size: var(--hms-font-size-xs);
+  color: var(--hms-color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ceo-quadrant-chart {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 220px;
+  transition: opacity var(--hms-transition-base);
+}
+
+// Dims the previous render during a refetch rather than flashing to a blank
+// skeleton - the chart stays legible and the loading bar signals "updating".
+.ceo-quadrant-chart-loading {
+  opacity: 0.45;
+}
+
+.ceo-quadrant-legend {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hms-space-2);
+}
+
+.ceo-quadrant-legend-row {
+  display: flex;
+  align-items: center;
+  gap: var(--hms-space-2);
+  font-size: var(--hms-font-size-sm);
+}
+
+.ceo-quadrant-legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--hms-radius-full);
+  flex-shrink: 0;
+}
+
+.ceo-quadrant-legend-label {
+  flex: 1 1 auto;
+  color: var(--hms-color-text);
+}
+
+.ceo-quadrant-legend-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--hms-font-weight-medium);
+  color: var(--hms-color-text-muted);
+}
+
+.ceo-quadrant-footer {
+  display: flex;
+  justify-content: flex-end;
+}

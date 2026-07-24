@@ -51,4 +51,17 @@ public interface LabRequisitionRepository extends JpaRepository<LabRequisition, 
             @Param("consultantId") Long consultantId,
             @Param("paymentMode") LabPaymentMode paymentMode,
             @Param("categoryName") String categoryName);
+
+    // CEO/MD Dashboard IP Revenue's Lab & X-ray slice - combined (no
+    // Lab-vs-Radiology split needed on the IP side, unlike OP - see the
+    // reference image's IP Revenue legend).
+    @Query("""
+            SELECT COALESCE(SUM(r.totalAmount), 0) FROM LabRequisition r
+            WHERE r.status = com.pms.lab.entity.LabRequisitionStatus.APPROVED
+              AND r.patientType = 'IP'
+              AND r.admission IS NOT NULL
+              AND (:from IS NULL OR r.approvedAt >= :from)
+              AND (:to IS NULL OR r.approvedAt < :to)
+            """)
+    double sumForIpDashboard(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 }

@@ -1,0 +1,42 @@
+<div class="ceo-quadrant-header">
+  <h2 class="ceo-quadrant-title">IP Dashboard</h2>
+</div>
+
+@if (loading() && !data() && !error()) {
+  <mat-progress-bar mode="indeterminate" />
+} @else if (error()) {
+  <app-empty-state icon="error_outline" title="Couldn't load IP Dashboard" message="Something went wrong fetching this data.">
+    <button mat-stroked-button type="button" (click)="retry()">Retry</button>
+  </app-empty-state>
+} @else if (isEmpty()) {
+  <app-empty-state icon="local_hospital" title="No IP activity" message="No admissions or discharges for this period." />
+} @else {
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  <div class="ceo-quadrant-kpis">
+    <div class="ceo-quadrant-kpi">
+      <span class="ceo-quadrant-kpi-value">{{ data()?.bedsOccupied }}/{{ data()?.bedsTotal }} ({{ occupancyPercent() }}%)</span>
+      <span class="ceo-quadrant-kpi-label">Bed Occupancy (as of now)</span>
+    </div>
+    <div class="ceo-quadrant-kpi">
+      <span class="ceo-quadrant-kpi-value">{{ data()?.patientsAdmitted }}</span>
+      <span class="ceo-quadrant-kpi-label">Patients Admitted</span>
+    </div>
+    <div class="ceo-quadrant-kpi">
+      <span class="ceo-quadrant-kpi-value">{{ data()?.patientsDischarged }}</span>
+      <span class="ceo-quadrant-kpi-label">Patients Discharged</span>
+    </div>
+  </div>
+
+  <div class="ceo-quadrant-chart" [class.ceo-quadrant-chart-loading]="loading()">
+    <canvas baseChart [type]="'bar'" [data]="chartData()" [options]="chartOptions"></canvas>
+  </div>
+}
+
+<div class="ceo-quadrant-footer">
+  <a mat-button color="primary" routerLink="/ip/room-availability">
+    View IP Bed Management
+  </a>
+</div>
